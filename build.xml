@@ -1,0 +1,138 @@
+<?xml version='1.0' encoding='utf-8'?>
+<project name="common utils classes" default="compile" basedir=".">
+
+  <target name="clean" depends="init" description="remove compiled classes">
+    <delete dir="build"/>
+  </target>
+
+
+  <target name="compile" depends="init" description="quick compile modified classes (default target)">
+    <antcall target="compile-to">
+      <param name="srcdir" value="java:test"/>
+      <param name="to" value="build/classes"/>
+    </antcall>
+  </target>
+
+
+  <target name="build" depends="clean, compile" description="recompile all source code in the project"/>
+
+
+  <target name="jar" depends="clean, get-revision-info" description="make webui jars">
+    <antcall target="compile-to">
+      <param name="srcdir" value="java"/>
+      <param name="to" value="build/classes"/>
+    </antcall>
+    <jar jarfile="build/${app.name}-${spec.version}${spec.extraversion}.jar">
+      <fileset dir="build/classes">
+        <include name="org/echosoft/common/**/*.*"/>
+      </fileset>
+      <manifest>
+        <attribute name="Built-By" value="${built.by}"/>
+        <attribute name="Built-Date" value="${built.date}"/>
+        <attribute name="Specification-Vendor" value="${spec.vendor}"/>
+        <attribute name="Specification-Version" value="${spec.version}"/>
+        <attribute name="Implementation-Version" value="${built.revision}"/>
+       </manifest>
+    </jar>
+    <jar destfile="build/${app.name}-${spec.version}${spec.extraversion}-src.zip">
+      <fileset dir="java">
+        <include name="org/echosoft/common/**/*.*"/>
+      </fileset>
+      <manifest>
+        <attribute name="Built-By" value="${built.by}"/>
+        <attribute name="Built-Date" value="${built.date}"/>
+        <attribute name="Specification-Vendor" value="${spec.vendor}"/>
+        <attribute name="Specification-Version" value="${spec.version}"/>
+        <attribute name="Implementation-Version" value="${built.revision}"/>
+       </manifest>
+    </jar>
+    <delete dir="build/classes"/>
+  </target>
+
+
+  <target name="javadoc" depends="init" description="make java documentation">
+    <delete dir="build/doc"/>
+    <mkdir dir="build/doc/javadoc"/>
+    <javadoc sourcepath="java" destdir="build/doc/javadoc"
+             encoding="${build.encoding}" charset="${build.encoding}"
+             packagenames="org.echosoft.**.*"
+             classpathref="build.classpath"
+             author="true"
+             version="true"
+             use="true"
+             windowtitle="${app.name} ${spec.version} Java API">
+    </javadoc>
+  </target>
+
+
+  <target name="test" depends="compile" description="run all unit tests">
+    <junit printsummary="withOutAndErr">
+      <classpath refid="run.classpath"/>
+      <formatter type="plain"/>
+      <batchtest todir="build">
+        <fileset dir="test">
+          <include name="**/*Test.java"/>
+        </fileset>
+      </batchtest>
+    </junit>
+  </target>
+
+  <target name="test-parallelizer" depends="build" description="parallelizer example">
+    <java classname="ParallelizerExample" >
+      <classpath refid="run.classpath" />
+    </java>
+  </target>
+
+
+  <!-- any supplementary declarations -->
+
+  <target name="init">
+    <tstamp>
+      <format property="built.date" pattern="dd.MM.yyyy HH:mm:ss" />
+    </tstamp>
+    <property file="build.properties"/>
+    <path id="build.classpath">
+      <fileset dir="lib" includes="**/*.jar"/>
+    </path>
+    <path id="run.classpath">
+      <pathelement location="build/classes"/>
+      <path refid="build.classpath"/>
+    </path>
+    <patternset id="all.config.files">
+      <include name="**/*.xml"/>
+      <include name="**/*.sql"/>
+    </patternset>
+  </target>
+
+
+  <target name="get-revision-info">
+    <exec executable="svn" dir="."  output="revision.info">
+      <arg value="info"/>
+    </exec>
+    <replaceregexp file="revision.info" match="(?s)(.*Revision:\ )(\d+)(.*)" replace="\2"/>
+    <loadfile property="built.revision" srcfile="revision.info"/>
+    <delete file="revision.info" />
+    <echo message="revision: ${built.revision}" />
+  </target>
+
+
+  <target name="compile-to" depends="init">
+    <mkdir dir="${to}"/>
+    <depend srcdir="${srcdir}" destdir="${to}" closure="yes">
+      <include name="**/*.java"/>
+    </depend>
+    <javac srcdir="${srcdir}" destdir="${to}" classpathref="build.classpath" encoding="${build.encoding}"
+           deprecation="${build.deprecation}" optimize="${build.optimized}" nowarn="${build.nowarn}"
+           debug="${build.debug}" debugLevel="${build.debug.level}"
+           executable="${jdk.home}/bin/javac" fork="true" includeAntRuntime="false">
+    </javac>
+    <!-- TODO: sometimes we need to copy files from test directory but ${srcdir} parameter does not works here ... -->
+    <copy todir="${to}">
+      <fileset dir="java">
+        <patternset refid="all.config.files"/>
+      </fileset>
+    </copy>
+    <native2ascii encoding="${build.encoding}" src="java" dest="${to}" includes="**/*.properties"/>
+  </target>
+
+</project>
