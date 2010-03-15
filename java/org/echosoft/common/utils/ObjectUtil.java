@@ -281,6 +281,20 @@ public class ObjectUtil {
 
 
     @SuppressWarnings("unchecked")
+    public static <T,E extends T> E makeInstance(Class<E> clazz, Class<T> ancestorClass) throws ClassNotFoundException, InstantiationException, NoSuchMethodException, InvocationTargetException, IllegalAccessException {
+        if (ancestorClass!=null) {
+        if (!ancestorClass.isAssignableFrom(clazz))
+            throw new IllegalArgumentException(ancestorClass.getName()+" is not assignable from "+clazz.getName());
+        }
+        try {
+            return clazz.newInstance();
+        } catch (IllegalAccessException e) {
+            final Method method = clazz.getMethod("getInstance");
+            return (E)method.invoke(null);
+        }
+    }
+
+    @SuppressWarnings("unchecked")
     public static <T,E extends T> E makeInstance(String className, Class<T> ancestorClass) throws ClassNotFoundException, InstantiationException, NoSuchMethodException, InvocationTargetException, IllegalAccessException {
         final Class<E> clazz = loadClass(className);
         if (ancestorClass!=null) {
