@@ -23,7 +23,6 @@ import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 import java.util.zip.InflaterInputStream;
 
-import org.apache.commons.codec.binary.Hex;
 import org.echosoft.common.collections.ArrayIterator;
 import org.echosoft.common.collections.EnumerationIterator;
 import org.echosoft.common.collections.ObjectArrayIterator;
@@ -37,6 +36,7 @@ import org.echosoft.common.collections.ObjectArrayIterator;
 public class ObjectUtil {
 
     public static final int READ_STREAM_BUFFER_SIZE = 4096;
+
     private ObjectUtil() {}
 
     /**
@@ -205,15 +205,11 @@ public class ObjectUtil {
     public static void dump(final Appendable out, final byte[] data) throws IOException {
         if (data==null || data.length==0)
             return;
-        final char[] hex = Hex.encodeHex(data);
         final StringBuilder buf = new StringBuilder(196);
         for (int i=0; i<data.length; i++) {
             if (i % 32==0) {
                 if (i>0) {
-                    while (buf.length()<118)
-                        buf.append(' ');
-                    appendEncoded(buf, new String(data, i-32, 32) );
-                    buf.append('\n');
+                    appendTextExplanation(buf, new String(data, i-32, 32) );
                     out.append( buf );
                     buf.setLength(0);
                 }
@@ -222,29 +218,31 @@ public class ObjectUtil {
                 if (i%4==0)
                     buf.append("| ");
             }
-            final int h = i<<1;
-            buf.append( Character.toUpperCase(hex[h]) );
-            buf.append( Character.toUpperCase(hex[h+1]) );
+            final byte b = data[i];
+            buf.append( HEXDIGITS[(0xF0 & b) >>> 4] );
+            buf.append( HEXDIGITS[0x0F & b] );
             buf.append(' ');
         }
-        while (buf.length()<118)
-            buf.append(' ');
         int rest = data.length%32;
         if (rest==0)
             rest = 32;
-        appendEncoded(buf, new String(data, data.length-rest, rest) );
-        buf.append('\n');
+        appendTextExplanation(buf, new String(data, data.length-rest, rest) );
         out.append( buf );
         if (out instanceof Flushable) {
             ((Flushable)out).flush();
         }
     }
-    private static void appendEncoded(final StringBuilder out, final String text) {
+    private static void appendTextExplanation(final StringBuilder out, final String text) {
+        for (int i=118-out.length(); i>0; i--) {
+            out.append(' ');
+        }
         for (int i=0,length=text.length(); i<length; i++) {
             final char c = text.charAt(i);
             out.append( c<32 || c>65280 ? (char)0 : c );
         }
+        out.append('\n');
     }
+    private static final char[] HEXDIGITS = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F'};
 
 
     @SuppressWarnings("unchecked")

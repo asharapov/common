@@ -20,8 +20,7 @@ import java.util.NoSuchElementException;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
-import org.apache.commons.codec.binary.Base64;
-
+import org.echosoft.common.utils.Base64Util;
 
 /**
  * Allows to specify something additional formal rules for quering various data from miscelaneous storages. <br/>
@@ -62,8 +61,7 @@ public final class Query implements Serializable, Cloneable {
             final ObjectOutput out = new ObjectOutputStream(xout);
             write(query, out);
             out.close();
-            final byte[] data = Base64.encodeBase64(bout.toByteArray());
-            final String str = new String(data, "ISO-8859-1");
+            final String str = Base64Util.encode(bout.toByteArray());
             return archive ? "!"+str : str;
         } catch (Exception e) {
             throw new RuntimeException(e.getMessage(), e);
@@ -71,14 +69,13 @@ public final class Query implements Serializable, Cloneable {
 
     }
 
-    public static Query deserialize(String encodedData) {
+    public static Query deserialize(final String encodedData) {
         if (encodedData==null || encodedData.length()==0)
             return null;
         final boolean archive = encodedData.charAt(0)=='!';
-        final byte[] data;
         try {
-            data = archive ? encodedData.substring(1).getBytes("ISO-8859-1") : encodedData.getBytes("ISO-8859-1");
-            final ByteArrayInputStream bin = new ByteArrayInputStream(Base64.decodeBase64(data));
+            final byte[] data = Base64Util.decode( archive ? encodedData.substring(1) : encodedData );
+            final ByteArrayInputStream bin = new ByteArrayInputStream(data);
             final InputStream xin = archive ? new GZIPInputStream(bin) : bin;
             final ObjectInputStream in = new ObjectInputStream(xin);
             final Query result = read(in);
