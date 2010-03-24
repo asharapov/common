@@ -3,7 +3,7 @@ package org.echosoft.common.json;
 import java.io.IOException;
 import java.io.Writer;
 import java.lang.reflect.InvocationTargetException;
-import java.util.HashMap;
+import java.util.ArrayList;
 import java.util.LinkedList;
 
 import org.echosoft.common.utils.StringUtil;
@@ -20,29 +20,19 @@ import org.echosoft.common.utils.StringUtil;
  */
 public class PrintableJsonWriter implements JsonWriter {
 
-    private static final int INDENT_FACTOR = 4; // сколько пробелов соответствуют одному уровню иерархии.
-    private static final HashMap<Integer,String> indentstr = new HashMap<Integer,String>();
-
-    private static String getIndentString(final int level) {
-        String result = indentstr.get(level);
-        if (result==null) {
-            result = StringUtil.leadRight("", ' ', level*INDENT_FACTOR);
-            indentstr.put(level, result);
-        }
-        return result;
-    }
+    public static final int DEFAULT_INDENT_FACTOR = 4;  // сколько пробелов соответствуют одному уровню иерархии.
 
     private static enum State{ARRAY, OBJECT}
+
     private static final class WriterContext {
         public final String prefix;
         public final State state;
         public int items;
         public boolean inWriteObj;
         public boolean inObjProperty;
-
-        public WriterContext(final State state, final int level) {
+        public WriterContext(final State state, final String prefix) {
             this.state = state;
-            this.prefix = getIndentString(level+1);
+            this.prefix = prefix;
         }
         public String toString() {
             return "[WriterContext{state:"+state+", items:"+items+", inWriteObj:"+inWriteObj+", inObjProperty:"+inObjProperty+"}]";
@@ -52,6 +42,8 @@ public class PrintableJsonWriter implements JsonWriter {
     private final JsonContext ctx;
     private final Writer out;
     private final JsonFieldNameSerializer fieldNameSerializer;
+    private final int indentFactor;
+    private final ArrayList<String> indents;
     private final LinkedList<WriterContext> stack;
     private WriterContext current;
 
@@ -67,6 +59,8 @@ public class PrintableJsonWriter implements JsonWriter {
         this.out = out;
         this.fieldNameSerializer = ctx.getFieldNameSerializer();
         this.stack = new LinkedList<WriterContext>();
+        this.indentFactor = DEFAULT_INDENT_FACTOR;  //TODO: добавить возможность кастомизации данного параметра.
+        this.indents = JsonUtil.getIndentationStrings(indentFactor);
         current = null;
     }
 
@@ -83,7 +77,7 @@ public class PrintableJsonWriter implements JsonWriter {
             if (!current.inObjProperty)
                 out.write(current.prefix);
         }
-        current = new WriterContext(State.ARRAY, stack.size());
+        current = new WriterContext(State.ARRAY, getIndentString(stack.size()));
         stack.push( current );
         out.write("[\n");
     }
@@ -146,7 +140,7 @@ public class PrintableJsonWriter implements JsonWriter {
             if (!current.inObjProperty)
                 out.write(current.prefix);
         }
-        current = new WriterContext(State.OBJECT, stack.size());
+        current = new WriterContext(State.OBJECT, getIndentString(stack.size()));
         stack.push( current );
         out.write("{\n");
     }
@@ -220,6 +214,24 @@ public class PrintableJsonWriter implements JsonWriter {
      */
     public Writer getOutputWriter() {
         return out;
+    }
+
+
+    /**
+     * Для заданного уровня вложенности возвращает строку из пробелов той длины что требуется для отрисовки надлежащего кол-ва отступов слева.
+     * @param level уровень вложенности.
+     * @return  строка из пробелов.
+     */
+    private String getIndentString(int level) {
+        final int size = indents.size();
+        level++;
+        if (level<size) {
+            return indents.get(level);
+        } else {
+            final String result = StringUtil.leadRight("", ' ', size*indentFactor);
+            indents.add( result );
+            return result;
+        }
     }
 
 }

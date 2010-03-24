@@ -7,6 +7,7 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 
 /**
@@ -86,6 +87,17 @@ public final class JsonUtil {
                 return (A)a;
         }
         return null;
+    }
+
+    public static ArrayList<String> getIndentationStrings(final int factor) {
+        final int cnt = 16;  // максимальная предрасчитанная глубина вложенности.
+        final char[] buf = new char[factor*cnt];
+        Arrays.fill(buf, ' ');
+        final ArrayList<String> result = new ArrayList<String>(cnt);
+        for (int i=0; i<cnt; i++) {
+            result.add( new String(buf, 0, factor*i) );
+        }
+        return result;
     }
 
     public static Collection<NamedMethod> findGetters(final Class<?> cls) {

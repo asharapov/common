@@ -1,6 +1,7 @@
 package org.echosoft.common.json;
 
 import java.io.StringWriter;
+import java.util.ArrayList;
 
 import org.echosoft.common.json.beans.Data;
 import org.echosoft.common.model.BasicReference;
@@ -26,7 +27,43 @@ public class PrintableJsonWriterTest {
 
     @Before
     public void setUp() {
+        System.out.println("\n   ---   \n");
         sw.getBuffer().setLength(0);
+    }
+
+    @Test
+    public void testObject1() throws Exception {
+        jw.getOutputWriter().write("var data = ");
+        jw.beginObject();
+        jw.writeProperty("a", "A");
+        jw.writeProperty("b", "B");
+        jw.writeComplexProperty("c");
+        jw.beginObject();
+        jw.writeProperty("d", "D");
+        jw.writeProperty("e", "E");
+        jw.writeComplexProperty("f");
+        jw.beginObject();
+        jw.writeComplexProperty("g");
+        jw.beginObject();
+        jw.writeProperty("h", "H");
+        jw.endObject();
+        jw.writeProperty("i", "I");
+        jw.endObject();
+        jw.writeProperty("j", "J");
+        jw.writeComplexProperty("k");
+        jw.beginObject();
+        jw.writeProperty("l", "L");
+        jw.writeComplexProperty("m");
+        jw.beginObject();
+        jw.endObject();
+        jw.writeComplexProperty("n");
+        jw.beginObject();
+        jw.writeProperty("o", "O");
+        jw.endObject();
+        jw.endObject();
+        jw.endObject();
+        jw.endObject();
+        System.out.println(sw.getBuffer().toString());
     }
 
     @Test
