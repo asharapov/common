@@ -28,7 +28,6 @@ public class PrintableJsonWriter implements JsonWriter {
         public State state;
         public int items;
         public boolean inWriteObj;
-        //public boolean inObjProperty;
         public WriterContext(final State state, final String prefix) {
             this.state = state;
             this.prefix = prefix;
@@ -68,13 +67,14 @@ public class PrintableJsonWriter implements JsonWriter {
      * {@inheritDoc}
      */
     public void beginArray() throws IOException {
-        if (current!=null) {
-            if (current.state==State.OBJECT && !current.inObjProperty)
+        if (current != null) {
+            if (current.state == State.OBJECT )
                 throw new IllegalStateException();
-            if (current.state==State.ARRAY && !current.inWriteObj && current.items++>0)
-                out.write(",\n");
-            if (!current.inObjProperty)
+            if (current.state == State.ARRAY) {
+                if (!current.inWriteObj && current.items++>0)
+                    out.write(",\n");
                 out.write(current.prefix);
+            }
         }
         current = new WriterContext(State.ARRAY, getIndentString(stack.size()));
         stack.push( current );
@@ -85,17 +85,18 @@ public class PrintableJsonWriter implements JsonWriter {
      * {@inheritDoc}
      */
     public void endArray() throws IOException {
-        if (current.state!= State.ARRAY)
+        if (current.state != State.ARRAY)
             throw new IllegalStateException();
         stack.pop();
         if (stack.size()>0) {
             current = stack.getFirst();
-            current.inObjProperty = false;
+            if (current.state == State.OBJPARAM)
+                current.state = State.OBJECT;
         } else {
             current = null;
         }
         out.write('\n');
-        if (current!=null) {
+        if (current != null) {
             out.write(current.prefix);
         }
         out.write(']');
@@ -105,13 +106,13 @@ public class PrintableJsonWriter implements JsonWriter {
      * {@inheritDoc}
      */
     public void writeObject(final Object obj) throws IOException, InvocationTargetException, IllegalAccessException {
-        if (current!=null) {
-            if (current.state==State.OBJECT && !current.inObjProperty)
+        if (current != null) {
+            if (current.state == State.OBJECT)
                 throw new IllegalStateException();
-            if (current.state==State.ARRAY && current.items++>0) {
+            if (current.state == State.ARRAY && current.items++>0) {
                 out.write(",\n");
             }
-            if (obj==null) {
+            if (obj == null) {
                 out.write("null");
             } else {
                 current.inWriteObj = true;
@@ -119,7 +120,7 @@ public class PrintableJsonWriter implements JsonWriter {
                 current.inWriteObj = false;
             }
         } else {
-            if (obj==null) {
+            if (obj == null) {
                 out.write("null");
             } else {
                 ctx.getSerializer(obj.getClass()).serialize(obj, this);
@@ -131,13 +132,14 @@ public class PrintableJsonWriter implements JsonWriter {
      * {@inheritDoc}
      */
     public void beginObject() throws IOException {
-        if (current!=null) {
-            if (current.state==State.OBJECT && !current.inObjProperty)
+        if (current != null) {
+            if (current.state == State.OBJECT)
                 throw new IllegalStateException();
-            if (current.state==State.ARRAY && !current.inWriteObj && current.items++>0)
-                out.write(",\n");
-            if (!current.inObjProperty)
+            if (current.state == State.ARRAY) {
+                if (!current.inWriteObj && current.items++>0)
+                    out.write(",\n");
                 out.write(current.prefix);
+            }
         }
         current = new WriterContext(State.OBJECT, getIndentString(stack.size()));
         stack.push( current );
@@ -148,17 +150,18 @@ public class PrintableJsonWriter implements JsonWriter {
      * {@inheritDoc}
      */
     public void endObject() throws IOException {
-        if (current.state != State.OBJECT || current.inObjProperty)
+        if (current.state != State.OBJECT)
             throw new IllegalStateException();
         stack.pop();
-        if (stack.size()>0) {
+        if (stack.size() > 0) {
             current = stack.getFirst();
-            current.inObjProperty = false;
+            if (current.state == State.OBJPARAM)
+                current.state = State.OBJECT;
         } else {
             current = null;
         }
         out.write('\n');
-        if (current!=null) {
+        if (current != null) {
             out.write(current.prefix);
         }
         out.write('}');
@@ -168,20 +171,20 @@ public class PrintableJsonWriter implements JsonWriter {
      * {@inheritDoc}
      */
     public void writeProperty(final String name, final Object value) throws IOException, InvocationTargetException, IllegalAccessException {
-        if (current.state!=State.OBJECT || current.inObjProperty)
+        if (current.state != State.OBJECT)
             throw new IllegalStateException();
-        if (current.items++>0) {
+        if (current.items++ > 0) {
             out.write(",\n");
         }
         out.write(current.prefix);
         fieldNameSerializer.serialize(name, out);
         out.write(": ");
-        if (value==null) {
+        if (value == null) {
             out.write("null");
         } else {
-            current.inObjProperty = true;
+            current.state = State.OBJPARAM;
             ctx.getSerializer(value.getClass()).serialize(value, this);
-            current.inObjProperty = false;
+            current.state = State.OBJECT;
         }
     }
 
@@ -189,15 +192,15 @@ public class PrintableJsonWriter implements JsonWriter {
      * {@inheritDoc}
      */
     public void writeComplexProperty(final String name) throws IOException {
-        if (current.state!=State.OBJECT || current.inObjProperty)
+        if (current.state != State.OBJECT)
             throw new IllegalStateException();
-        if (current.items++>0) {
+        if (current.items++ > 0) {
             out.write(",\n");
         }
         out.write(current.prefix);
         fieldNameSerializer.serialize(name, out);
         out.write(": ");
-        current.inObjProperty = true;
+        current.state = State.OBJPARAM;
     }
 
 
@@ -224,7 +227,7 @@ public class PrintableJsonWriter implements JsonWriter {
     private String getIndentString(int level) {
         final int size = indents.size();
         level++;
-        if (level<size) {
+        if (level < size) {
             return indents.get(level);
         } else {
             final char[] buf = new char[size*indentFactor];
