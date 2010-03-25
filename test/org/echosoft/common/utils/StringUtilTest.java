@@ -15,6 +15,32 @@ import org.junit.Test;
 public class StringUtilTest {
 
     @Test
+    public void testLeadLeft() throws Exception {
+        Assert.assertEquals("", StringUtil.leadLeft("",' ', 0));
+        Assert.assertEquals("", StringUtil.leadLeft(null,' ', 0));
+        Assert.assertEquals("abc", StringUtil.leadLeft("abc",' ', 2));
+        Assert.assertEquals("abc", StringUtil.leadLeft("abc",' ', 3));
+        Assert.assertEquals(" abc", StringUtil.leadLeft("abc",' ', 4));
+        Assert.assertEquals("  ab", StringUtil.leadLeft("ab",' ', 4));
+        Assert.assertEquals("   a", StringUtil.leadLeft("a",' ', 4));
+        Assert.assertEquals("    ", StringUtil.leadLeft("",' ', 4));
+        Assert.assertEquals("    ", StringUtil.leadLeft(null,' ', 4));
+    }
+
+    @Test
+    public void testLeadRight() throws Exception {
+        Assert.assertEquals("", StringUtil.leadRight("",' ', 0));
+        Assert.assertEquals("", StringUtil.leadRight(null,' ', 0));
+        Assert.assertEquals("abc", StringUtil.leadRight("abc",' ', 2));
+        Assert.assertEquals("abc", StringUtil.leadRight("abc",' ', 3));
+        Assert.assertEquals("abc ", StringUtil.leadRight("abc",' ', 4));
+        Assert.assertEquals("ab  ", StringUtil.leadRight("ab",' ', 4));
+        Assert.assertEquals("a   ", StringUtil.leadRight("a",' ', 4));
+        Assert.assertEquals("    ", StringUtil.leadRight("",' ', 4));
+        Assert.assertEquals("    ", StringUtil.leadRight(null,' ', 4));
+    }
+
+    @Test
     public void testIndexOf() throws Exception {
         final String text = "abcdefgh";
         Assert.assertEquals(0, StringUtil.indexOf(text, 0, 'b','a'));

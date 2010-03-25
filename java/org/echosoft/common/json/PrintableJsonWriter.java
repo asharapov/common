@@ -4,9 +4,8 @@ import java.io.IOException;
 import java.io.Writer;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.LinkedList;
-
-import org.echosoft.common.utils.StringUtil;
 
 /**
  * Реализация интерфейса {@link JsonWriter} особенностями которой являются:
@@ -228,7 +227,9 @@ public class PrintableJsonWriter implements JsonWriter {
         if (level<size) {
             return indents.get(level);
         } else {
-            final String result = StringUtil.leadRight("", ' ', size*indentFactor);
+            final char[] buf = new char[size*indentFactor];
+            Arrays.fill(buf, ' ');
+            final String result = new String(buf);
             indents.add( result );
             return result;
         }

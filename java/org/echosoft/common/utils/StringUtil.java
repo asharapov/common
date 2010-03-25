@@ -79,49 +79,53 @@ public class StringUtil {
     /**
      * Дополняет переданную в аргументе строку до требуемой длины путем добавления в начало строки указанных символов.
      * Если длина исходной строки равна или больше указанной длины то метод не делает ничего и возвращает исходную строку.
-     * Leads string with specified symbol to specified length from left side.
-     * @param string  исходная строка
+     * @param str  исходная строка
      * @param symbol  символ который используется до заполнения строки до требуемой длины.
-     * @param length  минимальная требуемая длина возвращаемой методом строки.
+     * @param requiredLength  минимальная требуемая длина возвращаемой методом строки.
      * @return  строка требуемой длины.
      */
-    public static String leadLeft(final String string, final char symbol, final int length) {
-        final int mustBeAdded = length - (string!=null ? string.length() : 0);
-        if (mustBeAdded<=0)
-            return string;
-
-        final StringBuilder out = new StringBuilder(length);
-        for (int i=0; i<mustBeAdded; i++) {
-            out.append(symbol);
+    public static String leadLeft(final String str, final char symbol, final int requiredLength) {
+        final char[] buf;
+        final int strlen;
+        if (str==null || (strlen=str.length())==0) {
+            buf = new char[requiredLength];
+            for (int i=0; i<requiredLength; i++) buf[i] = symbol;
+            return new String(buf);
+        } else {
+            final int mustBeAdded=requiredLength-strlen;
+            if (mustBeAdded<=0)
+                return str;
+            buf = new char[requiredLength];
+            for (int i=0; i<mustBeAdded; i++) buf[i] = symbol;
+            str.getChars(0, strlen, buf, mustBeAdded);
+            return new String(buf);
         }
-        if (string!=null)
-            out.append(string);
-        return out.toString();
     }
 
     /**
      * Дополняет переданную в аргументе строку до требуемой длины путем добавления в конец строки указанных символов.
      * Если длина исходной строки равна или больше указанной длины то метод не делает ничего и возвращает исходную строку.
-     * Leads string with specified symbol to specified length from left side.
-     * @param string  исходная строка
+     * @param str  исходная строка
      * @param symbol  символ который используется до заполнения строки до требуемой длины.
-     * @param length  минимальная требуемая длина возвращаемой методом строки.
+     * @param requiredLength  минимальная требуемая длина возвращаемой методом строки.
      * @return  строка требуемой длины.
      */
-    public static String leadRight(final String string, final char symbol, final int length) {
-        final int mustBeAdded = length - (string!=null ? string.length() : 0);
-        if (mustBeAdded<=0)
-            return string;
-
-        final StringBuilder out = new StringBuilder(length);
-        if (string!=null)
-            out.append(string);
-
-        // leading string with symbol
-        for (int i=0; i<mustBeAdded; i++) {
-            out.append(symbol);
+    public static String leadRight(final String str, final char symbol, final int requiredLength) {
+        final char[] buf;
+        final int strlen;
+        if (str==null || (strlen=str.length())==0) {
+            buf = new char[requiredLength];
+            for (int i=0; i<requiredLength; i++) buf[i] = symbol;
+            return new String(buf);
+        } else {
+            final int mustBeAdded=requiredLength-strlen;
+            if (mustBeAdded<=0)
+                return str;
+            buf = new char[requiredLength];
+            str.getChars(0, strlen, buf, 0);
+            for (int i=strlen; i<requiredLength; i++) buf[i] = symbol;
+            return new String(buf);
         }
-        return out.toString();
     }
 
     /**
