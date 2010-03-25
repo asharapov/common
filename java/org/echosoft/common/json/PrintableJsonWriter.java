@@ -21,20 +21,20 @@ public class PrintableJsonWriter implements JsonWriter {
 
     public static final int DEFAULT_INDENT_FACTOR = 4;  // сколько пробелов соответствуют одному уровню иерархии.
 
-    private static enum State{ARRAY, OBJECT}
+    private static enum State{ARRAY, OBJECT, OBJPARAM}
 
     private static final class WriterContext {
         public final String prefix;
-        public final State state;
+        public State state;
         public int items;
         public boolean inWriteObj;
-        public boolean inObjProperty;
+        //public boolean inObjProperty;
         public WriterContext(final State state, final String prefix) {
             this.state = state;
             this.prefix = prefix;
         }
         public String toString() {
-            return "[WriterContext{state:"+state+", items:"+items+", inWriteObj:"+inWriteObj+", inObjProperty:"+inObjProperty+"}]";
+            return "[WriterContext{state:"+state+", items:"+items+", inWriteObj:"+inWriteObj+"}]";
         }
     }
 
