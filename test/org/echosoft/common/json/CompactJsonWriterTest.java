@@ -2,6 +2,7 @@ package org.echosoft.common.json;
 
 import java.io.StringWriter;
 import java.math.BigDecimal;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
 
@@ -15,7 +16,6 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-
 public class CompactJsonWriterTest {
 
     private static StringWriter sw;
@@ -25,6 +25,91 @@ public class CompactJsonWriterTest {
     public void before() {
         sw = new StringWriter();
         jw = new CompactJsonWriter(new JsonContext(), sw);
+    }
+
+    @Test
+    public void testState1() throws Exception {
+        try {
+            jw.writeProperty("a", "A");
+            Assert.fail();
+        } catch (Exception e) {}
+        try {
+            jw.writeComplexProperty("a");
+            Assert.fail();
+        } catch (Exception e) {}
+        try {
+            jw.endArray();
+            Assert.fail();
+        } catch (Exception e) {}
+        try {
+            jw.endObject();
+            Assert.fail();
+        } catch (Exception e) {}
+
+        jw.writeObject("A");
+        try {
+            jw.writeObject("a");
+            Assert.fail();
+        } catch (Exception e) {}
+        try {
+            jw.beginArray();
+            Assert.fail();
+        } catch (Exception e) {}
+        try {
+            jw.beginObject();
+            Assert.fail();
+        } catch (Exception e) {}
+        try {
+            jw.endArray();
+            Assert.fail();
+        } catch (Exception e) {}
+        try {
+            jw.endObject();
+            Assert.fail();
+        } catch (Exception e) {}
+    }
+
+    @Test
+    public void testState2() throws Exception {
+        jw.beginArray();
+        try {
+            jw.writeProperty("a", "A");
+            Assert.fail();
+        } catch (Exception e) {}
+        try {
+            jw.writeComplexProperty("a");
+            Assert.fail();
+        } catch (Exception e) {}
+        try {
+            jw.endObject();
+            Assert.fail();
+        } catch (Exception e) {}
+    }
+
+    @Test
+    public void testState3() throws Exception {
+        jw.beginObject();
+        try {
+            jw.beginObject();
+            Assert.fail();
+        } catch (Exception e) {}
+        try {
+            jw.beginArray();
+            Assert.fail();
+        } catch (Exception e) {}
+        try {
+            jw.endArray();
+            Assert.fail();
+        } catch (Exception e) {}
+        jw.writeComplexProperty("a");
+        try {
+            jw.endObject();
+            Assert.fail();
+        } catch (Exception e) {}
+        try {
+            jw.endArray();
+            Assert.fail();
+        } catch (Exception e) {}
     }
 
     @Test
@@ -55,6 +140,16 @@ public class CompactJsonWriterTest {
 
     @Test
     public void testWriter3() throws Exception {
+        jw.beginArray();
+        jw.writeObject("A");
+        jw.writeObject(new HashMap());
+        jw.writeObject( new Object[]{1,2});
+        jw.endArray();
+        Assert.assertEquals("[\"A\",{},[1,2]]", sw.getBuffer().toString());
+    }
+
+    @Test
+    public void testWriter4() throws Exception {
         final Map<String,Object> map = new TreeMap<String,Object>();
         map.put("a", 1);
         map.put("b", "B");
@@ -68,7 +163,7 @@ public class CompactJsonWriterTest {
     }
 
     @Test
-    public void testWriter4() throws Exception {
+    public void testWriter5() throws Exception {
         jw.beginObject();
         jw.writeProperty("id", 1);
         jw.writeComplexProperty("settings");
@@ -78,6 +173,25 @@ public class CompactJsonWriterTest {
         jw.writeProperty("name", "testname");
         jw.endObject();
         Assert.assertEquals("{id:1,settings:{a:\"A\"},name:\"testname\"}", sw.getBuffer().toString());
+    }
+
+    @Test
+    public void testWriter6() throws Exception {
+        jw.beginArray();
+        jw.beginArray();
+        jw.beginArray();
+        jw.writeObject(new HashMap());
+        jw.writeObject(new HashMap());
+        jw.endArray();
+        jw.endArray();
+        jw.beginArray();
+        jw.beginArray();
+        jw.writeObject(new HashMap());
+        jw.writeObject(new HashMap());
+        jw.endArray();
+        jw.endArray();
+        jw.endArray();
+        Assert.assertEquals("[[[{},{}]],[[{},{}]]]", sw.getBuffer().toString());
     }
 
     @Test
@@ -122,32 +236,40 @@ public class CompactJsonWriterTest {
         System.out.println(sw.getBuffer().toString());
     }
 
-
     @Test
-    public void testHierarchyBase() throws Exception {
+    public void testHierarchyBase1() throws Exception {
         jw.writeObject(new Data.A());
         Assert.assertEquals("{a:\"A\"}", sw.getBuffer().toString());
-        sw.getBuffer().setLength(0);
+    }
 
+    @Test
+    public void testHierachyBase2() throws Exception {
         jw.writeObject(new Data.B());
         Assert.assertEquals("{b:\"B\",a:\"A\"}", sw.getBuffer().toString());
-        sw.getBuffer().setLength(0);
+    }
 
+    @Test
+    public void testHierachyBase3() throws Exception {
         jw.writeObject(new Data.C1());
         Assert.assertEquals("{$:\"JSC1\",a:\"A\",b:\"B\",c1:\"C1\"}", sw.getBuffer().toString());
-        sw.getBuffer().setLength(0);
+    }
 
+    @Test
+    public void testHierachyBase4() throws Exception {
         jw.writeObject(new Data.C2());
         Assert.assertEquals("{$:\"JSC2\",a:\"A\",b:\"B\",c2:\"C2\"}", sw.getBuffer().toString());
-        sw.getBuffer().setLength(0);
+    }
 
+    @Test
+    public void testHierachyBase5() throws Exception {
         jw.writeObject(new Data.D1());
         Assert.assertEquals("{$:\"JSC1\",a:\"A\",b:\"B\",c1:\"C1\"}", sw.getBuffer().toString());
-        sw.getBuffer().setLength(0);
+    }
 
+    @Test
+    public void testHierachyBase6() throws Exception {
         jw.writeObject(new Data.D2());
         Assert.assertEquals("{d:2,c2:\"C2\",b:\"B\",a:\"A\"}", sw.getBuffer().toString());
-        sw.getBuffer().setLength(0);
     }
 
     @Test
@@ -155,27 +277,27 @@ public class CompactJsonWriterTest {
         jw.getContext().registerSerializer(Data.C1.class, new BeanSerializer(Data.C1.class), false);
         jw.writeObject(new Data.C1());
         Assert.assertEquals("{c1:\"C1\",b:\"B\",a:\"A\"}", sw.getBuffer().toString());
-        sw.getBuffer().setLength(0);
-
-        jw.writeObject(new Data.D1());
-        Assert.assertEquals("{$:\"JSC1\",a:\"A\",b:\"B\",c1:\"C1\"}", sw.getBuffer().toString());
-        sw.getBuffer().setLength(0);
     }
 
     @Test
     public void testHierarchyExt2() throws Exception {
+        jw.writeObject(new Data.D1());
+        Assert.assertEquals("{$:\"JSC1\",a:\"A\",b:\"B\",c1:\"C1\"}", sw.getBuffer().toString());
+    }
+
+    @Test
+    public void testHierarchyExt3() throws Exception {
         jw.getContext().registerSerializer(Data.C1.class, new BeanSerializer(Data.C1.class), true);
         jw.writeObject(new Data.C1());
         Assert.assertEquals("{c1:\"C1\",b:\"B\",a:\"A\"}", sw.getBuffer().toString());
-        sw.getBuffer().setLength(0);
-
-        jw.writeObject(new Data.D1());
-        Assert.assertEquals("{c1:\"C1\",b:\"B\",a:\"A\"}", sw.getBuffer().toString());
-        sw.getBuffer().setLength(0);
     }
 
-
-
+    @Test
+    public void testHierarchyExt4() throws Exception {
+        jw.getContext().registerSerializer(Data.C1.class, new BeanSerializer(Data.C1.class), true);
+        jw.writeObject(new Data.D1());
+        Assert.assertEquals("{c1:\"C1\",b:\"B\",a:\"A\"}", sw.getBuffer().toString());
+    }
 
     @Test
     public void testDynamicDereference() throws Exception {

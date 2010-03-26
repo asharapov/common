@@ -181,7 +181,7 @@ public class JsonContext {
      * @param cls  класс для которого должен быть найден соответствующий сериализатор в JSON формат.
      * @return  наиболее подходящий сериализатор или <code>null</code>.
      */
-    public JsonSerializer getSerializer(final Class<?> cls) {
+    public <T> JsonSerializer<T> getSerializer(final Class<? extends T> cls) {
         JsonSerializer result = serializers.get(cls);
         if (result==null) {
             result = resolveSerializer(cls);

@@ -1,14 +1,12 @@
 package org.echosoft.common.json;
 
 import java.io.StringWriter;
-import java.util.ArrayList;
+import java.util.HashMap;
 
 import org.echosoft.common.json.beans.Data;
-import org.echosoft.common.model.BasicReference;
 import org.echosoft.common.model.TreeNode;
-import org.echosoft.common.utils.StringUtil;
+import org.junit.After;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 
 /**
@@ -19,20 +17,42 @@ public class PrintableJsonWriterTest {
     private static StringWriter sw;
     private static JsonWriter jw;
 
-    @BeforeClass
-    public static void beforeClass() {
+    @Before
+    public void before() {
         sw = new StringWriter();
         jw = new PrintableJsonWriter(new JsonContext(), sw);
     }
 
-    @Before
-    public void setUp() {
+    @After
+    public void after() {
         System.out.println("\n   ---   \n");
-        sw.getBuffer().setLength(0);
     }
 
     @Test
-    public void testObject1() throws Exception {
+    public void testArray1() throws Exception {
+        jw.beginArray();
+        jw.beginObject();
+        jw.endObject();
+        jw.beginObject();
+        jw.endObject();
+        jw.beginObject();
+        jw.endObject();
+        jw.endArray();
+        System.out.println(sw.getBuffer().toString());
+    }
+
+    @Test
+    public void testArray2() throws Exception {
+        jw.beginArray();
+        jw.writeObject( new Object() );
+        jw.writeObject( new Object() );
+        jw.writeObject( new Object() );
+        jw.endArray();
+        System.out.println(sw.getBuffer().toString());
+    }
+
+    @Test
+    public void testComplex1() throws Exception {
         jw.getOutputWriter().write("var data = ");
         jw.beginObject();
         jw.writeProperty("a", "A");
@@ -67,28 +87,35 @@ public class PrintableJsonWriterTest {
     }
 
     @Test
-    public void testWriter1() throws Exception {
+    public void testComplex2() throws Exception {
+        jw.getOutputWriter().write("var data = ");
         jw.beginObject();
-        jw.writeProperty("name", "Anton");
-        jw.writeProperty("age", 32);
-        jw.writeProperty("skills", new String[]{"A","B",null});
-        jw.writeComplexProperty("items");
+        jw.writeProperty("a", "A");
+        jw.writeComplexProperty("b");
+        jw.beginObject();
+        jw.writeProperty("c", "C");
+        jw.writeComplexProperty("d");
         jw.beginArray();
         jw.beginObject();
-        jw.writeProperty("default", true);
-        jw.writeProperty("date", StringUtil.parseDate("01.01.2009"));
+        jw.writeProperty("e", "E");
         jw.endObject();
+        jw.beginObject();
+        jw.writeProperty("f", "F");
+        jw.endObject();
+        jw.writeObject("G");
+        jw.writeObject("H");
+        jw.beginArray();
+        jw.writeObject("I");
+        jw.beginObject();
+        jw.endObject();
+        jw.beginObject();
+        jw.endObject();
+        jw.writeObject(new HashMap());
+        jw.beginArray();
         jw.endArray();
-        jw.writeComplexProperty("env");
-        jw.beginObject();
-        jw.writeProperty("path", "/usr/local");
-        jw.writeProperty("owner", "admin");
-        jw.writeComplexProperty("listeners");
-        jw.beginObject();
-        jw.writeProperty("oninit", new JSExpression("null"));
-        jw.writeProperty("onchange", new JSExpression("function() {alert(this);}"));
-        jw.writeProperty("director", new BasicReference("1", "Ivanov"));
-        jw.endObject();
+        jw.writeObject(new Object[0]);
+        jw.endArray();
+        jw.endArray();
         jw.endObject();
         jw.endObject();
         System.out.println(sw.getBuffer().toString());
