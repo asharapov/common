@@ -1,5 +1,7 @@
 package org.echosoft.common.model;
 
+import org.echosoft.common.json.annotate.JsonUseSeriazer;
+import org.echosoft.common.model.spi.ReferenceJsonSerializer;
 import org.echosoft.common.utils.StringUtil;
 
 /**
@@ -9,6 +11,7 @@ import org.echosoft.common.utils.StringUtil;
  *
  * @author Anton Sharapov
  */
+@JsonUseSeriazer(value = ReferenceJsonSerializer.class, recursive = true)
 public class BasicReference<T> implements Reference<T> {
 
     private final String key;
@@ -49,7 +52,7 @@ public class BasicReference<T> implements Reference<T> {
      * @exception  NumberFormatException  if the <code>key</code> does not contain a parsable <code>long</code>.
      */
     public long getKeyAsLong() {
-        return Long.parseLong(key);
+        return Long.parseLong(key,10);
     }
 
     /**

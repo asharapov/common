@@ -3,11 +3,15 @@ package org.echosoft.common.model;
 import java.io.Serializable;
 import java.text.ParseException;
 
+import org.echosoft.common.json.annotate.JsonUseSeriazer;
+import org.echosoft.common.model.spi.VersionJsonSerializer;
+
 /**
  * Описывает версию чего бы то ни было.
  *
  * @author Anton Sharapov
  */
+@JsonUseSeriazer(value = VersionJsonSerializer.class, recursive = true)
 public class Version implements Serializable, Comparable<Version> {
 
     /**
@@ -33,7 +37,7 @@ public class Version implements Serializable, Comparable<Version> {
             if (e>s) {
                 parts[p++] = Integer.parseInt( version.substring(s,e) );
                 s = e;
-                if (c=='.' && s+1<length && Character.isDigit(version.charAt(s+1))) {
+                if (c=='.' && p<parts.length && s+1<length && Character.isDigit(version.charAt(s+1))) {
                     s = ++e;
                 } else {
                     break;
@@ -42,9 +46,9 @@ public class Version implements Serializable, Comparable<Version> {
                 break;
             }
         }
-        if (p==parts.length || s==length) {
-            extra = version.substring(s, length);
-        } else
+        if (p>0) {
+            extra = version.substring(s, length).trim();
+        } else 
             throw new ParseException("Invalid version "+version, s);
         return new Version(parts[0], parts[1], parts[2], extra);
     }
@@ -58,8 +62,16 @@ public class Version implements Serializable, Comparable<Version> {
         this(major, 0, 0, null);
     }
 
+    public Version(final int major, final String extraVersion) {
+        this(major, 0, 0, extraVersion);
+    }
+
     public Version(final int major, final int minor) {
         this(major, minor, 0, null);
+    }
+
+    public Version(final int major, final int minor, final String extraVersion) {
+        this(major, minor, 0, extraVersion);
     }
 
     public Version(final int major, final int minor, final int revision) {

@@ -12,8 +12,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
-import org.echosoft.common.model.Reference;
-
 /**
  * Содержит ссылки на объекты - реализации интерфейса {@link JsonSerializer} для базового набора классов:
  * <ul>
@@ -37,7 +35,6 @@ import org.echosoft.common.model.Reference;
  * <li> <code>java.lang.String[]</code>
  * <li> <code>java.lang.Integer[]</code>
  * <li> <code>ru.topsbi.common.util.json.JSExpression</code>
- * <li> <code>ru.topsbi.common.util.Reference</code>
  * </ul>
  * @author Anton Sharapov
  */
@@ -149,6 +146,13 @@ public class Serializers {
                     out.write(',');
                     out.write( Integer.toString(cal.get(Calendar.SECOND)) );
                     out.write(')');
+                }
+            };
+
+    public static final JsonSerializer<Date> DATE_MILLIS =
+            new JsonSerializer<Date>() {
+                public void serialize(final Date src, final JsonWriter jw) throws IOException {
+                    jw.getOutputWriter().write( Long.toString(src.getTime(),10) );
                 }
             };
 
@@ -476,18 +480,6 @@ public class Serializers {
                 }
             };
 
-
-    public static final JsonSerializer<Reference> REFERENCE =
-            new JsonSerializer<Reference>() {
-                public void serialize(final Reference src, final JsonWriter jw) throws IOException {
-                    final Writer out = jw.getOutputWriter();
-                    out.write("{key:");
-                    JsonUtil.encodeString(src.getKey(), out);
-                    out.write(",title:");
-                    JsonUtil.encodeString(src.getTitle(), out);
-                    out.write('}');
-                }
-            };
 
 
     /**

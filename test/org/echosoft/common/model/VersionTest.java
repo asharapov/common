@@ -22,15 +22,17 @@ public class VersionTest {
         cases.put("1", new Version(1, 0, 0));
         cases.put("1.2", new Version(1, 2, 0));
         cases.put("1.2.3", new Version(1,2,3));
+        cases.put("1.2.3x", new Version(1,2,3, "x"));
         cases.put("1.2.3.", new Version(1,2,3, "."));
+        cases.put("1.2.3.4", new Version(1,2,3, ".4"));
         cases.put("ash", null);
-        cases.put("1ash", null);
-        cases.put("1.2ash", null);
+        cases.put("1ash", new Version(1,0,0,"ash"));
+        cases.put("1.2ash", new Version(1,2,0,"ash"));
         cases.put("1.2.3.ash", new Version(1,2,3, ".ash"));
         cases.put("2", new Version(2,0,0));
         cases.put("1.3", new Version(1,3,0));
         cases.put("1.3.1", new Version(1,3,1));
-        cases.put(" 1 .3.1 ", null);
+        cases.put(" 1 .3.1 ", new Version(1,0,0, ".3.1"));
         cases.put("0.0.1-test", new Version(0,0,1,"-test"));
         cases.put("0.0.1-ash", new Version(0,0,1,"-ash"));
         cases.put("0.0.1", new Version(0,0,1));
@@ -43,7 +45,7 @@ public class VersionTest {
             Version v;
             try {
                 v = Version.parseVersion(entry.getKey());
-                Assert.assertEquals("Wrong version parsed", v, entry.getValue());
+                Assert.assertEquals(entry.getValue(), v);
             } catch (ParseException e) {
                 Assert.assertNull("Unable to parse version [" + entry.getKey() + "]: ", entry.getValue());
             }
@@ -57,7 +59,7 @@ public class VersionTest {
             if (entry.getValue() != null)
                 set.add(entry.getValue());
         }
-        Assert.assertEquals("Incorrect versions counts", set.size(), 11);
+        Assert.assertEquals("Incorrect versions counts", set.size(), 16);
 
         System.out.println("---------");
         for (Version version : set) {

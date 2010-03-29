@@ -11,7 +11,6 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.echosoft.common.json.annotate.JsonUseSeriazer;
 import org.echosoft.common.json.introspect.BeanSerializer;
-import org.echosoft.common.model.Reference;
 
 /**
  * <p>Ключевой класс модуля отвечающего за конвертацию java объектов в JSON формат.</p>
@@ -71,7 +70,6 @@ public class JsonContext {
             registerSerializer(CharSequence.class, Serializers.STRING, true);
             registerSerializer(CharSequence[].class, Serializers.STRING_ARRAY, true);
             registerSerializer(JSExpression.class, Serializers.JSEXPRESSION, true);
-            registerSerializer(Reference.class, Serializers.REFERENCE, true);
             fieldNameSerializer = Serializers.COMPACT_FIELDNAME_SERIALIZER;
             writerFactory = Serializers.COMPACT_JSON_WRITER_FACTORY;
         } else {
