@@ -1,11 +1,15 @@
 package org.echosoft.common.json;
 
+import javax.script.ScriptEngine;
+import javax.script.ScriptEngineManager;
+import javax.script.ScriptException;
 import java.io.StringWriter;
 import java.util.HashMap;
 
 import org.echosoft.common.json.beans.Data;
 import org.echosoft.common.model.TreeNode;
 import org.junit.After;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -30,30 +34,76 @@ public class PrintableJsonWriterTest {
 
     @Test
     public void testArray1() throws Exception {
+        jw.getOutputWriter().write("result = ");
         jw.beginArray();
-        jw.beginObject();
-        jw.endObject();
-        jw.beginObject();
-        jw.endObject();
-        jw.beginObject();
-        jw.endObject();
         jw.endArray();
-        System.out.println(sw.getBuffer().toString());
+        validateScript(sw.getBuffer().toString());
     }
 
     @Test
     public void testArray2() throws Exception {
+        jw.getOutputWriter().write("result = ");
+        jw.beginArray();
+        jw.beginObject();
+        jw.endObject();
+        jw.beginObject();
+        jw.endObject();
+        jw.beginObject();
+        jw.endObject();
+        jw.endArray();
+        validateScript(sw.getBuffer().toString());
+    }
+
+    @Test
+    public void testArray3() throws Exception {
+        jw.getOutputWriter().write("result = ");
         jw.beginArray();
         jw.writeObject( new Object() );
         jw.writeObject( new Object() );
         jw.writeObject( new Object() );
         jw.endArray();
-        System.out.println(sw.getBuffer().toString());
+        validateScript(sw.getBuffer().toString());
+    }
+
+    @Test
+    public void testArray4() throws Exception {
+        jw.getOutputWriter().write("result = ");
+        jw.beginArray();
+        jw.beginArray();
+        jw.beginArray();
+        jw.endArray();
+        jw.endArray();
+        jw.endArray();
+        validateScript(sw.getBuffer().toString());
+    }
+
+    @Test
+    public void testObject1() throws Exception {
+        jw.getOutputWriter().write("result = ");
+        jw.beginObject();
+        jw.endObject();
+        validateScript(sw.getBuffer().toString());
+    }
+
+    @Test
+    public void testObject2() throws Exception {
+        jw.getOutputWriter().write("result = ");
+        jw.beginObject();
+        jw.writeComplexProperty("a");
+        jw.beginArray();
+        jw.beginArray();
+        jw.writeObject("A");
+        jw.writeObject("B");
+        jw.writeObject("C");
+        jw.endArray();
+        jw.endArray();
+        jw.endObject();
+        validateScript(sw.getBuffer().toString());
     }
 
     @Test
     public void testComplex1() throws Exception {
-        jw.getOutputWriter().write("var data = ");
+        jw.getOutputWriter().write("result = ");
         jw.beginObject();
         jw.writeProperty("a", "A");
         jw.writeProperty("b", "B");
@@ -83,12 +133,12 @@ public class PrintableJsonWriterTest {
         jw.endObject();
         jw.endObject();
         jw.endObject();
-        System.out.println(sw.getBuffer().toString());
+        validateScript(sw.getBuffer().toString());
     }
 
     @Test
     public void testComplex2() throws Exception {
-        jw.getOutputWriter().write("var data = ");
+        jw.getOutputWriter().write("result = ");
         jw.beginObject();
         jw.writeProperty("a", "A");
         jw.writeComplexProperty("b");
@@ -118,13 +168,14 @@ public class PrintableJsonWriterTest {
         jw.endArray();
         jw.endObject();
         jw.endObject();
-        System.out.println(sw.getBuffer().toString());
+        validateScript(sw.getBuffer().toString());
     }
 
     @Test
     public void testWriter2() throws Exception {
+        jw.getOutputWriter().write("result = ");
         jw.writeObject(Data.data);
-        System.out.println("\n\n"+sw.getBuffer().toString());
+        validateScript("\n\n"+sw.getBuffer().toString());
     }
 
     @Test
@@ -133,9 +184,23 @@ public class PrintableJsonWriterTest {
         root.addChildNode("n1", "node1");
         root.addChildNode("n2", "node2");
         root.findNode("n1").addChildNode("n11", "node1.1");
-        System.out.println(root.debugInfo());
+        System.err.println(root.debugInfo());
+        jw.getOutputWriter().write("result = ");
         jw.writeObject(root);
-        System.out.println("\n\n"+sw.getBuffer().toString());
+        validateScript("\n\n"+sw.getBuffer().toString());
     }
 
+
+    private static Object validateScript(final String script) throws ScriptException {
+        System.out.println(script);
+        try {
+            final ScriptEngineManager factory = new ScriptEngineManager();
+            final ScriptEngine engine = factory.getEngineByName("JavaScript");
+            final Object result = engine.eval(script);
+            return result;
+        } catch (Exception e) {
+            Assert.fail("expression failed:\n "+script);
+            return null;
+        }
+    }
 }

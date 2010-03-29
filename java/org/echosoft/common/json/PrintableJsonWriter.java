@@ -22,36 +22,6 @@ public class PrintableJsonWriter implements JsonWriter {
 
     private static enum State{UNKNOWN, ARRAY, OBJECT, OBJATTR}
 
-    /**
-    private static final class Indenter {
-        private final int factor;
-        private final ArrayList<String> strings;
-        private Indenter(final int factor, final int cnt) {
-            this.factor = factor;
-            this.strings = new ArrayList<String>(cnt);
-            final int buflen = cnt * factor;
-            final char[] buf = new char[buflen];
-            for (int i=0; i<buflen; i++) buf[i] = ' ';
-            for (int i=0; i<cnt; i++) {
-                strings.add( new String(buf, 0, factor*i) );
-            }
-        }
-        private String getIndentString(final int level) {
-            final int size = strings.size();
-            //level++;
-            if (level < size) {
-                return strings.get(level);
-            } else {
-                final char[] buf = new char[size*factor];
-                Arrays.fill(buf, ' ');
-                final String result = new String(buf);
-                strings.add( result );
-                return result;
-            }
-        }
-    }
-    */
-
     private static final class Context {
         private final Context prev;
         private final String prefix;
@@ -79,7 +49,7 @@ public class PrintableJsonWriter implements JsonWriter {
     private final JsonContext ctx;
     private final Writer out;
     private final JsonFieldNameSerializer fieldNameSerializer;
-    private final int indentFactor;
+    private final int indent;
     private final ArrayList<String> indents;
     private Context current;
 
@@ -87,16 +57,26 @@ public class PrintableJsonWriter implements JsonWriter {
      * Инициализирует поток данных в нотации JSON.
      * @param ctx  глобальный контекст. Обязательное поле, не может быть <code>null</code>.
      * @param out  выходной поток куда будет помещаться результат. Не может быть <code>null</code>.
+     * @param indent  определяет величину отступов при форматировании.
      */
-    public PrintableJsonWriter(final JsonContext ctx, final Writer out) {
+    public PrintableJsonWriter(final JsonContext ctx, final Writer out, final int indent) {
         if (ctx==null || out==null)
             throw new IllegalArgumentException("All arguments should be specified");
         this.ctx = ctx;
         this.out = out;
         this.fieldNameSerializer = ctx.getFieldNameSerializer();
-        this.indentFactor = DEFAULT_INDENT_FACTOR;  //TODO: добавить возможность кастомизации данного параметра.
-        this.indents = JsonUtil.getIndentationStrings(indentFactor);
+        this.indent = indent>=0 ? indent : DEFAULT_INDENT_FACTOR;
+        this.indents = JsonUtil.getIndentationStrings(this.indent);
         this.current = new Context();
+    }
+
+    /**
+     * Инициализирует поток данных в нотации JSON.
+     * @param ctx  глобальный контекст. Обязательное поле, не может быть <code>null</code>.
+     * @param out  выходной поток куда будет помещаться результат. Не может быть <code>null</code>.
+     */
+    public PrintableJsonWriter(final JsonContext ctx, final Writer out) {
+        this(ctx, out, DEFAULT_INDENT_FACTOR);
     }
 
 
@@ -115,9 +95,9 @@ public class PrintableJsonWriter implements JsonWriter {
             }
             case ARRAY : {
                 if (!current.inWriteObj && current.items++>0)
-                    out.write(",");
+                    out.write(',');
                 current = new Context(current, State.ARRAY, getIndentString(current.depth));
-                out.write(" [");
+                out.write("[");
                 break;
             }
             case OBJECT : {
@@ -143,11 +123,9 @@ public class PrintableJsonWriter implements JsonWriter {
                 throw new IllegalStateException();
             }
             case ARRAY : {
-                if (true || current.items>0) {
-                    out.write('\n');
-                    out.write(current.prev.prefix);
-                }
                 current = current.prev;
+                out.write('\n');
+                out.write(current.prefix);
                 out.write(']');
                 break;
             }
@@ -164,20 +142,15 @@ public class PrintableJsonWriter implements JsonWriter {
                     throw new IllegalStateException();
                 current.items = 1;
                 current = new Context(current, State.OBJECT, getIndentString(current.depth));
-                out.write("{");
+//                out.write("{");
                 break;
             }
             case ARRAY : {
-                if (!current.inWriteObj) {
-                    if (current.items++ > 0) {
-                        out.write(",");
-                    } else {
-//                        out.write('\n');
-//                        out.write(current.prefix);
-                    }
+                if (!current.inWriteObj && current.items++ > 0) {
+                    out.write(',');
                 }
                 current = new Context(current, State.OBJECT, getIndentString(current.depth));
-                out.write(" {");
+//                out.write(" {");
                 break;
             }
             case OBJECT : {
@@ -186,7 +159,7 @@ public class PrintableJsonWriter implements JsonWriter {
             case OBJATTR : {
                 current.state = State.OBJECT;
                 current = new Context(current, State.OBJECT, getIndentString(current.depth));
-                out.write("{");
+//                out.write("{");
                 break;
             }
         }
@@ -203,12 +176,19 @@ public class PrintableJsonWriter implements JsonWriter {
                 throw new IllegalStateException();
             }
             case OBJECT : {
-                if (true || current.items>0) {
+                if (current.items==0) {
+                    current = current.prev;
+                    if (current.state==State.ARRAY) {
+                        out.write('\n');
+                        out.write(current.prefix);
+                    }
+                    out.write("{}");
+                } else {
+                    current = current.prev;
                     out.write('\n');
-                    out.write(current.prev.prefix);
+                    out.write(current.prefix);
+                    out.write('}');
                 }
-                current = current.prev;
-                out.write("}");
                 break;
             }
         }
@@ -234,11 +214,7 @@ public class PrintableJsonWriter implements JsonWriter {
             }
             case ARRAY : {
                 if (current.items++ > 0) {
-                    out.write(",\n");
-                    out.write(current.prefix);
-                } else {
-                    out.write('\n');
-                    out.write(current.prefix);
+                    out.write(',');
                 }
                 if (obj == null) {
                     out.write("null");
@@ -280,7 +256,7 @@ public class PrintableJsonWriter implements JsonWriter {
                 if (current.items++ > 0) {
                     out.write(",\n");
                 } else {
-                    out.write('\n');
+                    out.write("{\n");
                 }
                 out.write(current.prefix);
                 fieldNameSerializer.serialize(name, out);
@@ -311,7 +287,7 @@ public class PrintableJsonWriter implements JsonWriter {
                 if (current.items++ > 0) {
                     out.write(",\n");
                 } else {
-                    out.write('\n');
+                    out.write("{\n");
                 }
                 out.write(current.prefix);
                 fieldNameSerializer.serialize(name, out);
@@ -349,7 +325,7 @@ public class PrintableJsonWriter implements JsonWriter {
         if (level < size) {
             return indents.get(level);
         } else {
-            final char[] buf = new char[size*indentFactor];
+            final char[] buf = new char[size* indent];
             Arrays.fill(buf, ' ');
             final String result = new String(buf);
             indents.add( result );
