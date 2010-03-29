@@ -32,6 +32,7 @@ public class VersionJsonSerializer implements JsonSerializer<Version> {
             out.write(",extra:");
             JsonUtil.encodeString(src.getExtraVersion(), out);
         }
+        out.write('}');
     }
 
 }

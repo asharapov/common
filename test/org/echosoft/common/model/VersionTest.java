@@ -1,10 +1,14 @@
 package org.echosoft.common.model;
 
+import java.io.StringWriter;
 import java.text.ParseException;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
+import org.echosoft.common.json.CompactJsonWriter;
+import org.echosoft.common.json.JsonContext;
+import org.echosoft.common.json.JsonWriter;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -66,5 +70,22 @@ public class VersionTest {
             System.out.println(version);
         }
         System.out.println("---------");
+    }
+
+
+    @Test
+    public void testJson() throws Exception {
+        final JsonContext jctx = new JsonContext();
+        final StringWriter out = new StringWriter();
+        final JsonWriter jw = new CompactJsonWriter(jctx, out);
+        jw.beginArray();
+        jw.writeObject( new Version(1) );
+        jw.writeObject( new Version(1,2) );
+        jw.writeObject( new Version(1,2,3) );
+        jw.writeObject( new Version(1,2,3,"x") );
+        jw.writeObject( new Version(1,2,"x") );
+        jw.writeObject( new Version(1,"x") );
+        jw.endArray();
+        Assert.assertEquals("[{major:1},{major:1,minor:2},{major:1,minor:2,rev:3},{major:1,minor:2,rev:3,extra:\"x\"},{major:1,minor:2,extra:\"x\"},{major:1,extra:\"x\"}]", out.toString());
     }
 }
