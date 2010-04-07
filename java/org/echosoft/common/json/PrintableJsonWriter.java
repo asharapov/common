@@ -3,8 +3,6 @@ package org.echosoft.common.json;
 import java.io.IOException;
 import java.io.Writer;
 import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
-import java.util.Arrays;
 
 /**
  * Реализация интерфейса {@link JsonWriter} особенностями которой являются:
@@ -18,28 +16,60 @@ import java.util.Arrays;
  */
 public class PrintableJsonWriter implements JsonWriter {
 
-    public static final int DEFAULT_INDENT_FACTOR = 2;  // сколько пробелов соответствуют одному уровню иерархии.
-
     private static enum State{UNKNOWN, ARRAY, OBJECT, OBJATTR}
+    private static final int DEFAULT_INDENT_FACTOR = 2;         // сколько пробелов соответствуют одному уровню иерархии.
+    private static final char[] NUL = {'n','u','l','l'};
+    private static final char[] LRB = {'{','}'};
+    private static final char[] LBE = {'{','\n'};
+    private static final char[] CME = {',','\n'};
+    private static final char[] CLW = {':',' '};
+
+    private static final class Indenter {
+        private final Writer out;
+        private final int factor;
+        private int depth;
+        private char[] buf;
+        private Indenter(final Writer out, final int factor) {
+            this.out = out;
+            this.factor = factor;
+            this.depth = 16;
+            this.buf = new char[factor * depth];
+            for (int i=buf.length-1; i>=0; i--) buf[i] = ' ';
+        }
+        private void ensureCapacity(final int requiredDepth) {
+            if (requiredDepth>depth) {
+                this.depth = requiredDepth;
+                this.buf = new char[factor * depth];
+                for (int i=buf.length-1; i>=0; i--) buf[i] = ' ';
+            }
+        }
+        private void indent(final int depth) throws IOException {
+            out.write(buf, 0, depth*factor);
+        }
+    }
 
     private static final class Context {
         private final Context prev;
-        private final String prefix;
         private final int depth;
+        private final Indenter indenter;
         private State state;
         private int items;
         private boolean inWriteObj;
-        private Context() {
+        private Context(final Indenter indenter) {
             this.prev = this;
-            this.prefix = "";
             this.depth = 0;
+            this.indenter = indenter;
             this.state = State.UNKNOWN;
         }
-        private Context(final Context prev, final State state, final String prefix) {
+        private Context(final Context prev, final State state) {
             this.prev = prev;
-            this.prefix = prefix;
             this.depth = prev.depth + 1;
+            this.indenter = prev.indenter;
+            indenter.ensureCapacity(this.depth);
             this.state = state;
+        }
+        private void indent() throws IOException {
+            indenter.indent(depth);
         }
         public String toString() {
             return "[Context{state:"+state+", items:"+items+", inWriteObj:"+inWriteObj+"}]";
@@ -49,25 +79,22 @@ public class PrintableJsonWriter implements JsonWriter {
     private final JsonContext ctx;
     private final Writer out;
     private final JsonFieldNameSerializer fieldNameSerializer;
-    private final int indent;
-    private final ArrayList<String> indents;
     private Context current;
 
     /**
      * Инициализирует поток данных в нотации JSON.
      * @param ctx  глобальный контекст. Обязательное поле, не может быть <code>null</code>.
      * @param out  выходной поток куда будет помещаться результат. Не может быть <code>null</code>.
-     * @param indent  определяет величину отступов при форматировании.
+     * @param indentFactor  определяет величину отступов при форматировании.
      */
-    public PrintableJsonWriter(final JsonContext ctx, final Writer out, final int indent) {
+    public PrintableJsonWriter(final JsonContext ctx, final Writer out, final int indentFactor) {
         if (ctx==null || out==null)
             throw new IllegalArgumentException("All arguments should be specified");
         this.ctx = ctx;
         this.out = out;
         this.fieldNameSerializer = ctx.getFieldNameSerializer();
-        this.indent = indent>=0 ? indent : DEFAULT_INDENT_FACTOR;
-        this.indents = JsonUtil.getIndentationStrings(this.indent);
-        this.current = new Context();
+        final Indenter indenter = new Indenter(out, indentFactor>=0 ? indentFactor : DEFAULT_INDENT_FACTOR);
+        this.current = new Context( indenter );
     }
 
     /**
@@ -89,15 +116,15 @@ public class PrintableJsonWriter implements JsonWriter {
                 if (!current.inWriteObj && current.items > 0)
                     throw new IllegalStateException();
                 current.items = 1;
-                current = new Context(current, State.ARRAY, getIndentString(current.depth));
-                out.write("[");
+                current = new Context(current, State.ARRAY);
+                out.write('[');
                 break;
             }
             case ARRAY : {
                 if (!current.inWriteObj && current.items++>0)
                     out.write(',');
-                current = new Context(current, State.ARRAY, getIndentString(current.depth));
-                out.write("[");
+                current = new Context(current, State.ARRAY);
+                out.write('[');
                 break;
             }
             case OBJECT : {
@@ -105,8 +132,8 @@ public class PrintableJsonWriter implements JsonWriter {
             }
             case OBJATTR : {
                 current.state = State.OBJECT;
-                current = new Context(current, State.ARRAY, getIndentString(current.depth));
-                out.write("[");
+                current = new Context(current, State.ARRAY);
+                out.write('[');
                 break;
             }
         }
@@ -125,7 +152,7 @@ public class PrintableJsonWriter implements JsonWriter {
             case ARRAY : {
                 current = current.prev;
                 out.write('\n');
-                out.write(current.prefix);
+                current.indent();
                 out.write(']');
                 break;
             }
@@ -141,16 +168,14 @@ public class PrintableJsonWriter implements JsonWriter {
                 if (!current.inWriteObj && current.items > 0)
                     throw new IllegalStateException();
                 current.items = 1;
-                current = new Context(current, State.OBJECT, getIndentString(current.depth));
-//                out.write("{");
+                current = new Context(current, State.OBJECT);
                 break;
             }
             case ARRAY : {
                 if (!current.inWriteObj && current.items++ > 0) {
                     out.write(',');
                 }
-                current = new Context(current, State.OBJECT, getIndentString(current.depth));
-//                out.write(" {");
+                current = new Context(current, State.OBJECT);
                 break;
             }
             case OBJECT : {
@@ -158,8 +183,7 @@ public class PrintableJsonWriter implements JsonWriter {
             }
             case OBJATTR : {
                 current.state = State.OBJECT;
-                current = new Context(current, State.OBJECT, getIndentString(current.depth));
-//                out.write("{");
+                current = new Context(current, State.OBJECT);
                 break;
             }
         }
@@ -180,13 +204,13 @@ public class PrintableJsonWriter implements JsonWriter {
                     current = current.prev;
                     if (current.state==State.ARRAY) {
                         out.write('\n');
-                        out.write(current.prefix);
+                        current.indent();
                     }
-                    out.write("{}");
+                    out.write(LRB,0,2);     // out.write("{}");
                 } else {
                     current = current.prev;
                     out.write('\n');
-                    out.write(current.prefix);
+                    current.indent();
                     out.write('}');
                 }
                 break;
@@ -204,7 +228,7 @@ public class PrintableJsonWriter implements JsonWriter {
                     throw new IllegalStateException();
                 current.items = 1;
                 if (obj==null) {
-                    out.write("null");
+                    out.write(NUL,0,4);     // out.write("null");
                 } else {
                     current.inWriteObj = true;
                     ctx.getSerializer(obj.getClass()).serialize(obj, this);
@@ -217,7 +241,7 @@ public class PrintableJsonWriter implements JsonWriter {
                     out.write(',');
                 }
                 if (obj == null) {
-                    out.write("null");
+                    out.write(NUL,0,4);     // out.write("null");
                 } else {
                     current.inWriteObj = true;
                     ctx.getSerializer(obj.getClass()).serialize(obj, this);
@@ -231,7 +255,7 @@ public class PrintableJsonWriter implements JsonWriter {
             case OBJATTR : {
                 current.state = State.OBJECT;
                 if (obj == null) {
-                    out.write("null");
+                    out.write(NUL,0,4);     // out.write("null");
                 } else {
                     current.inWriteObj = true;
                     ctx.getSerializer(obj.getClass()).serialize(obj, this);
@@ -254,15 +278,15 @@ public class PrintableJsonWriter implements JsonWriter {
             }
             case OBJECT: {
                 if (current.items++ > 0) {
-                    out.write(",\n");
+                    out.write(CME,0,2);     // out.write(",\n");
                 } else {
-                    out.write("{\n");
+                    out.write(LBE,0,2);     // out.write("{\n");
                 }
-                out.write(current.prefix);
+                current.indent();
                 fieldNameSerializer.serialize(name, out);
-                out.write(": ");
+                out.write(CLW,0,2);         // out.write(": ");
                 if (value == null) {
-                    out.write("null");
+                    out.write(NUL,0,4);     // out.write("null");
                 } else {
                     current.state = State.OBJATTR;
                     ctx.getSerializer(value.getClass()).serialize(value, this);
@@ -285,13 +309,13 @@ public class PrintableJsonWriter implements JsonWriter {
             }
             case OBJECT : {
                 if (current.items++ > 0) {
-                    out.write(",\n");
+                    out.write(CME,0,2);     // out.write(",\n");
                 } else {
-                    out.write("{\n");
+                    out.write(LBE,0,2);     // out.write("{\n");
                 }
-                out.write(current.prefix);
+                current.indent();
                 fieldNameSerializer.serialize(name, out);
-                out.write(": ");
+                out.write(CLW,0,2);         // out.write(": ");
                 current.state = State.OBJATTR;
                 break;
             }
@@ -313,24 +337,7 @@ public class PrintableJsonWriter implements JsonWriter {
         return out;
     }
 
-
-    /**
-     * Для заданного уровня вложенности возвращает строку из пробелов той длины что требуется для отрисовки надлежащего кол-ва отступов слева.
-     * @param level уровень вложенности.
-     * @return  строка из пробелов.
-     */
-    private String getIndentString(int level) {
-        final int size = indents.size();
-        level++;
-        if (level < size) {
-            return indents.get(level);
-        } else {
-            final char[] buf = new char[size* indent];
-            Arrays.fill(buf, ' ');
-            final String result = new String(buf);
-            indents.add( result );
-            return result;
-        }
+    public int getIndentLength() {
+        return current.indenter.factor * current.depth;
     }
-
 }

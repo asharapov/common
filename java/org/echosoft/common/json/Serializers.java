@@ -98,7 +98,11 @@ public class Serializers {
     public static final JsonSerializer<Boolean> BOOLEAN =
             new JsonSerializer<Boolean>() {
                 public void serialize(final Boolean src, final JsonWriter jw) throws IOException {
-                    jw.getOutputWriter().write( src.toString() );
+                    if (src) {
+                        jw.getOutputWriter().write(JsonUtil.TRUE,0,4);
+                    } else {
+                        jw.getOutputWriter().write(JsonUtil.FALSE,0,5);
+                    }
                 }
             };
 
@@ -149,7 +153,7 @@ public class Serializers {
                 }
             };
 
-    public static final JsonSerializer<Date> DATE_MILLIS =
+    public static final JsonSerializer<Date> TIMESTAMP =
             new JsonSerializer<Date>() {
                 public void serialize(final Date src, final JsonWriter jw) throws IOException {
                     jw.getOutputWriter().write( Long.toString(src.getTime(),10) );
@@ -162,8 +166,9 @@ public class Serializers {
             new JsonSerializer<char[]>() {
                 public void serialize(final char[] src, final JsonWriter jw) throws IOException {
                     final Writer out = jw.getOutputWriter();
+                    final int length = src.length;
                     out.write('[');
-                    for (int i=0; i<src.length; i++) {
+                    for (int i=0; i<length; i++) {
                         if (i>0)
                             out.write(',');
                         JsonUtil.encodeChar(src[i], out);
@@ -176,11 +181,16 @@ public class Serializers {
             new JsonSerializer<boolean[]>() {
                 public void serialize(final boolean[] src, final JsonWriter jw) throws IOException {
                     final Writer out = jw.getOutputWriter();
+                    final int length = src.length;
                     out.write('[');
-                    for (int i=0; i<src.length; i++) {
+                    for (int i=0; i<length; i++) {
                         if (i>0)
                             out.write(',');
-                        out.write(Boolean.toString(src[i]));
+                        if (src[i]) {
+                            out.write(JsonUtil.TRUE,0,4);
+                        } else {
+                            out.write(JsonUtil.FALSE,0,5);
+                        }
                     }
                     out.write(']');
                 }
@@ -190,11 +200,12 @@ public class Serializers {
             new JsonSerializer<byte[]>() {
                 public void serialize(final byte[] src, final JsonWriter jw) throws IOException {
                     final Writer out = jw.getOutputWriter();
+                    final int length = src.length;
                     out.write('[');
-                    for (int i=0; i<src.length; i++) {
+                    for (int i=0; i<length; i++) {
                         if (i>0)
                             out.write(',');
-                        out.write(Byte.toString(src[i]));
+                        out.write(Integer.toString(src[i],10));
                     }
                     out.write(']');
                 }
@@ -204,11 +215,12 @@ public class Serializers {
             new JsonSerializer<short[]>() {
                 public void serialize(final short[] src, final JsonWriter jw) throws IOException {
                     final Writer out = jw.getOutputWriter();
+                    final int length = src.length;
                     out.write('[');
-                    for (int i=0; i<src.length; i++) {
+                    for (int i=0; i<length; i++) {
                         if (i>0)
                             out.write(',');
-                        out.write(Short.toString(src[i]));
+                        out.write(Integer.toString(src[i],10));
                     }
                     out.write(']');
                 }
@@ -218,11 +230,12 @@ public class Serializers {
             new JsonSerializer<int[]>() {
                 public void serialize(final int[] src, final JsonWriter jw) throws IOException {
                     final Writer out = jw.getOutputWriter();
+                    final int length = src.length;
                     out.write('[');
-                    for (int i=0; i<src.length; i++) {
+                    for (int i=0; i<length; i++) {
                         if (i>0)
                             out.write(',');
-                        out.write(Integer.toString(src[i]));
+                        out.write(Integer.toString(src[i],10));
                     }
                     out.write(']');
                 }
@@ -232,8 +245,9 @@ public class Serializers {
             new JsonSerializer<long[]>() {
                 public void serialize(final long[] src, final JsonWriter jw) throws IOException {
                     final Writer out = jw.getOutputWriter();
+                    final int length = src.length;
                     out.write('[');
-                    for (int i=0; i<src.length; i++) {
+                    for (int i=0; i<length; i++) {
                         if (i>0)
                             out.write(',');
                         out.write(Long.toString(src[i]));
@@ -246,8 +260,9 @@ public class Serializers {
             new JsonSerializer<float[]>() {
                 public void serialize(final float[] src, final JsonWriter jw) throws IOException {
                     final Writer out = jw.getOutputWriter();
+                    final int length = src.length;
                     out.write('[');
-                    for (int i=0; i<src.length; i++) {
+                    for (int i=0; i<length; i++) {
                         if (i>0)
                             out.write(',');
                         out.write(Float.toString(src[i]));
@@ -260,8 +275,9 @@ public class Serializers {
             new JsonSerializer<double[]>() {
                 public void serialize(final double[] src, final JsonWriter jw) throws IOException {
                     final Writer out = jw.getOutputWriter();
+                    final int length = src.length;
                     out.write('[');
-                    for (int i=0; i<src.length; i++) {
+                    for (int i=0; i<length; i++) {
                         if (i>0)
                             out.write(',');
                         out.write(Double.toString(src[i]));
@@ -289,8 +305,9 @@ public class Serializers {
             new JsonSerializer<CharSequence[]>() {
                 public void serialize(final CharSequence[] src, final JsonWriter jw) throws IOException {
                     final Writer out = jw.getOutputWriter();
+                    final int length = src.length;
                     out.write('[');
-                    for (int i=0; i<src.length; i++) {
+                    for (int i=0; i<length; i++) {
                         if (i>0)
                             out.write(',');
                         JsonUtil.encodeString(src[i], out);
@@ -304,14 +321,16 @@ public class Serializers {
             new JsonSerializer<Character[]>() {
                 public void serialize(final Character[] src, final JsonWriter jw) throws IOException {
                     final Writer out = jw.getOutputWriter();
+                    final int length = src.length;
                     out.write('[');
-                    for (int i=0; i<src.length; i++) {
+                    for (int i=0; i<length; i++) {
                         if (i>0)
                             out.write(',');
-                        if (src[i]==null) {
-                            out.write("null");
+                        final Character value = src[i];
+                        if (value==null) {
+                            out.write(JsonUtil.NULL,0,4);             // out.write("null");
                         } else {
-                            JsonUtil.encodeChar(src[i], out);
+                            JsonUtil.encodeChar(value, out);
                         }
                     }
                     out.write(']');
@@ -323,11 +342,20 @@ public class Serializers {
             new JsonSerializer<Boolean[]>() {
                 public void serialize(final Boolean[] src, final JsonWriter jw) throws IOException {
                     final Writer out = jw.getOutputWriter();
+                    final int length = src.length;
                     out.write('[');
-                    for (int i=0; i<src.length; i++) {
+                    for (int i=0; i<length; i++) {
                         if (i>0)
                             out.write(',');
-                        out.write( src[i]==null ? "null" : Boolean.toString(src[i]));
+                        final Boolean value = src[i];
+                        if (value==null) {
+                            out.write(JsonUtil.NULL,0,4);               // out.write("null");
+                        } else
+                        if (value) {
+                            out.write(JsonUtil.TRUE,0,4);               // out.write("true");
+                        } else {
+                            out.write(JsonUtil.FALSE,0,5);              // out.write("false");
+                        }
                     }
                     out.write(']');
                 }
@@ -338,11 +366,17 @@ public class Serializers {
             new JsonSerializer<Byte[]>() {
                 public void serialize(final Byte[] src, final JsonWriter jw) throws IOException {
                     final Writer out = jw.getOutputWriter();
+                    final int length = src.length;
                     out.write('[');
-                    for (int i=0; i<src.length; i++) {
+                    for (int i=0; i<length; i++) {
                         if (i>0)
                             out.write(',');
-                        out.write( src[i]==null ? "null" : Integer.toString((int)src[i], 10) );
+                        final Byte value = src[i];
+                        if (value==null) {
+                            out.write(JsonUtil.NULL,0,4);               // out.write("null");
+                        } else {
+                            out.write(Integer.toString(value,10));
+                        }
                     }
                     out.write(']');
                 }
@@ -353,11 +387,17 @@ public class Serializers {
             new JsonSerializer<Short[]>() {
                 public void serialize(final Short[] src, final JsonWriter jw) throws IOException {
                     final Writer out = jw.getOutputWriter();
+                    final int length = src.length;
                     out.write('[');
-                    for (int i=0; i<src.length; i++) {
+                    for (int i=0; i<length; i++) {
                         if (i>0)
                             out.write(',');
-                        out.write( src[i]==null ? "null" : Integer.toString((int)src[i], 10) );
+                        final Short value = src[i];
+                        if (value==null) {
+                            out.write(JsonUtil.NULL,0,4);               // out.write("null");
+                        } else {
+                            out.write(Integer.toString(value,10));
+                        }
                     }
                     out.write(']');
                 }
@@ -368,11 +408,17 @@ public class Serializers {
             new JsonSerializer<Integer[]>() {
                 public void serialize(final Integer[] src, final JsonWriter jw) throws IOException {
                     final Writer out = jw.getOutputWriter();
+                    final int length = src.length;
                     out.write('[');
-                    for (int i=0; i<src.length; i++) {
+                    for (int i=0; i<length; i++) {
                         if (i>0)
                             out.write(',');
-                        out.write( src[i]==null ? "null" : Integer.toString(src[i]) );
+                        final Integer value = src[i];
+                        if (value==null) {
+                            out.write(JsonUtil.NULL,0,4);               // out.write("null");
+                        } else {
+                            out.write(Integer.toString(value,10));
+                        }
                     }
                     out.write(']');
                 }
@@ -383,11 +429,17 @@ public class Serializers {
             new JsonSerializer<Long[]>() {
                 public void serialize(final Long[] src, final JsonWriter jw) throws IOException {
                     final Writer out = jw.getOutputWriter();
+                    final int length = src.length;
                     out.write('[');
-                    for (int i=0; i<src.length; i++) {
+                    for (int i=0; i<length; i++) {
                         if (i>0)
                             out.write(',');
-                        out.write( src[i]==null ? "null" : Long.toString(src[i]) );
+                        final Long value = src[i];
+                        if (value==null) {
+                            out.write(JsonUtil.NULL,0,4);               // out.write("null");
+                        } else {
+                            out.write(Long.toString(value));
+                        }
                     }
                     out.write(']');
                 }
@@ -398,25 +450,38 @@ public class Serializers {
             new JsonSerializer<Float[]>() {
                 public void serialize(final Float[] src, final JsonWriter jw) throws IOException {
                     final Writer out = jw.getOutputWriter();
+                    final int length = src.length;
                     out.write('[');
-                    for (int i=0; i<src.length; i++) {
+                    for (int i=0; i<length; i++) {
                         if (i>0)
                             out.write(',');
-                        out.write( src[i]==null ? "null" : Float.toString(src[i]) );
+                        final Float value = src[i];
+                        if (value==null) {
+                            out.write(JsonUtil.NULL,0,4);               // out.write("null");
+                        } else {
+                            out.write(Float.toString(value));
+                        }
                     }
                     out.write(']');
                 }
             };
 
+    // данный класс не является необходимым (можно использовать и {@link OBJECT_ARRAY} но дает некоторый выигрыш в производительности.
     public static final JsonSerializer<Double[]> DOUBLES_ARRAY =
             new JsonSerializer<Double[]>() {
                 public void serialize(final Double[] src, final JsonWriter jw) throws IOException {
                     final Writer out = jw.getOutputWriter();
+                    final int length = src.length;
                     out.write('[');
-                    for (int i=0; i<src.length; i++) {
+                    for (int i=0; i<length; i++) {
                         if (i>0)
                             out.write(',');
-                        out.write( src[i]==null ? "null" : Double.toString(src[i]) );
+                        final Double value = src[i];
+                        if (value==null) {
+                            out.write(JsonUtil.NULL,0,4);               // out.write("null");
+                        } else {
+                            out.write(Double.toString(value));
+                        }
                     }
                     out.write(']');
                 }
@@ -465,7 +530,7 @@ public class Serializers {
                     jw.beginObject();
                     for (Object o : ((Map)src).entrySet()) {
                         final Map.Entry entry = (Map.Entry) o;
-                        final String name = "\"" + entry.getKey() + "\"";
+                        final String name = "\"" + entry.getKey() + '\"';  // TODO: баг, такое код не совместим со STANDARD_FIELD_NAME_SERIALIZER 
                         jw.writeProperty(name, entry.getValue());
                     }
                     jw.endObject();
@@ -479,7 +544,6 @@ public class Serializers {
                     jw.getOutputWriter().write( src.getExpression() );
                 }
             };
-
 
 
     /**

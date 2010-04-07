@@ -20,6 +20,10 @@ public final class JsonUtil {
       "return", "super", "switch", "this", "throw", "try", "typeof", "var", "void", "while", "with"
     };
 
+    public static final char[] NULL = {'n','u','l','l'};
+    public static final char[] TRUE = {'t', 'r', 'u', 'e'};
+    public static final char[] FALSE = {'f', 'a', 'l', 's', 'e'};
+
     public static void encodeChar(final char c, final Writer out) throws IOException {
         out.write('"');
         switch (c) {
@@ -30,7 +34,6 @@ public final class JsonUtil {
             case '\r' : out.write("\\r"); break;
             case '\"' : out.write("\\\""); break;
             case '\'' : out.write("\\\'"); break;
-//          case '/'  : out.write("\\/"); break;
             case '\\' : out.write("\\\\"); break;
             default: out.write(c);
         }
@@ -39,7 +42,7 @@ public final class JsonUtil {
 
     public static void encodeString(final CharSequence text, final Writer out) throws IOException {
         if (text==null) {
-            out.write("null");
+            out.write(NULL,0,4);             // out.write("null");
         } else {
             out.write('"');
             final int length = text.length();
@@ -53,7 +56,6 @@ public final class JsonUtil {
                     case '\r' : out.write("\\r"); break;
                     case '\"' : out.write("\\\""); break;
                     case '\'' : out.write("\\\'"); break;
-//                  case '/'  : out.write("\\/"); break;
                     case '\\' : out.write("\\\\"); break;
                     default : out.write(c);
                 }
@@ -86,18 +88,6 @@ public final class JsonUtil {
                 return (A)a;
         }
         return null;
-    }
-
-    public static ArrayList<String> getIndentationStrings(final int factor) {
-        final int cnt = 16;  // максимальная предрасчитанная глубина вложенности.
-        final int buflen = cnt * factor;
-        final char[] buf = new char[buflen];
-        for (int i=0; i<buflen; i++) buf[i] = ' ';
-        final ArrayList<String> result = new ArrayList<String>(cnt);
-        for (int i=0; i<cnt; i++) {
-            result.add( new String(buf, 0, factor*i) );
-        }
-        return result;
     }
 
     public static Collection<NamedMethod> findGetters(final Class<?> cls) {

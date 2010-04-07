@@ -4,195 +4,260 @@ import java.io.IOException;
 import java.io.Writer;
 
 /**
- * A character stream that collects its output in a character buffer, 
- * which can then be used to construct a string.
- * The main difference from the java.io.StringWriter is non synchronized methods.
+ * <p>Поток символов, который хранит все помещаемые в него символы в некотором внутреннем буфере,
+ * который при необходимости расширяется до требуемых размеров.</p>
+ * <p>Функционально данный класс аналогичен стандартному <code>java.io.StringWriter</code>. Основным отличием от последнего
+ * является то что все методы данного класса не синхронизованы.
  * @author Anton Sharapov
  */
 public final class FastStringWriter extends Writer {
+
     private static final int INITIAL_CAPACITY = 16;
 
     /**
-     * The value is used for character storage.
+     * Буфер в котором хранятся все символы помещенные в данный поток.
      */
     private char value[];
 
     /** 
-     * The count is the number of characters in the buffer.
+     * Реальное количество символов в буфере.
      */
     private int count;
 
 
-
     /**
-     * Constructs a string writer with no characters in it and an 
-     * default initial capacity characters 
+     * Создает новый пустой экземпляр потока с настройками по умолчанию.
      */
     public FastStringWriter() {
         this(INITIAL_CAPACITY);
     }
 
     /**
-     * Constructs a string writer with no characters in it and an 
-     * initial capacity specified by the <code>capacity</code> argument. 
-     *
-     * @param      capacity   the initial capacity.
-     * @exception  NegativeArraySizeException  if the <code>length</code>
-     *               argument is less than <code>0</code>.
+     * Создает новый поток с предустановленной емкостью внутреннего буфера.
+     * @param capacity   начальная емкость буфера.
      */
     public FastStringWriter(final int capacity) {
         value = new char[capacity];
     }
 
     /**
-     * Constructs a string writer so that it represents the same
-     * sequence of characters as the string argument; in other
-     * words, the initial contents of the string writer is a copy of the
-     * argument string. The initial capacity of the string writer is
-     * <code>16</code> plus the length of the string argument.
-     *
-     * @param   str   the initial contents of the buffer.
-     * @exception NullPointerException if <code>str</code> is <code>null</code>
+     * Создает экземпляр потока символов и сразу помещает в него указанную строку.
+     * По умолчанию емкость внутреннего буфера равна длине записываемой строки плюс {@link #INITIAL_CAPACITY} символов.
+     * @param text  строка для записи в поток, может быть <code>null</code>.
      */
-    public FastStringWriter(final String str) {
-        final int capacity = INITIAL_CAPACITY + str.length();
-        value = new char[capacity];
-        write(str);
-    }
-
-    /**
-     * Write a string. 
-     * @param str  a string.
-     */
-    public void write(String str) {
-        if (str == null) {
-            str = String.valueOf(str);
+    public FastStringWriter(final String text) {
+        if (text==null) {
+            value = new char[INITIAL_CAPACITY + 4];
+            value[0] = 'n';
+            value[1] = 'u';
+            value[2] = 'l';
+            value[3] = 'l';
+            count = 4;
+        } else {
+            count = text.length();
+            value = new char[INITIAL_CAPACITY + count];
+            text.getChars(0, count, value, 0);
         }
-
-        final int len = str.length();
-        final int newcount = count + len;
-        if (newcount > value.length)
-            expandCapacity(newcount);
-        str.getChars(0, len, value, count);
-        count = newcount;
     }
 
     /**
-     * Write a portion of a string.
-     * @param str  A string
-     * @param offset  Offset from which to start writing characters
-     * @param len  Number of characters to write
+     * Записывает в поток указанную строку символов.
+     * @param text  строка для записи в поток, может быть <code>null</code>.
      */
-    public void write(final String str, final int offset, final int len) {
-        write(str.substring(offset, offset+len));
+    @Override
+    public void write(final String text) {
+        if (text == null) {
+            ensureCapacity(4);
+            value[count++] = 'n';
+            value[count++] = 'u';
+            value[count++] = 'l';
+            value[count++] = 'l';
+        } else {
+            final int length = text.length();
+            ensureCapacity(length);
+            text.getChars(0, length, value, count);
+            count += length;
+        }
     }
 
     /**
-     * Write an array of characters.
-     * @param   str   the characters to be writen.
+     * Записывает в поток фрагмент указанной в аргументе строки символов.
+     * @param text  строка, чей фрагмент требуется записать в поток. Может быть <code>null</code>.
+     * @param offset  смещение, по которому доступен первый символ требуемого фрагмента.
+     * @param length  кол-во символов для записи в поток.
      */
-    public void write(final char str[]) { 
-        final int len = str.length;
-        final int newcount = count + len;
-        if (newcount > value.length)
-            expandCapacity(newcount);
-        System.arraycopy(str, 0, value, count, len);
-        count = newcount;
+    @Override
+    public void write(final String text, final int offset, final int length) {
+        if (text == null) {
+            ensureCapacity(4);
+            value[count++] = 'n';
+            value[count++] = 'u';
+            value[count++] = 'l';
+            value[count++] = 'l';
+        } else {
+            ensureCapacity(length);
+            text.getChars(offset, length, value, count);
+            count += length;
+        }
     }
 
     /**
-     * Writes the string representation of a subarray of the 
-     * <code>char</code> array argument to this string buffer. 
-     * <p>
-     * Characters of the character array <code>str</code>, starting at 
-     * index <code>offset</code>, are appended, in order, to the contents 
-     * of this string buffer. The length of this string buffer increases 
-     * by the value of <code>len</code>. 
-     * <p>
-     * The overall effect is exactly as if the arguments were converted to 
-     * a string by the method {@link String#valueOf(char[],int,int)} and the
-     * characters of that string were then {@link #write(String) appended} 
-     * to this <code>FastStringBuffer</code> object.
-     *
-     * @param   str      the characters to be appended.
-     * @param   offset   the index of the first character to append.
-     * @param   len      the number of characters to append.
+     * Записывает в поток массив символов.
+     * @param chars  массив символов для записи в поток, не может быть <code>null</code>.
      */
-    public void write(final char str[], final int offset, final int len) {
-        final int newcount = count + len;
-        if (newcount > value.length)
-            expandCapacity(newcount);
-        System.arraycopy(str, offset, value, count, len);
-        count = newcount;
+    @Override
+    public void write(final char chars[]) {
+        final int length = chars.length;
+        ensureCapacity(length);
+        System.arraycopy(chars, 0, value, count, length);
+        count += length;
     }
 
     /**
-     * Writes the string representation of the <code>char</code> 
-     * argument to this string buffer. 
-     * <p>
-     * The argument is appended to the contents of this string buffer. 
-     * The length of this string buffer increases by <code>1</code>. 
-     * <p>
-     * The overall effect is exactly as if the argument were converted to 
-     * a string by the method {@link String#valueOf(char)} and the character 
-     * in that string were then {@link #write(String) appended} to this
-     * <code>FastStringBuffer</code> object.
-     * @param   c   a <code>char</code>.
+     * Записывает в поток фрагмент указанного в аргументе массива символов.
+     * @param chars  массив, чей фрагмент требуется записать в поток. Может быть <code>null</code>.
+     * @param offset  смещение, по которому доступен первый символ требуемого фрагмента.
+     * @param length  кол-во символов для записи в поток.
+     */
+    public void write(final char chars[], final int offset, final int length) {
+        ensureCapacity(length);
+        System.arraycopy(chars, offset, value, count, length);
+        count += length;
+    }
+
+    /**
+     * Записывает в поток отдельный символ.
+     * @param c  символ для записи в поток.
+     */
+    @Override
+    public void write(final int c) {
+        ensureCapacity(1);
+        value[count++] = (char)c;
+    }
+
+    /**
+     * Записывает в поток отдельный символ.
+     * @param c  символ для записи в поток.
      */
     public void write(final char c) {
-        final int newcount = count + 1;
-        if (newcount > value.length)
-            expandCapacity(newcount);
+        ensureCapacity(1);
         value[count++] = c;
     }
 
     /**
-     * Write a single character.
+     * Добавляет в поток указанную последовательность символов.
+     * @param cseq  описывает последовательность символов которую требуется добавить в выходной поток, может быть <code>null</code>.
+     * @return  ссылку на данный поток.
      */
-    public void write(final int c) {
-        write( (char)c );
+    @Override
+    public FastStringWriter append(final CharSequence cseq) {
+        if (cseq==null) {
+            ensureCapacity(4);
+            value[count++] = 'n';
+            value[count++] = 'u';
+            value[count++] = 'l';
+            value[count++] = 'l';
+        } else {
+            final int length = cseq.length();
+            ensureCapacity(length);
+            cseq.toString().getChars(0, length, value, count);
+            count += length;
+        }
+        return this;
     }
 
     /**
-     * Write the contents of this FastStringWriter into a Writer.
-     * @param out The writer into which to place the contents of this writer.
-     * @throws IOException in case of any errors occurs.
+     * Добавляет в поток фрагмент указанной последовательности символов.
+     * @param cseq  описывает последовательность символов чей фрагмент требуется добавить в выходной поток, может быть <code>null</code>.
+     * @param start индекс первого символа фрагмента который требуется записать в поток.
+     * @param end индекс символа, следующего за последним символом требуемого фрагмента.
+     * @return  ссылку на данный поток.
+     */
+    @Override
+    public FastStringWriter append(final CharSequence cseq, final int start, final int end) {
+        if (cseq==null) {
+            ensureCapacity(4);
+            value[count++] = 'n';
+            value[count++] = 'u';
+            value[count++] = 'l';
+            value[count++] = 'l';
+        } else {
+            final CharSequence cs = cseq.subSequence(start, end);
+            final int length = cs.length();
+            ensureCapacity(length);
+            cs.toString().getChars(0, length, value, count);
+            count += length;
+        }
+        return this;
+    }
+
+    /**
+     * Добавляет в поток отдельный символ.
+     * @param c  символ для записи в поток.
+     * @return  ссылку на данный поток.
+     */
+    @Override
+    public FastStringWriter append(final char c) {
+        ensureCapacity(1);
+        value[count++] = c;
+        return this;
+    }
+
+    /**
+     * Сохраняет в поток все буфера (если они есть).
+     * В данной реализации метод не делает ничего.
+     */
+    public void flush() {
+    }
+
+    /**
+     * Сохраняет в поток все буфера (если они есть) и закрывает поток.
+     * В данной реализации метод не делает ничего.
+     */
+    public void close() {
+    }
+
+
+
+    /**
+     * Переносит весь сохраненный в потоке контент в другой поток.
+     * @param out выходной поток куда будет помещено все содержимое данного потока.
+     * @throws IOException в случае проблем при помещении данных в выходной поток.
      */
     public void writeOut(final Writer out) throws IOException {
         out.write(value, 0, count);
     }
 
     /**
-     * Write the contents of this FastStringWriter into a other FastStringWriter.
-     * @param out The writer into which to place the contents of this writer.
+     * Переносит весь сохраненный в потоке контент в другой поток.
+     * @param out выходной поток куда будет помещено все содержимое данного потока.
      */
     public void writeOut(final FastStringWriter out) {
         out.write(value, 0, count);
     }
 
     /**
-     * Flush the stream.
-     */
-    public void flush() {
-    }
-
-    /**
-     * Close the stream.
-     */
-    public void close() {
-    }
-
-    /**
-     * Returns count of the chars, passed into this writer.
-     * @return  chars count.
+     * Возвращает количество символов, помещенных в данный поток.
+     * @return  количество символов в потоке на данный момент.
      */
     public int length() {
         return count;
     }
 
     /**
-     * Return the buffer's current value as a string.
-     * @return  a string representation of the object.
+     * Копирует запрошенный фрагмент от всего содержимого потока в указанный массив символов.
+     * @param srcBegin  индекс первого символа для копирования.
+     * @param srcEnd индекс символа, следующего за последним копируемым символом.
+     * @param dst  целевой буфер.
+     * @param dstBegin смещение по которому будет проводиться запись в целевой буфер.
+     */
+    public void getChars(final int srcBegin, final int srcEnd, final char dst[], final int dstBegin) {
+        System.arraycopy(value, srcBegin, dst, dstBegin, srcEnd - srcBegin);
+    }
+
+    /**
+     * Возвращает все символы помещенные в данный поток в виде строки.
+     * @return  все символы помещенные в данный поток в виде строки. 
      */
     public String toString() {
         return new String(value, 0, count);
@@ -200,31 +265,24 @@ public final class FastStringWriter extends Writer {
 
 
     /**
-     * Ensures that the capacity of the buffer is at least equal to the
-     * specified minimum.
-     * If the current capacity of this string buffer is less than the 
-     * argument, then a new internal buffer is allocated with greater 
-     * capacity. The new capacity is the larger of: 
-     * <ul>
-     * <li>The <code>minimumCapacity</code> argument. 
-     * <li>Twice the old capacity, plus <code>2</code>. 
-     * </ul>
-     * If the <code>minimumCapacity</code> argument is nonpositive, this
-     * method takes no action and simply returns.
-     *
-     * @param   minimumCapacity   the minimum desired capacity.
+     * Метод выполняет проверку что в буфере еще есть место для размещения дополнительных N байт, где N указывается в аргументе метода.
+     * Если в буфере недостаточно свободного места то он расширяется на требуемую величину.
+     * @param delta  сколько байт еще требуется положить в буфер.
      */
-    private void expandCapacity(final int minimumCapacity) {
-        int newCapacity = (value.length + 1) * 2;
-        if (newCapacity < 0) {
-            newCapacity = Integer.MAX_VALUE;
-        } else
-        if (minimumCapacity > newCapacity) {
-            newCapacity = minimumCapacity;
+    private void ensureCapacity(final int delta) {
+        final int required = count + delta;
+        if (required > value.length) {
+            int capacity = (value.length + 1) * 2;
+            if (capacity < 0) {
+                capacity = Integer.MAX_VALUE;
+            } else
+            if (required > capacity) {
+                capacity = required;
+            }
+            final char buf[] = new char[capacity];
+            System.arraycopy(value, 0, buf, 0, count);
+            value = buf;
         }
-
-        final char newValue[] = new char[newCapacity];
-        System.arraycopy(value, 0, newValue, 0, count);
-        value = newValue;
     }
+
 }

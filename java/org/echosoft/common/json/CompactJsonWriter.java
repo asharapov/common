@@ -17,6 +17,7 @@ import java.lang.reflect.InvocationTargetException;
 public class CompactJsonWriter implements JsonWriter {
 
     private static enum State{UNKNOWN, ARRAY, OBJECT, OBJATTR}
+    private static final char[] NUL = {'n','u','l','l'};
 
     private static final class Context {
         private final Context prev;
@@ -166,7 +167,7 @@ public class CompactJsonWriter implements JsonWriter {
                     throw new IllegalStateException();
                 current.items = 1;
                 if (obj==null) {
-                    out.write("null");
+                    out.write(NUL,0,4);     // out.write("null");
                 } else {
                     current.inWriteObj = true;
                     ctx.getSerializer(obj.getClass()).serialize(obj, this);
@@ -178,7 +179,7 @@ public class CompactJsonWriter implements JsonWriter {
                 if (current.items++ > 0)
                     out.write(',');
                 if (obj == null) {
-                    out.write("null");
+                    out.write(NUL,0,4);     // out.write("null");
                 } else {
                     current.inWriteObj = true;
                     ctx.getSerializer(obj.getClass()).serialize(obj, this);
@@ -192,7 +193,7 @@ public class CompactJsonWriter implements JsonWriter {
             case OBJATTR : {
                 current.state = State.OBJECT;
                 if (obj == null) {
-                    out.write("null");
+                    out.write(NUL,0,4);     // out.write("null");
                 } else {
                     current.inWriteObj = true;
                     ctx.getSerializer(obj.getClass()).serialize(obj, this);
@@ -220,7 +221,7 @@ public class CompactJsonWriter implements JsonWriter {
                 fieldNameSerializer.serialize(name, out);
                 out.write(':');
                 if (value == null) {
-                    out.write("null");
+                    out.write(NUL,0,4);     // out.write("null");
                 } else {
                     current.state = State.OBJATTR;
                     ctx.getSerializer(value.getClass()).serialize(value, this);

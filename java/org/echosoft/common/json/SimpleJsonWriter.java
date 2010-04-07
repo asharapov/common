@@ -13,11 +13,13 @@ import java.lang.reflect.InvocationTargetException;
  */
 public class SimpleJsonWriter implements JsonWriter {
 
+    private static final char[] NUL = {'n','u','l','l'};
+
     private final JsonContext ctx;
     private final Writer out;
     private final JsonFieldNameSerializer fieldNameSerializer;
     private boolean hasPrevFields;
-    private int deep;
+    private int depth;
 
     /**
      * Инициализирует поток данных в нотации JSON.
@@ -31,7 +33,7 @@ public class SimpleJsonWriter implements JsonWriter {
         this.out = out;
         this.fieldNameSerializer = ctx.getFieldNameSerializer();
         hasPrevFields = false;
-        deep = 0;
+        depth = 0;
     }
 
 
@@ -39,7 +41,7 @@ public class SimpleJsonWriter implements JsonWriter {
      * {@inheritDoc}
      */
     public void beginArray() throws IOException {
-        if (deep++ > 0 && hasPrevFields) {
+        if (depth++ > 0 && hasPrevFields) {
             out.write(',');
         }
         hasPrevFields = false;
@@ -50,7 +52,7 @@ public class SimpleJsonWriter implements JsonWriter {
      * {@inheritDoc}
      */
     public void endArray() throws IOException {
-        if (deep-- <= 0)
+        if (depth-- <= 0)
             throw new IllegalStateException();
         hasPrevFields = true;
         out.write(']');
@@ -59,24 +61,8 @@ public class SimpleJsonWriter implements JsonWriter {
     /**
      * {@inheritDoc}
      */
-    public void writeObject(final Object obj) throws IOException, InvocationTargetException, IllegalAccessException {
-        if (deep>0 && hasPrevFields) {
-            out.write(',');
-        }
-        if (obj==null) {
-            out.write("null");
-        } else {
-            hasPrevFields = false;
-            ctx.getSerializer(obj.getClass()).serialize(obj, this);
-        }
-        hasPrevFields = true;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
     public void beginObject() throws IOException {
-        if (deep++ > 0 && hasPrevFields) {
+        if (depth++ > 0 && hasPrevFields) {
             out.write(',');
         }
         hasPrevFields = false;
@@ -87,7 +73,7 @@ public class SimpleJsonWriter implements JsonWriter {
      * {@inheritDoc}
      */
     public void endObject() throws IOException {
-        if (deep-- <= 0)
+        if (depth-- <= 0)
             throw new IllegalStateException();
         hasPrevFields = true;
         out.write('}');
@@ -96,8 +82,24 @@ public class SimpleJsonWriter implements JsonWriter {
     /**
      * {@inheritDoc}
      */
+    public void writeObject(final Object obj) throws IOException, InvocationTargetException, IllegalAccessException {
+        if (depth>0 && hasPrevFields) {
+            out.write(',');
+        }
+        if (obj==null) {
+            out.write(NUL,0,4);     // out.write("null");
+        } else {
+            hasPrevFields = false;
+            ctx.getSerializer(obj.getClass()).serialize(obj, this);
+        }
+        hasPrevFields = true;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
     public void writeProperty(final String name, final Object value) throws IOException, InvocationTargetException, IllegalAccessException {
-        if (deep<=0)
+        if (depth<=0)
             throw new IllegalStateException();
         if (hasPrevFields) {
             out.write(',');
@@ -105,7 +107,7 @@ public class SimpleJsonWriter implements JsonWriter {
         fieldNameSerializer.serialize(name, out);
         out.write(':');
         if (value==null) {
-            out.write("null");
+            out.write(NUL,0,4);     // out.write("null");
         } else {
             hasPrevFields = false;
             ctx.getSerializer(value.getClass()).serialize(value, this);
@@ -117,7 +119,7 @@ public class SimpleJsonWriter implements JsonWriter {
      * {@inheritDoc}
      */
     public void writeComplexProperty(final String name) throws IOException {
-        if (deep<=0)
+        if (depth<=0)
             throw new IllegalStateException();
         if (hasPrevFields) {
             out.write(',');
