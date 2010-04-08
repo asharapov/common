@@ -26,50 +26,44 @@ public class PrintableJsonWriter implements JsonWriter {
 
     private static final class Indenter {
         private final Writer out;
-        private final int factor;
-        private int depth;
+        private int capacity;
         private char[] buf;
-        private Indenter(final Writer out, final int factor) {
+        private Indenter(final Writer out, final int indentFactor) {
             this.out = out;
-            this.factor = factor;
-            this.depth = 16;
-            this.buf = new char[factor * depth];
-            for (int i=buf.length-1; i>=0; i--) buf[i] = ' ';
+            this.capacity = indentFactor * 16;
+            this.buf = new char[capacity];
+            for (int i=capacity-1; i>=0; i--) buf[i] = ' ';
         }
-        private void ensureCapacity(final int requiredDepth) {
-            if (requiredDepth>depth) {
-                this.depth = requiredDepth;
-                this.buf = new char[factor * depth];
-                for (int i=buf.length-1; i>=0; i--) buf[i] = ' ';
+        private void ensureCapacity(final int capacity) {
+            if (capacity>this.capacity) {
+                this.capacity = capacity;
+                this.buf = new char[capacity];
+                for (int i=capacity-1; i>=0; i--) buf[i] = ' ';
             }
         }
-        private void indent(final int depth) throws IOException {
-            out.write(buf, 0, depth*factor);
+        private void indent(final int indentLength) throws IOException {
+            out.write(buf, 0, indentLength);
         }
     }
 
     private static final class Context {
         private final Context prev;
         private final int depth;
-        private final Indenter indenter;
+        private final int indent;
         private State state;
         private int items;
         private boolean inWriteObj;
-        private Context(final Indenter indenter) {
+        private Context() {
             this.prev = this;
             this.depth = 0;
-            this.indenter = indenter;
+            this.indent = 0;
             this.state = State.UNKNOWN;
         }
-        private Context(final Context prev, final State state) {
+        private Context(final Context prev, final State state, final int indentFactor) {
             this.prev = prev;
             this.depth = prev.depth + 1;
-            this.indenter = prev.indenter;
-            indenter.ensureCapacity(this.depth);
+            this.indent = this.depth * indentFactor;
             this.state = state;
-        }
-        private void indent() throws IOException {
-            indenter.indent(depth);
         }
         public String toString() {
             return "[Context{state:"+state+", items:"+items+", inWriteObj:"+inWriteObj+"}]";
@@ -79,6 +73,8 @@ public class PrintableJsonWriter implements JsonWriter {
     private final JsonContext ctx;
     private final Writer out;
     private final JsonFieldNameSerializer fieldNameSerializer;
+    private final int indentFactor;
+    private char[] whitespaces;
     private Context current;
 
     /**
@@ -93,8 +89,10 @@ public class PrintableJsonWriter implements JsonWriter {
         this.ctx = ctx;
         this.out = out;
         this.fieldNameSerializer = ctx.getFieldNameSerializer();
-        final Indenter indenter = new Indenter(out, indentFactor>=0 ? indentFactor : DEFAULT_INDENT_FACTOR);
-        this.current = new Context( indenter );
+        this.indentFactor = indentFactor>=0 ? indentFactor : DEFAULT_INDENT_FACTOR;
+        this.current = new Context();
+        this.whitespaces = new char[16 * indentFactor];
+        for (int i=whitespaces.length-1; i>=0; i--) whitespaces[i] = ' ';
     }
 
     /**
@@ -116,14 +114,16 @@ public class PrintableJsonWriter implements JsonWriter {
                 if (!current.inWriteObj && current.items > 0)
                     throw new IllegalStateException();
                 current.items = 1;
-                current = new Context(current, State.ARRAY);
+                current = new Context(current, State.ARRAY, indentFactor);
+                ensureWhitespaceCapacity(current.indent);
                 out.write('[');
                 break;
             }
             case ARRAY : {
                 if (!current.inWriteObj && current.items++>0)
                     out.write(',');
-                current = new Context(current, State.ARRAY);
+                current = new Context(current, State.ARRAY, indentFactor);
+                ensureWhitespaceCapacity(current.indent);
                 out.write('[');
                 break;
             }
@@ -132,7 +132,8 @@ public class PrintableJsonWriter implements JsonWriter {
             }
             case OBJATTR : {
                 current.state = State.OBJECT;
-                current = new Context(current, State.ARRAY);
+                current = new Context(current, State.ARRAY, indentFactor);
+                ensureWhitespaceCapacity(current.indent);
                 out.write('[');
                 break;
             }
@@ -152,7 +153,7 @@ public class PrintableJsonWriter implements JsonWriter {
             case ARRAY : {
                 current = current.prev;
                 out.write('\n');
-                current.indent();
+                out.write(whitespaces, 0, current.indent);
                 out.write(']');
                 break;
             }
@@ -168,14 +169,16 @@ public class PrintableJsonWriter implements JsonWriter {
                 if (!current.inWriteObj && current.items > 0)
                     throw new IllegalStateException();
                 current.items = 1;
-                current = new Context(current, State.OBJECT);
+                current = new Context(current, State.OBJECT, indentFactor);
+                ensureWhitespaceCapacity(current.indent);
                 break;
             }
             case ARRAY : {
                 if (!current.inWriteObj && current.items++ > 0) {
                     out.write(',');
                 }
-                current = new Context(current, State.OBJECT);
+                current = new Context(current, State.OBJECT, indentFactor);
+                ensureWhitespaceCapacity(current.indent);
                 break;
             }
             case OBJECT : {
@@ -183,7 +186,8 @@ public class PrintableJsonWriter implements JsonWriter {
             }
             case OBJATTR : {
                 current.state = State.OBJECT;
-                current = new Context(current, State.OBJECT);
+                current = new Context(current, State.OBJECT, indentFactor);
+                ensureWhitespaceCapacity(current.indent);
                 break;
             }
         }
@@ -204,13 +208,13 @@ public class PrintableJsonWriter implements JsonWriter {
                     current = current.prev;
                     if (current.state==State.ARRAY) {
                         out.write('\n');
-                        current.indent();
+                        out.write(whitespaces, 0, current.indent);
                     }
                     out.write(LRB,0,2);     // out.write("{}");
                 } else {
                     current = current.prev;
                     out.write('\n');
-                    current.indent();
+                    out.write(whitespaces, 0, current.indent);
                     out.write('}');
                 }
                 break;
@@ -282,7 +286,7 @@ public class PrintableJsonWriter implements JsonWriter {
                 } else {
                     out.write(LBE,0,2);     // out.write("{\n");
                 }
-                current.indent();
+                out.write(whitespaces, 0, current.indent);
                 fieldNameSerializer.serialize(name, out);
                 out.write(CLW,0,2);         // out.write(": ");
                 if (value == null) {
@@ -313,7 +317,7 @@ public class PrintableJsonWriter implements JsonWriter {
                 } else {
                     out.write(LBE,0,2);     // out.write("{\n");
                 }
-                current.indent();
+                out.write(whitespaces, 0, current.indent);
                 fieldNameSerializer.serialize(name, out);
                 out.write(CLW,0,2);         // out.write(": ");
                 current.state = State.OBJATTR;
@@ -337,7 +341,19 @@ public class PrintableJsonWriter implements JsonWriter {
         return out;
     }
 
-    public int getIndentLength() {
-        return current.indenter.factor * current.depth;
+    /**
+     * Возвращает текущий уровень отступов при форматировании.
+     * Может использоваться сериализерами, специально заточенными для форматированного вида результата.
+     * @return уровень отступа кода от начала строки.
+     */
+    public int getCurrentIndent() {
+        return current.indent;
+    }
+
+    private void ensureWhitespaceCapacity(final int capacity) {
+        if (capacity>whitespaces.length) {
+            this.whitespaces = new char[capacity];
+            for (int i=capacity-1; i>=0; i--) whitespaces[i] = ' ';
+        }
     }
 }

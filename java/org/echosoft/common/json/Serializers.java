@@ -71,10 +71,18 @@ public class Serializers {
             };
     public static final JsonFieldNameSerializer STANDARD_FIELD_NAME_SERIALIZER =
             new JsonFieldNameSerializer() {
+                private final char[] quotes = {'\"','\"'};
                 public void serialize(final String fieldname, final Writer out) throws IOException {
-                    out.write('\"');
-                    out.write(fieldname);
-                    out.write('\"');
+                    if (fieldname==null || fieldname.length()==0) {
+                        out.write(quotes,0,2);
+                    } else
+                    if (fieldname.charAt(0)=='\"') {
+                        out.write(fieldname);
+                    } else {
+                        out.write('\"');
+                        out.write(fieldname);
+                        out.write('\"');
+                    }
                 }
             };
 
@@ -528,9 +536,8 @@ public class Serializers {
             new JsonSerializer() {
                 public void serialize(final Object src, final JsonWriter jw) throws IOException, InvocationTargetException, IllegalAccessException {
                     jw.beginObject();
-                    for (Object o : ((Map)src).entrySet()) {
-                        final Map.Entry entry = (Map.Entry) o;
-                        final String name = "\"" + entry.getKey() + '\"';  // TODO: баг, такое код не совместим со STANDARD_FIELD_NAME_SERIALIZER 
+                    for (Map.Entry<Object,Object> entry : ((Map<Object,Object>)src).entrySet()) {
+                        final String name = "\"" + entry.getKey() + '\"';  // TODO: баг, такое код не совместим со STANDARD_FIELD_NAME_SERIALIZER
                         jw.writeProperty(name, entry.getValue());
                     }
                     jw.endObject();
