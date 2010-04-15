@@ -24,28 +24,6 @@ public class PrintableJsonWriter implements JsonWriter {
     private static final char[] CME = {',','\n'};
     private static final char[] CLW = {':',' '};
 
-    private static final class Indenter {
-        private final Writer out;
-        private int capacity;
-        private char[] buf;
-        private Indenter(final Writer out, final int indentFactor) {
-            this.out = out;
-            this.capacity = indentFactor * 16;
-            this.buf = new char[capacity];
-            for (int i=capacity-1; i>=0; i--) buf[i] = ' ';
-        }
-        private void ensureCapacity(final int capacity) {
-            if (capacity>this.capacity) {
-                this.capacity = capacity;
-                this.buf = new char[capacity];
-                for (int i=capacity-1; i>=0; i--) buf[i] = ' ';
-            }
-        }
-        private void indent(final int indentLength) throws IOException {
-            out.write(buf, 0, indentLength);
-        }
-    }
-
     private static final class Context {
         private final Context prev;
         private final int depth;

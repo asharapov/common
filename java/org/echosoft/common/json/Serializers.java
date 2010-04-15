@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.io.Writer;
 import java.lang.reflect.InvocationTargetException;
 import java.math.BigDecimal;
-import java.math.MathContext;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Enumeration;
@@ -124,8 +123,7 @@ public class Serializers {
     public static final JsonSerializer<BigDecimal> BIGDECIMAL =
             new JsonSerializer<BigDecimal>() {
                 public void serialize(final BigDecimal src, final JsonWriter jw) throws IOException {
-                    final MathContext mc = new MathContext(src.precision()-src.scale() + 4);
-                    jw.getOutputWriter().write( src.round(mc).toPlainString() );
+                    jw.getOutputWriter().write( src.toString() );
                 }
             };
 

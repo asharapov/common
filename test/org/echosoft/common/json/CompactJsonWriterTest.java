@@ -135,7 +135,7 @@ public class CompactJsonWriterTest {
         jw.writeProperty("bool", Boolean.TRUE);
         jw.writeProperty("bd", new BigDecimal(123.66666666));
         jw.endObject();
-        Assert.assertEquals("{total:3,date:new Date(2008,0,13,23,59,59),bool:true,bd:123.6667}", sw.getBuffer().toString());
+        Assert.assertEquals("{total:3,date:new Date(2008,0,13,23,59,59),bool:true,bd:123.666666660000004185349098406732082366943359375}", sw.getBuffer().toString());
     }
 
     @Test
@@ -197,7 +197,7 @@ public class CompactJsonWriterTest {
     @Test
     public void testObjectWriter1() throws Exception {
         jw.writeObject( new Item("item2", 2, 5.3) );
-        Assert.assertEquals("{cost:10.6000,name:\"item2\",quantity:2,price:5.3000}", sw.getBuffer().toString());
+        Assert.assertEquals("{cost:10.59999999999999964472863211994990706443786621093750,name:\"item2\",quantity:2,price:5.29999999999999982236431605997495353221893310546875}", sw.getBuffer().toString());
     }
 
     @Test
