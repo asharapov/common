@@ -11,7 +11,7 @@ public class ReferenceTest {
     public void testReference() {
         final SimpleEntity b1 = new SimpleEntity(1, "first bean");
         final Reference<SimpleEntity> r1 = b1.getReference();
-        final BasicReference<SimpleEntity> r2 = new BasicReference<SimpleEntity>(2, "second bean");
+        final LongReference<SimpleEntity> r2 = new LongReference<SimpleEntity>(2, "second bean");
         process1(r1);
         process2(r1);
 //        process3(r1);  // shouldn't be compiled
@@ -34,6 +34,7 @@ public class ReferenceTest {
         public long id;
         public String name;
         public int amount;
+        private transient Reference<SimpleEntity> ref;
         public SimpleEntity(long id, String name) {
             this.id = id;
             this.name = name;
@@ -42,20 +43,20 @@ public class ReferenceTest {
             return "[SimpleEntity{id:"+id+", name:"+name+", amount:"+amount+"}]";
         }
         public Reference<SimpleEntity> getReference() {
-            return new Reference<SimpleEntity>() {
-                public String getKey() {
-                    return Long.toString(id);
-                }
-                public long getKeyAsLong() {
-                    return id;
-                }
-                public String getTitle() {
-                    return name;
-                }
-                public String toString() {
-                    return "[SimpleEntity.Reference{key:"+getKey()+", title:"+getTitle()+"}]";
-                }
-            };
+            if (ref==null) {
+                ref = new LongReference<SimpleEntity>(0) {
+                    public Long getId() {
+                        return id;
+                    }
+                    public String getTitle() {
+                        return name;
+                    }
+                    public String toString() {
+                        return "[SimpleEntity.Reference{id:"+ getId()+", title:"+getTitle()+"}]";
+                    }
+                };
+            }
+            return ref;
         }
     }
 }

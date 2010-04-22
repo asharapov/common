@@ -23,18 +23,26 @@ public final class JsonUtil {
     public static final char[] NULL = {'n','u','l','l'};
     public static final char[] TRUE = {'t', 'r', 'u', 'e'};
     public static final char[] FALSE = {'f', 'a', 'l', 's', 'e'};
+    private static final char[] SB = {'\\','b'};
+    private static final char[] ST = {'\\','t'};
+    private static final char[] SN = {'\\','n'};
+    private static final char[] SF = {'\\','f'};
+    private static final char[] SR = {'\\','r'};
+    private static final char[] SQ1 = {'\\','\''};
+    private static final char[] SQ2 = {'\\','\"'};
+    private static final char[] SS = {'\\','\\'};
 
     public static void encodeChar(final char c, final Writer out) throws IOException {
         out.write('"');
         switch (c) {
-            case '\b' : out.write("\\b"); break;
-            case '\t' : out.write("\\t"); break;
-            case '\n' : out.write("\\n"); break;
-            case '\f' : out.write("\\f"); break;
-            case '\r' : out.write("\\r"); break;
-            case '\"' : out.write("\\\""); break;
-            case '\'' : out.write("\\\'"); break;
-            case '\\' : out.write("\\\\"); break;
+            case '\b' : out.write(SB,0,2); break;   // out.write("\\b")
+            case '\t' : out.write(ST,0,2); break;   // out.write("\\t")
+            case '\n' : out.write(SN,0,2); break;   // out.write("\\n")
+            case '\f' : out.write(SF,0,2); break;   // out.write("\\f")
+            case '\r' : out.write(SR,0,2); break;   // out.write("\\r")
+            case '\"' : out.write(SQ2,0,2); break;  // out.write("\\\"")
+            case '\'' : out.write(SQ1,0,2); break;  // out.write("\\\'")
+            case '\\' : out.write(SS,0,2); break;   // out.write("\\\\")
             default: out.write(c);
         }
         out.write('"');
@@ -49,14 +57,14 @@ public final class JsonUtil {
             for (int i=0; i<length; i++) {
                 final char c = text.charAt(i);
                 switch (c) {
-                    case '\b' : out.write("\\b"); break;
-                    case '\t' : out.write("\\t"); break;
-                    case '\n' : out.write("\\n"); break;
-                    case '\f' : out.write("\\f"); break;
-                    case '\r' : out.write("\\r"); break;
-                    case '\"' : out.write("\\\""); break;
-                    case '\'' : out.write("\\\'"); break;
-                    case '\\' : out.write("\\\\"); break;
+                    case '\b' : out.write(SB,0,2); break;   // out.write("\\b")
+                    case '\t' : out.write(ST,0,2); break;   // out.write("\\t")
+                    case '\n' : out.write(SN,0,2); break;   // out.write("\\n")
+                    case '\f' : out.write(SF,0,2); break;   // out.write("\\f")
+                    case '\r' : out.write(SR,0,2); break;   // out.write("\\r")
+                    case '\"' : out.write(SQ2,0,2); break;  // out.write("\\\"")
+                    case '\'' : out.write(SQ1,0,2); break;  // out.write("\\\'")
+                    case '\\' : out.write(SS,0,2); break;   // out.write("\\\\")
                     default : out.write(c);
                 }
             }
