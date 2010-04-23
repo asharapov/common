@@ -18,7 +18,7 @@ public class LongReferenceJsonSerializer implements JsonSerializer<LongReference
     @Override
     public void serialize(final LongReference src, final JsonWriter jw) throws IOException, InvocationTargetException, IllegalAccessException {
         final Writer out = jw.getOutputWriter();
-        out.write("{key:");
+        out.write("{id:");
         out.write(Long.toString(src.getId()) );
         out.write(",title:");
         JsonUtil.encodeString(src.getTitle(), out);

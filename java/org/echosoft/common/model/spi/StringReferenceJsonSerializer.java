@@ -18,7 +18,7 @@ public class StringReferenceJsonSerializer implements JsonSerializer<StringRefer
     @Override
     public void serialize(final StringReference src, final JsonWriter jw) throws IOException, InvocationTargetException, IllegalAccessException {
         final Writer out = jw.getOutputWriter();
-        out.write("{key:");
+        out.write("{id:");
         JsonUtil.encodeString(src.getId(), out);
         out.write(",title:");
         JsonUtil.encodeString(src.getTitle(), out);
