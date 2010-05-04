@@ -8,29 +8,25 @@ import org.echosoft.common.utils.StringUtil;
  */
 public class JSFunction extends JSExpression {
 
-    private final String name;
     private final String[] args;
     private final String body;
 
     public JSFunction(final String[] args, final JSExpression body) {
-        this(null,args,body!=null ? body.getExpression() : null);
+        this(args,body!=null ? body.getExpression() : null);
     }
     public JSFunction(final String[] args, final String body) {
-        this(null,args,body);
-    }
-    public JSFunction(final String name, final String[] args, final String body) {
-        super( makeFunction(name,args,body) );
-        this.name = StringUtil.trim(name);
+        super( makeFunction(args,body) );
         this.args = args!=null ? args : StringUtil.EMPTY_STRING_ARRAY;
         this.body = body!=null ? body : "";
     }
 
-    /**
-     * Возвращает имя функции или <code>null</code> для анонимной функции.
-     * @return  имя функции или <code>null</code>.
-     */
-    public String getName() {
-        return name;
+    public JSFunction(final JSExpression body) {
+        this(body!=null ? body.getExpression() : null);
+    }
+    public JSFunction(final String body) {
+        super( makeFunction(null,body) );
+        this.args = StringUtil.EMPTY_STRING_ARRAY;
+        this.body = body!=null ? body : "";
     }
 
     /**
@@ -49,13 +45,9 @@ public class JSFunction extends JSExpression {
         return body;
     }
 
-    private static String makeFunction(final String name, final String[] args, final String body) {
+    private static String makeFunction(final String[] args, final String body) {
         final StringBuilder out = new StringBuilder(30);
-        out.append("function");
-        if (name!=null) {
-            out.append(' ').append(name);
-        }
-        out.append('(');
+        out.append("function(");
         if (args!=null) {
             for (int i = 0, ln = args.length; i < ln; i++) {
                 if (i > 0)
@@ -64,7 +56,8 @@ public class JSFunction extends JSExpression {
             }
         }
         out.append("){");
-        out.append(body);
+        if (body!=null)
+            out.append(body);
         out.append('}');
         return out.toString();
     }

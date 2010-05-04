@@ -125,9 +125,8 @@
       <include name="**/*.java"/>
     </depend>
     <javac srcdir="${srcdir}" destdir="${to}" classpathref="build.classpath" encoding="${build.encoding}"
-           deprecation="${build.deprecation}" optimize="${build.optimized}" nowarn="${build.nowarn}"
-           debug="${build.debug}" debugLevel="${build.debug.level}"
-           executable="${jdk.home}/bin/javac" fork="true" includeAntRuntime="false">
+           source="${build.source}" target="${build.target}" deprecation="${build.deprecation}" nowarn="${build.nowarn}"  
+           debug="${build.debug}" debugLevel="${build.debug.level}" includeAntRuntime="false">
     </javac>
     <!-- TODO: sometimes we need to copy files from test directory but ${srcdir} parameter does not works here ... -->
     <copy todir="${to}">

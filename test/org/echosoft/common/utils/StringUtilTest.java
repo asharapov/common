@@ -206,4 +206,16 @@ public class StringUtilTest {
             Assert.assertEquals(testcase[0], testcase[1], result);
         }
     }
+
+    @Test
+    public void testJavaIdentifier() throws Exception {
+        final String[] validcases = {"a", "ab", "тест", "a1", "_a1", "_"};
+        final String[] invalidcases = {null, "", " ", "\t", " a", "a b", "a ", "1", " 0", "1a", "x*y", ":", "?"};
+        for (String str : validcases) {
+            Assert.assertEquals(str, true, StringUtil.isJavaIdentifier(str));
+        }
+        for (String str : invalidcases) {
+            Assert.assertEquals(str, false, StringUtil.isJavaIdentifier(str));
+        }
+    }
 }

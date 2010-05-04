@@ -801,6 +801,25 @@ public class StringUtil {
         }
     }
 
+    /**
+     * Возвращает <code>true</code> если переданная в аргументе строка удовлетворяет требованиям предъявляемым
+     * к идентификаторам в языке java.
+     * @param str строка.
+     * @return <code>true</code> если переданная в аргументе строка удовлетворяет требованиям предъявляемым
+     * к идентификаторам в языке java.
+     */
+    public static boolean isJavaIdentifier(final String str) {
+        if (str==null || str.isEmpty())
+            return false;
+        if (!Character.isJavaIdentifierStart(str.charAt(0)))
+            return false;
+        for (int i=1,len=str.length(); i<len; i++) {
+            if (!Character.isJavaIdentifierPart(str.charAt(i)))
+                return false;
+        }
+        return true;
+    }
+
     public static Set<String> asUnmodifiableSet(final String... items) {
         final Set<String> set = new HashSet<String>(items.length);
         set.addAll( Arrays.asList(items) );
