@@ -208,6 +208,30 @@ public class StringUtilTest {
     }
 
     @Test
+    public void testMask() throws Exception {
+        final String[][] testcases = {
+                {null, null}, {"",  ""}, {"a", "a"}, {"ab", "ab"}, {"&", "\\&"}, {"\\", "\\\\"},
+                {"abc&def\\&", "abc\\&def\\\\\\&"}
+        };
+        for (String[] testcase : testcases) {
+            String result = StringUtil.mask(testcase[0],'&','\\');
+            Assert.assertEquals(testcase[0],testcase[1],result);
+        }
+    }
+
+    @Test
+    public void testUnmask() throws Exception {
+        final String[][] testcases = {
+                {null, null}, {"",  ""}, {"a", "a"}, {"ab", "ab"}, {"\\&", "&"}, {"\\\\", "\\"},
+                {"abc\\&def\\\\\\&", "abc&def\\&"}, {"abc&def\\ghi\\", "abc&def\\ghi\\"}
+        };
+        for (String[] testcase : testcases) {
+            String result = StringUtil.unmask(testcase[0],'&','\\');
+            Assert.assertEquals(testcase[0],testcase[1],result);
+        }
+    }
+
+    @Test
     public void testJavaIdentifier() throws Exception {
         final String[] validcases = {"a", "ab", "тест", "a1", "_a1", "_"};
         final String[] invalidcases = {null, "", " ", "\t", " a", "a b", "a ", "1", " 0", "1a", "x*y", ":", "?"};

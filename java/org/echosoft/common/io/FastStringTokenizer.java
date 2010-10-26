@@ -4,11 +4,9 @@ import java.util.Iterator;
 
 
 /**
- * The string tokenizer class allows an application to break a
- * string into tokens. This tokenization method is much simpler than
- * the one used by the standard {@link java.util.StringTokenizer} and
- * properly handles empty and wrapped tokens.
- *
+ * Осуществляет разбор строки на токены. Поддерживаются два алгоритма токенизации:
+ * <li> простой способ, аналогичный способу, используемому в {@link java.util.StringTokenizer}.
+ * <li> алгоритм, способный обрабатывать токены, обрамленные некоторым определенным символом.
  * @author Anton Sharapov
  */
 public final class FastStringTokenizer implements Iterator<String> {
@@ -46,12 +44,17 @@ public final class FastStringTokenizer implements Iterator<String> {
     }
 
 
+    @Override
     public boolean hasNext() {
         return hasMoreTokens();
     }
+
+    @Override
     public String next() {
         return nextToken();
     }
+
+    @Override
     public void remove() {
         throw new UnsupportedOperationException("Method remove() was not supported in the given class");
     }

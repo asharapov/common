@@ -325,6 +325,66 @@ public class StringUtil {
         return buf.toArray(new String[buf.size()]);
     }
 
+    /**
+     * Маскирует использование символа указанного в аргументе <code>maskedSymbol</code> при помощи некоторого другого символа <code>maskingSymbol</code>.<br/>
+     * пример: вызов метода: <b><code>mask("abc-def\iklmn",'-','\')</code></b>
+     * вернет строку: <b><code>"abc\-def\\iklmn"</code></b>.
+     * @param text  исходная строка.
+     * @param maskedSymbol  символ, использование которого требуется замаскировать в строке с использованием другого символа.
+     * @param maskingSymbol  символ, которым требуется замаскировать использование некоторого другого символа.
+     * @return  измененная исходная строка в которой перед каждым вхождением маскируемого символа <code>maskedSymbol</code> установлен маскирующий символ <code>maskingSymbol</code>.
+     *  Если в исходной строке маскируемый символ не встречается то метод вернет исходную строку без изменений.
+     */
+    public static String mask(final String text, final char maskedSymbol, final char maskingSymbol) {
+        if (text==null || text.isEmpty() || text.indexOf(maskedSymbol,0)<0 && text.indexOf(maskingSymbol,0)<0)
+            return text;
+        final int length = text.length();
+        final StringBuilder buf = new StringBuilder(text.length()+2);
+        for (int i=0; i<length; i++) {
+            final char c = text.charAt(i);
+            if (c==maskedSymbol || c==maskingSymbol) {
+                buf.append(maskingSymbol);
+            }
+            buf.append(c);
+        }
+        return buf.toString();
+    }
+
+    /**
+     * Выполняет операцию, обратную той что делает метод {@link StringUtil#mask(String, char, char)}, т.е всегда выполняется условие:<br/>
+     * <code>StringUtil.unmask(StringUtil.mask(str,c,mask), mask) == str</code>.
+     * @param text  строка в которой требуется убрать маскировку с символов.
+     * @param maskedSymbol  символ, использование которого маскировалось в строке с использованием другого символа.
+     * @param maskingSymbol  символ, используемый для маскировки других символов.
+     * @return  измененная исходная строка в которой была убрана маскировка
+     */
+    public static String unmask(final String text, final char maskedSymbol, final char maskingSymbol) {
+        if (text==null || text.isEmpty() || text.indexOf(maskingSymbol,0)<0)
+            return text;
+        final int length = text.length();
+        final StringBuilder buf = new StringBuilder(text.length());
+        boolean masked = false;
+        for (int i=0; i<length; i++) {
+            final char c = text.charAt(i);
+            if (masked) {
+                if (c!=maskedSymbol && c!=maskingSymbol) {
+                    buf.append(maskingSymbol);
+                }
+                buf.append(c);
+                masked = false;
+            } else {
+                if (c==maskingSymbol) {
+                    masked = true;
+                } else {
+                    buf.append(c);
+                }
+            }
+        }
+        if (masked)
+            buf.append(maskingSymbol);
+        return buf.toString();
+    }
+
 
     /**
      * Конвертирует недопустимые в HTML тексте символы в соответствующие кодовые обозначения принятые в HTML.<br/>
