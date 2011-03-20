@@ -17,17 +17,16 @@ import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringReader;
-import java.io.StringWriter;
 import java.net.URL;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 import java.util.Properties;
 
+import org.echosoft.common.io.FastStringWriter;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -62,61 +61,55 @@ public class XMLUtil {
 
 
     /**
-     * Loads document from file, that name specified as parameter to this
-     * method.
-     *
+     * Loads document from file, that name specified as parameter to this method.
      * @param file  the file name, that contains XML document.
-     * @return  the <code>Document</code> interface instance that represents
-     *          the entire XML document.
+     * @return  the <code>Document</code> interface instance that represents the entire XML document.
      * @throws IOException  in case of any io errors.
      * @throws ParserConfigurationException  in case of any parsing errors.
      * @throws SAXException  in case of any xml parsing errors.
      */
     public static Document loadDocument(final File file) throws IOException, ParserConfigurationException, SAXException {
         final DocumentBuilder builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
-        return builder.parse(new InputSource(new FileInputStream(file)));
+        final FileInputStream in = new FileInputStream(file);
+        try {
+            return builder.parse(new InputSource(in));
+        } finally {
+            in.close();
+        }
     }
 
     /**
-     * Loads document from the URL, that specified as parameter to this
-     * method. Also, the URL can referencing to the file.
-     *
+     * Loads document from the URL, that specified as parameter to this method. Also, the URL can referencing to the file.
      * @param   url the URL to the XML source.
-     * @return  the <code>Document</code> interface instance that represents
-     *          the entire XML document.
+     * @return  the <code>Document</code> interface instance that represents the entire XML document.
      * @throws IOException  in case of any io errors.
      * @throws ParserConfigurationException  in case of any parsing errors.
      * @throws SAXException  in case of any xml parsing errors.
      */
     public static Document loadDocument(final URL url) throws IOException, ParserConfigurationException, SAXException {
-        // extracting document source by url
         if (url.getProtocol().equalsIgnoreCase("file")) {
-            // if some errors, then something wrong with this URL
-            String fileName =
-                StringUtil.trim(url.getHost()) != null
-                    ? StringUtil.trim(url.getHost()) : "" + url.getFile();
-
+            final String fileName = StringUtil.trim(url.getHost()) != null ? StringUtil.trim(url.getHost()) : url.getFile();
             return loadDocument(new File(fileName));
+        } else {
+            final InputStream in = url.openStream();
+            try {
+                return loadDocument(in);
+            } finally {
+                in.close();
+            }
         }
-        // in other cases opening stream
-        return loadDocument(url.openStream());
     }
 
     /**
-     * Loads document from the input stream, that specified as parameter to
-     * this method.
-     *
+     * Loads document from the input stream, that specified as parameter to this method.
      * @param   in the input stream of XML document.
-     * @return  the <code>Document</code> interface instance that represents
-     *          the entire XML document.
+     * @return  the <code>Document</code> interface instance that represents the entire XML document.
      * @throws IOException  in case of any io errors.
      * @throws ParserConfigurationException  in case of any parsing errors.
      * @throws SAXException  in case of any xml parsing errors.
      */
     public static Document loadDocument(final InputStream in) throws IOException, ParserConfigurationException, SAXException {
-        // creating document builder from input stream
         final DocumentBuilder builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
-        // parsing document from XML resource
         return builder.parse(new InputSource(in));
     }
 
@@ -128,23 +121,24 @@ public class XMLUtil {
      * @return  text, that contains the specified node.
      */
     public static String getNodeText(final Node node) {
-        StringBuffer buf = null;
-        // clear from whitespaces and breaklines
-        node.normalize();
+//        node.normalize();
+        StringBuilder buf = null;
         final NodeList list = node.getChildNodes();
-        // searching for specified node
-        for (int i = 0; i < list.getLength(); i++) {
+        for (int i = 0, len=list.getLength(); i < len; i++) {
             final Node n = list.item(i);
-            if (n.getNodeType() == Node.TEXT_NODE) {
-                final String value = StringUtil.trim( n.getNodeValue() );
-                if (value!=null) {
-                    if (buf==null)
-                        buf = new StringBuffer();
-                    buf.append(value);
+            switch (n.getNodeType()) {
+                case Node.TEXT_NODE:
+                case Node.CDATA_SECTION_NODE: {
+                    final String value = n.getNodeValue();
+                    if (value!=null && value.length()>0) {
+                        if (buf==null)
+                            buf = new StringBuilder(value.length());
+                        buf.append(value);
+                    }
                 }
             }
         }
-        return buf!=null ? buf.toString() : null;
+        return buf!=null ? StringUtil.trim(buf.toString()) : null;
     }
 
 
@@ -154,17 +148,15 @@ public class XMLUtil {
      * @return iterator with proper node childs.
      */
     public static Iterator<Element> getChildElements(final Node node) {
-        // clear from whitespaces and breaklines
-        node.normalize();
+//        node.normalize();
         return new Iterator<Element>() {
-            final NodeList nodes = node.getChildNodes();
-            int nextPos = 0;
-            Element nextElement = seekNext();
+            private final NodeList nodes = node.getChildNodes();
+            private int nextPos = 0;
+            private Element nextElement = seekNext();
 
             public boolean hasNext() {
                 return nextElement!=null;
             }
-
             public Element next() {
                 if (nextElement==null)
                     throw new NoSuchElementException();
@@ -172,13 +164,11 @@ public class XMLUtil {
                 nextElement = seekNext();
                 return result;
             }
-
             public void remove() {
                 throw new UnsupportedOperationException("operation not supported");
             }
-
-            Element seekNext() {
-                for (int i=nextPos; i<nodes.getLength(); i++) {
+            private Element seekNext() {
+                for (int i=nextPos, len=nodes.getLength(); i<len; i++) {
                     final Node childNode = nodes.item(i);
                     if (childNode.getNodeType() == Node.ELEMENT_NODE) {
                         nextPos = i+1;
@@ -198,17 +188,15 @@ public class XMLUtil {
      * @return iterator with proper node childs.
      */
     public static Iterator<Element> getChildElements(final Node node, final String elementName) {
-        // clear from whitespaces and breaklines
-        node.normalize();
+//        node.normalize();
         return new Iterator<Element>() {
-            final NodeList nodes = node.getChildNodes();
-            int nextPos = 0;
-            Element nextElement = seekNext();
+            private final NodeList nodes = node.getChildNodes();
+            private int nextPos = 0;
+            private Element nextElement = seekNext();
 
             public boolean hasNext() {
                 return nextElement!=null;
             }
-
             public Element next() {
                 if (nextElement==null)
                     throw new NoSuchElementException();
@@ -216,13 +204,11 @@ public class XMLUtil {
                 nextElement = seekNext();
                 return result;
             }
-
             public void remove() {
                 throw new UnsupportedOperationException("operation not supported");
             }
-
-            Element seekNext() {
-                for (int i=nextPos; i<nodes.getLength(); i++) {
+            private Element seekNext() {
+                for (int i=nextPos, len=nodes.getLength(); i<len; i++) {
                     final Node childNode = nodes.item(i);
                     if (childNode.getNodeType()==Node.ELEMENT_NODE && childNode.getNodeName().equals(elementName)) {
                         nextPos = i+1;
@@ -235,15 +221,13 @@ public class XMLUtil {
     }
 
     /**
-     * Gets child parentNode by its name.
-     * @param   parentNode parent parentNode.
+     * Gets first child element with specified name.
+     * @param   parentNode parent node.
      * @param   childName child name.
-     * @return  parentNode with specified name.
+     * @return  first childr element with specified name.
      */
     public static Element getChildElement(final Node parentNode, final String childName) {
-        // clear from whitespaces and breaklines
-        parentNode.normalize();
-
+//        parentNode.normalize();
         final NodeList nodeList = parentNode.getChildNodes();
         for (int i = 0; i < nodeList.getLength(); i++) {
             final Node node = nodeList.item(i);
@@ -282,11 +266,9 @@ public class XMLUtil {
      * @return  text, that contains the specified node.
      */
     public static String getNodeCDATASection(final Node node) {
-        // clear from whitespaces and breaklines
-        node.normalize();
-
+//        node.normalize();
         final NodeList list = node.getChildNodes();
-        for (int i = 0; i < list.getLength(); i++) {
+        for (int i = 0, len=list.getLength(); i < len; i++) {
             final Node child = list.item(i);
             if (child.getNodeType() == Node.CDATA_SECTION_NODE)
                 return child.getNodeValue();
@@ -413,10 +395,8 @@ public class XMLUtil {
     public static String serialize(final Node node) throws TransformerException {
         final Transformer serializer = TransformerFactory.newInstance().newTransformer();
         serializer.setOutputProperties(SER_PROPS);
-
-        final StringWriter writer = new StringWriter();
+        final FastStringWriter writer = new FastStringWriter();
         serializer.transform(new DOMSource(node), new StreamResult(writer));
-
         return writer.toString();
     }
 
@@ -426,12 +406,17 @@ public class XMLUtil {
      * @param node  node which must be serialized.
      * @param outputFile  output file.
      * @throws TransformerException  in case of any errors.
-     * @throws FileNotFoundException  in case any io errors.
+     * @throws IOException  in case any io errors.
      */
-    public static void serialize(final Node node, final File outputFile) throws TransformerException, FileNotFoundException {
+    public static void serialize(final Node node, final File outputFile) throws TransformerException, IOException {
         final Transformer serializer = TransformerFactory.newInstance().newTransformer();
         serializer.setOutputProperties(SER_PROPS);
-        serializer.transform(new DOMSource(node), new StreamResult(new FileOutputStream(outputFile)));
+        final FileOutputStream out = new FileOutputStream(outputFile);
+        try {
+            serializer.transform(new DOMSource(node), new StreamResult(out));
+        } finally {
+            out.close();
+        }
     }
 
 

@@ -146,8 +146,7 @@ public class StringUtil {
      * @return  позиция по которой находится один из перечисленных в аргументе символов или -1 если ни один символ в строке не найден.
      */
     public static int indexOf(final CharSequence string, final int startPos, final char... chars) {
-        final int length = string.length();
-        for (int i=startPos, l=string.length(); i<l; i++) {
+        for (int i=startPos, len=string.length(); i<len; i++) {
             final char c = string.charAt(i);
             for (int j=chars.length-1; j>=0; j--) {
                 if (c==chars[j])
@@ -155,6 +154,24 @@ public class StringUtil {
             }
         }
         return -1;
+    }
+
+    /**
+     * Вырезает из строки все управляющие символы с ASCII кодами в диапазоне 0..31 включительно.
+     * @param text строка из которой должны быть вырезаны управляющие символы.
+     * @return полученная в результате строка.
+     */
+    public static String skipControlChars(final CharSequence text) {
+        if (text==null)
+            return null;
+        final int len = text.length();
+        final StringBuilder buf = new StringBuilder(len);
+        for (int i=0; i<len; i++) {
+            final char c = text.charAt(i);
+            if (c>=32)
+                buf.append(c);
+        }
+        return buf.toString();
     }
 
     /**
@@ -737,6 +754,56 @@ public class StringUtil {
         buf.append(Integer.toString(p));
         buf.append(':');
         p = cal.get(Calendar.MINUTE);
+        if (p<10)
+            buf.append('0');
+        buf.append(Integer.toString(p));
+    }
+
+    /**
+     * Преобразует переданную в аргументе дату в строку формата <code>yyyy-MM-dd</code>.
+     * @param date  дата которую требуется преобразовать в строку.
+     * @return  результат форматирования даты или пустая строка если исходная дата равна <code>null</code>.
+     */
+    public static String formatISODate(final Date date) {
+        if (date==null)
+            return "";
+        final StringBuilder buf = new StringBuilder(10);
+        final Calendar cal = getCalendarInstanceForThread();
+        cal.setTime(date);
+        buf.append(cal.get(Calendar.YEAR));
+        buf.append('-');
+        int p = cal.get(Calendar.MONTH)+1;
+        if (p<10)
+            buf.append('0');
+        buf.append(p);
+        buf.append('-');
+        p = cal.get(Calendar.DAY_OF_MONTH);
+        if (p<10)
+            buf.append('0');
+        buf.append(p);
+        return buf.toString();
+    }
+
+    /**
+     * Преобразует переданную в аргументе дату в строку формата <code>yyyy-MM-dd</code>.
+     * Если исходная дата равна <code>null</code> то метод не делает ничего.
+     * @param buf  буффер, реализующий интерфейс {@link Appendable} в котором будет аккумулироваться результат.
+     * @param date  дата которую требуется преобразовать в строку.
+     * @throws IOException  в случае каких-либо проблем с сохранением данных в буфере.
+     */
+    public static void formatISODate(final Appendable buf, final Date date) throws IOException {
+        if (date==null)
+            return;
+        final Calendar cal = getCalendarInstanceForThread();
+        cal.setTime(date);
+        buf.append(Integer.toString(cal.get(Calendar.YEAR)));
+        buf.append('-');
+        int p = cal.get(Calendar.MONTH)+1;
+        if (p<10)
+            buf.append('0');
+        buf.append(Integer.toString(p));
+        buf.append('-');
+        p = cal.get(Calendar.DAY_OF_MONTH);
         if (p<10)
             buf.append('0');
         buf.append(Integer.toString(p));

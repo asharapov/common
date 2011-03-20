@@ -7,10 +7,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.echosoft.common.utils.BeanUtil.getProperty;
+import static org.echosoft.common.utils.BeanUtil.setProperty;
 
 /**
  * Contains junit test cases for {@link BeanUtil} class.
@@ -19,48 +22,51 @@ import static org.junit.Assert.assertTrue;
  */
 public class BeanUtilTest {
 
-    private final Company company;
+    private static Company company;
 
-    public BeanUtilTest() {
-        super();
+    @BeforeClass
+    public static void beforeClass() {
         company = new Company("Company 1", "1001", new Person("Ivanov", 1, new Address("russia", "moscow", 101)));
+        company.employee.add( new Person("Petrov", 2, null) );
     }
 
     @Test
     public void testSimplePropertiesRead() throws Exception {
-        final String companyName = (String)BeanUtil.getProperty(company, "name");
+        final String companyName = (String)getProperty(company, "name");
         assertEquals("Unable to get simple property", "Company 1", companyName);
-        final Person director = (Person)BeanUtil.getProperty(company, "director");
+        final Person director = (Person)getProperty(company, "director");
         assertEquals("Unable to get custom object property", company.getDirector(), director);
-        final String cid = (String) BeanUtil.getProperty(company, "cid");
+        final String cid = (String)getProperty(company, "cid");
         assertEquals("Unable to get simple public property", company.cid, cid);
-        final Boolean hasChildren = (Boolean) BeanUtil.getProperty(company, "hasChildren");
-        assertEquals("Unable to call simplw public method", company.hasChildren(), hasChildren);
+        final Boolean hasChildren = (Boolean)getProperty(company, "hasChildren");
+        assertEquals("Unable to call simple public method", company.hasChildren(), hasChildren);
 
-        final String directorName = (String) BeanUtil.getProperty(company, "director.name");
+        final String directorName = (String)getProperty(company, "director.name");
         assertEquals("Unable to get nested property", company.getDirector().getName(), directorName);
-        final String country = (String) BeanUtil.getProperty(company, "director.address.country");
+        final String country = (String)getProperty(company, "director.address.country");
         assertEquals("Unable to get nested property", company.getDirector().getAddress().getCountry(), country);
+        final int size = (Integer)getProperty(company, "employee.size");
+        assertEquals("Unable to get list size", company.employee.size(), size);
 
-        BeanUtil.setProperty(company, "name", "New name of company");
+        setProperty(company, "name", "New name of company");
         assertEquals("unable to set simple property", company.getName(), "New name of company");
-        BeanUtil.setProperty(company, "director.name", "Petrov");
+        setProperty(company, "director.name", "Petrov");
         assertEquals("unable to set nested property", company.getDirector().getName(), "Petrov");
-        BeanUtil.setProperty(company, "cid", "CID22");
+        setProperty(company, "cid", "CID22");
         assertEquals("Unable to set simple public property", company.cid, "CID22");
     }
 
     @Test
     public void testIndexedPropertiesRead() throws Exception {
-        final String award2 = (String) BeanUtil.getProperty(company, "director.awards[2]");
+        final String award2 = (String)getProperty(company, "director.awards[2]");
         assertEquals("Unable to get indexed property", company.getDirector().getAwards()[2], award2);
-        final byte[] bytes = (byte[]) BeanUtil.getProperty(company, "director.awards[1].bytes");
+        final byte[] bytes = (byte[])getProperty(company, "director.awards[1].bytes");
         assertTrue("Unable to get indexed property", Arrays.equals(company.getDirector().getAwards()[1].getBytes(), bytes));
 
-        BeanUtil.setProperty(company.getDirector(), "awards[0]", "FUN");
-        assertEquals("Unable to set indexed property", company.getDirector().getAwards()[0], "FUN");
-        BeanUtil.setProperty(company, "director.list[2]", "XXX");
-        assertEquals("Unable to set indexed property", company.getDirector().getList().get(2), "XXX");
+        setProperty(company.getDirector(), "awards[0]", "A1X");
+        assertEquals("Unable to set indexed property", company.getDirector().getAwards()[0], "A1X");
+        setProperty(company, "director.skills[2]", "L2X");
+        assertEquals("Unable to set indexed property", company.getDirector().getSkills().get(2), "L2X");
     }
 
     @Test
@@ -78,21 +84,21 @@ public class BeanUtilTest {
 
     @Test
     public void testMethodsCall() throws Exception {
-        final Object obj1 = BeanUtil.getProperty(company, "director.someone(keystr)");
+        final Object obj1 = getProperty(company, "director.someone(keystr)");
         assertEquals("Unable to call method ", company.getDirector().getSomeone("keystr"), obj1);
-        final Object obj2 = BeanUtil.getProperty(company.getDirector(), "method1(2)");
+        final Object obj2 = getProperty(company.getDirector(), "method1(2)");
         assertEquals("Unable to call method ", company.getDirector().getMethod1(2), obj2);
-        final Object obj3 = BeanUtil.getProperty(company.getDirector(), "method2(2)");
+        final Object obj3 = getProperty(company.getDirector(), "method2(2)");
         assertEquals("Unable to call method ", company.getDirector().getMethod2(2), obj3);
 
-        BeanUtil.setProperty(company.getDirector(), "someone(a1)", "A1");
+        setProperty(company.getDirector(), "someone(a1)", "A1");
         assertEquals("Invalid dynamic assignment", "A1", company.getDirector().getSomeone("a1"));
-        BeanUtil.setProperty(company.getDirector(), "method1(2)", "ASD");
+        setProperty(company.getDirector(), "method1(2)", "ASD");
 
-        final Object obj4 = BeanUtil.getProperty(company, "top(-1)");
+        final Object obj4 = getProperty(company, "top(-1)");
         assertEquals("Unable to call method ", company.getTop(-1), obj4);
 
-        final Object obj5 = BeanUtil.getProperty(company, "bottom(-2)");
+        final Object obj5 = getProperty(company, "bottom(-2)");
         assertEquals("Unable to call method ", company.bottom(-2), obj5);
     }
 
@@ -105,11 +111,14 @@ public class BeanUtilTest {
         private String name;
         private String inn;
         private Person director;
+        public final List<Person> employee;
         public Company(String name, String inn, Person director) {
             this.name = name;
             this.inn = inn;
             this.director = director;
             this.cid = "fucked field";
+            this.employee = new ArrayList<Person>();
+            employee.add( director );
         }
         public String getName() {
             return name;
@@ -145,7 +154,7 @@ public class BeanUtilTest {
         private int rate;
         private Address address;
         private Map<Object,Object> env;
-        private List<String> list;
+        private List<String> skills;
         private String awards[];
         public Person(String name, int rate, Address address) {
             this.name = name;
@@ -154,10 +163,10 @@ public class BeanUtilTest {
             this.env = new HashMap<Object,Object>();
             this.env.put("keystr", "val:str");
             this.env.put(1, "val:1");
-            this.list = new ArrayList<String>();
-            this.list.add("L1");
-            this.list.add("L2");
-            this.list.add("L3");
+            this.skills = new ArrayList<String>();
+            this.skills.add("L1");
+            this.skills.add("L2");
+            this.skills.add("L3");
             this.awards = new String[]{"A1", "A2", "A3", "A4", "A5"};
         }
         public String getName() {
@@ -181,8 +190,8 @@ public class BeanUtilTest {
         public Map getEnv() {
             return env;
         }
-        public List getList() {
-            return list;
+        public List getSkills() {
+            return skills;
         }
         public String[] getAwards() {
             return awards;
