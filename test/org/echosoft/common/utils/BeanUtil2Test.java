@@ -2,7 +2,6 @@ package org.echosoft.common.utils;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -12,8 +11,8 @@ import org.junit.Test;
 
 import static org.echosoft.common.utils.BeanUtil2.getProperty;
 import static org.echosoft.common.utils.BeanUtil2.setProperty;
+import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 
 /**
  * @author Anton Sharapov
@@ -25,91 +24,114 @@ public class BeanUtil2Test {
     @BeforeClass
     public static void beforeClass() {
         company = new Company("Company 1", "1001", new Person("Ivanov", 1, new Address("russia", "moscow", 101)));
-        company.employee.add( new Person("Petrov", 2, null) );
+        company.employee.add(new Person("Petrov", 2, null));
     }
 
     @Test
-    public void test1() {
+    public void getStandardProperties() throws Exception {
+        Object value;
+        value = getProperty(company, "cid");
+        assertEquals("Can't get 'cid' field", company.cid, value);
+        value = getProperty(company, "name");
+        assertEquals("Can't get 'name' property", company.getName(), value);
+        value = getProperty(company, "director");
+        assertEquals("Can't get 'director' property", company.getDirector(), value);
+        value = getProperty(company, "director.name");
+        assertEquals("Can't get 'director.name' property", company.getDirector().getName(), value);
+        value = getProperty(company, "director.address.country");
+        assertEquals("Can't get 'director.address.country' property", company.getDirector().getAddress().getCountry(), value);
+        value = getProperty(company, "director.topRated");
+        assertEquals("Can't get 'director.topRated' property", company.getDirector().isTopRated(), value);
     }
 
     @Test
-    public void testSimplePropertiesRead() throws Exception {
-        final String companyName = (String)getProperty(company, "name");
-        assertEquals("Unable to get simple property", "Company 1", companyName);
-        final Person director = (Person)getProperty(company, "director");
-        assertEquals("Unable to get custom object property", company.getDirector(), director);
-        final String cid = (String)getProperty(company, "cid");
-        assertEquals("Unable to get simple public property", company.cid, cid);
-        final Boolean hasChildren = (Boolean)getProperty(company, "hasChildren");
-        assertEquals("Unable to call simple public method", company.hasChildren(), hasChildren);
-
-        final String directorName = (String)getProperty(company, "director.name");
-        assertEquals("Unable to get nested property", company.getDirector().getName(), directorName);
-        final String country = (String)getProperty(company, "director.address.country");
-        assertEquals("Unable to get nested property", company.getDirector().getAddress().getCountry(), country);
-        final int size = (Integer)getProperty(company, "employee.size");
-        assertEquals("Unable to get list size", company.employee.size(), size);
-
-        setProperty(company, "name", "New name of company");
-        assertEquals("unable to set simple property", "New name of company", company.getName());
-        setProperty(company, "director.name", "Petrov");
-        assertEquals("unable to set nested property", "Petrov", company.getDirector().getName());
-        setProperty(company, "cid", "CID22");
-        assertEquals("Unable to set simple public property", "CID22", company.cid);
+    public void setStandardProperties() throws Exception {
+        setProperty(company, "cid", "newcid");
+        assertEquals("Can't set 'cid' field", "newcid", company.cid);
+        setProperty(company, "name", "newname");
+        assertEquals("Can't set 'name' property", "newname", company.getName());
+        setProperty(company, "director.name", "newdirectorname");
+        assertEquals("Can't set 'director.name' property", "newdirectorname", company.getDirector().getName());
+        setProperty(company, "director.address.country", "Soviet Union");
+        assertEquals("Can't set 'director.address.country' property", "Soviet Union", company.getDirector().getAddress().getCountry());
+        setProperty(company, "director.rate", 13);
+        assertEquals("Can't set 'director.rate' property", 13, company.getDirector().getRate());
     }
 
     @Test
-    public void testIndexedPropertiesRead() throws Exception {
-        final String award2 = (String)getProperty(company, "director.awards[2]");
-        assertEquals("Unable to get indexed property", company.getDirector().getAwards()[2], award2);
-        final byte[] bytes = (byte[])getProperty(company, "director.awards[1].bytes");
-        assertTrue("Unable to get indexed property", Arrays.equals(company.getDirector().getAwards()[1].getBytes(), bytes));
-
-        setProperty(company.getDirector(), "awards[0]", "A1X");
-        assertEquals("Unable to set indexed property", company.getDirector().getAwards()[0], "A1X");
-        setProperty(company, "director.skills[2]", "L2X");
-        assertEquals("Unable to set indexed property", company.getDirector().getSkills().get(2), "L2X");
+    public void getIndexedProperties() throws Exception {
+        Object value;
+        value = getProperty(company, "director.awards[2]");
+        assertEquals("Can't get indexed property 'director.awards[2]'", company.getDirector().getAwards()[2], value);
+        value = getProperty(company, "director.awards[1].bytes");
+        assertArrayEquals("Can't get indexed property 'director.awards[1].bytes'", company.getDirector().getAwards()[1].getBytes(), (byte[]) value);
+        value = getProperty(company, "director.skills[0]");
+        assertEquals("Can't get indexed property 'director.skills[0]'", company.getDirector().getSkills().get(0), value);
     }
 
     @Test
-    public void testMappedProperties() throws Exception {
-        final Object obj1 = getProperty(company, "director.env.keystr");
-        assertEquals("Unable to get mapped property", company.getDirector().getEnv().get("keystr"), obj1);
-        final Object obj2 = getProperty(company, "director.env(keystr)");
-        assertEquals("Unable to get mapped property", company.getDirector().getEnv().get("keystr"), obj2);
-        final Object obj3 = getProperty(company.getDirector(), "env(keystr)");
-        assertEquals("Unable to get mapped property", company.getDirector().getEnv().get("keystr"), obj3);
-
-        // TODO: failed ...
-//        setProperty(company, "director.env(a2)", "A2");
-//        assertEquals("unable to set mapped property", company.getDirector().getEnv().get("a2"), "A2");
-        setProperty(company, "director.env.a3", "A3");
-        assertEquals("unable to set mapped property", company.getDirector().getEnv().get("a3"), "A3");
+    public void setIndexedProperties() throws Exception {
+        setProperty(company, "director.awards[2]", "222");
+        assertEquals("Can't set 'director.awards[2]' property", "222", company.getDirector().getAwards()[2]);
+        setProperty(company, "director.skills[2]", "LL3");
+        assertEquals("Can't set 'director.skills[2]' property", "LL3", company.getDirector().getSkills().get(2));
     }
 
     @Test
-    public void testMethodsCall() throws Exception {
-        final Object obj1 = getProperty(company, "director.someone(keystr)");
-        assertEquals("Unable to call method ", company.getDirector().getSomeone("keystr"), obj1);
-        final Object obj2 = getProperty(company, "director.getSomeone(keystr)");
-        assertEquals("Unable to call method ", company.getDirector().getSomeone("keystr"), obj2);
-        final Object obj3 = getProperty(company.getDirector(), "method1(2)");
-        assertEquals("Unable to call method ", company.getDirector().getMethod1(2), obj3);
-        final Object obj4 = getProperty(company.getDirector(), "method2(2)");
-        assertEquals("Unable to call method ", company.getDirector().getMethod2(2), obj4);
-        final Object obj5 = getProperty(company, "top(-1)");
-        assertEquals("Unable to call method ", company.getTop(-1), obj5);
-        final Object obj6 = getProperty(company, "bottom(-2)");
-        assertEquals("Unable to call method ", company.bottom(-2), obj6);
+    public void getMappedValues() throws Exception {
+        Object value;
+        value = getProperty(company, "director.env.k1");
+        assertEquals("Can't get 'director.env.k1' map entry", company.getDirector().getEnv().get("k1"), value);
+        value = getProperty(company, "director.getEnv.k2");
+        assertEquals("Can't get 'director.env.k1' map entry", company.getDirector().getEnv().get("k2"), value);
+//        value = getProperty(company, "director.someone.keystr");
+//        assertEquals("Can't get 'director.someone.keystr' map entry", company.getDirector().getSomeone("keystr"), value);
+//        value = getProperty(company, "director.getSomeone.keystr");
+//        assertEquals("Can't get 'director.getSomeone.keystr' map entry", company.getDirector().getSomeone("keystr"), value);
+    }
 
-        // TODO: unsupported ...
-        //setProperty(company.getDirector(), "someone(a1)", "A1");
-        //assertEquals("Invalid dynamic assignment", "A1", company.getDirector().getSomeone("a1"));
-        //setProperty(company.getDirector(), "method1(2)", "ASD");
+    @Test
+    public void setMappedValues() throws Exception {
+        setProperty(company, "director.env.p1", "pv1");
+        assertEquals("Can't set 'director.env.p1' map entry", "pv1", company.getDirector().getEnv().get("p1"));
+//        setProperty(company, "director.someone.k3", "v3");
+//        assertEquals("Can't set 'director.someone.k3' map entry", "v3", company.getDirector().getSomeone("k3"));
+//        setProperty(company, "director.getSomeone.k4", "v4");
+//        assertEquals("Can't set 'director.getSomeone.k4' map entry", "v4", company.getDirector().getSomeone("k4"));
+    }
+
+    @Test
+    public void getMethodsWithNoArgs() throws Exception {
+        Object value;
+        value = getProperty(company, "hasChildren");
+        assertEquals("Can't call 'Company.hasChildren()' method", company.hasChildren(), value);
+        value = getProperty(company, "director.address.hashCode");
+        assertEquals("Can't call 'Address.hashCode()' method", company.getDirector().getAddress().hashCode(), value);
+    }
+
+    @Test
+    public void getMethodsWithOneArg() throws Exception {
+        Object value;
+        value = getProperty(company, "director.getSomeone(keystr)");
+        assertEquals("Can't call 'Person.getSomeone(keystr)' method", company.getDirector().getSomeone("keystr"), value);
+        value = getProperty(company, "director.someone(keystr)");
+        assertEquals("Can't call 'Person.getSomeone(keystr)' method", company.getDirector().getSomeone("keystr"), value);
+        value = getProperty(company, "director.getMethod1(1)");
+        assertEquals("Can't call 'Director.getMethod1(1)' method", company.getDirector().getMethod1(1), value);
+        value = getProperty(company, "director.method1(2)");
+        assertEquals("Can't call 'Director.getMethod1(2)' method", company.getDirector().getMethod1(2), value);
+        value = getProperty(company, "director.getMethod2(1)");
+        assertEquals("Can't call 'Director.getMethod2(1)' method", company.getDirector().getMethod2(1), value);
+        value = getProperty(company, "director.method2(2)");
+        assertEquals("Can't call 'Director.getMethod2(2)' method", company.getDirector().getMethod2(2), value);
+        value = getProperty(company, "top(-1)");
+        assertEquals("Can't call 'Company.top(-1))' method", company.getTop(-1), value);
+        value = getProperty(company, "bottom(-2)");
+        assertEquals("Can't call 'Company.bottom(-2)' method", company.bottom(-2), value);
     }
 
 
-    public static class Company {
+    public static final class Company {
         public String cid;
         private String name;
         private String inn;
@@ -152,7 +174,7 @@ public class BeanUtil2Test {
         }
     }
 
-    public static class Person {
+    public static final class Person {
         private String name;
         private int rate;
         private Address address;
@@ -166,6 +188,8 @@ public class BeanUtil2Test {
             this.env = new HashMap<Object,Object>();
             this.env.put("keystr", "val:str");
             this.env.put(1, "val:1");
+            this.env.put("k1", 1);
+            this.env.put("k2", 2);
             this.skills = new ArrayList<String>();
             this.skills.add("L1");
             this.skills.add("L2");
@@ -189,6 +213,9 @@ public class BeanUtil2Test {
         }
         public void setAddress(Address address) {
             this.address = address;
+        }
+        public boolean isTopRated() {
+            return rate>0;
         }
         public Map getEnv() {
             return env;
@@ -216,7 +243,7 @@ public class BeanUtil2Test {
         }
     }
 
-    public static class Address implements Serializable {
+    public static final class Address implements Serializable {
         private String country;
         private String city;
         private int home;

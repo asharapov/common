@@ -248,10 +248,10 @@ public class BeanUtil2 {
             this.setters = new HashMap<String, Setter>();
             this.clsName = cls.getName();
             this.inheritsMapInterface = Map.class.isAssignableFrom(cls);
-            initGetters(cls);
+            init(cls);
         }
 
-        private void initGetters(final Class<?> cls) {
+        private void init(final Class<?> cls) {
             getters.clear();
             setters.clear();
             for (final Field field : cls.getFields()) {
@@ -279,7 +279,8 @@ public class BeanUtil2 {
                         } else
                         if (nameLength > 2 && name.startsWith("is", 0) && (returnType == boolean.class || returnType == Boolean.class)) {
                             getters.put(Introspector.decapitalize(name.substring(2)), getter);
-                        } else
+                        }
+                        if (!getters.containsKey(name))
                             getters.put(name, getter);
                     } else {
                         ArrayList<Method> list = overloadedGetters.get(name);
