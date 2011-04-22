@@ -828,8 +828,8 @@ public class StringUtil {
             throw new ParseException("Delimiter not finded", 2);
         if (text.charAt(5)!='.')
             throw new ParseException("Delimiter not finded", 5);
-        cal.set(Calendar.DAY_OF_MONTH, parseInt(text,0,2));
-        cal.set(Calendar.MONTH, parseInt(text,3,5)-1);
+        cal.set(Calendar.DAY_OF_MONTH, parseInt(text, 0, 2));
+        cal.set(Calendar.MONTH, parseInt(text, 3, 5) - 1);
         cal.set(Calendar.YEAR, parseInt(text,6,10));
         return cal.getTime();
     }
@@ -939,14 +939,30 @@ public class StringUtil {
     }
 
     /**
+     * Возвращает <code>true</code> если переданная в аргументе строка содержит только цифры.
+     * @param str строка
+     * @return <code>false</code> если переданная в аргументе строка содержит какие-либо символы не являющиеся цифрами. Для пустой строки или <code>null</code> метод возвращает <code>true</code>.
+     */
+    public static boolean hasDigitsOnly(final CharSequence str) {
+        if (str==null)
+            return true;
+        final int length = str.length();
+        for (int i=length-1; i>=0; i--) {
+            if (!Character.isDigit(str.charAt(i)))
+                return false;
+        }
+        return true;
+    }
+
+    /**
      * Возвращает <code>true</code> если переданная в аргументе строка удовлетворяет требованиям предъявляемым
      * к идентификаторам в языке java.
      * @param str строка.
      * @return <code>true</code> если переданная в аргументе строка удовлетворяет требованиям предъявляемым
      * к идентификаторам в языке java.
      */
-    public static boolean isJavaIdentifier(final String str) {
-        if (str==null || str.isEmpty())
+    public static boolean isJavaIdentifier(final CharSequence str) {
+        if (str==null || str.length()==0)
             return false;
         if (!Character.isJavaIdentifierStart(str.charAt(0)))
             return false;
