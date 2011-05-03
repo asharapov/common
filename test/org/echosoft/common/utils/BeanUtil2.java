@@ -19,6 +19,7 @@ import org.echosoft.common.types.TypeRegistry;
 /**
  * Используется для динамического доступа к свойствам объектов.
  * @author Anton Sharapov
+ * @version 2.0
  */
 public class BeanUtil2 {
 

@@ -1,24 +1,24 @@
 package org.echosoft.common.collections;
 
-import java.util.Iterator;
 import java.util.NoSuchElementException;
 
-/** 
- * An {@link Iterator} over an array of objects.<br/>
- * This iterator does not support {@link #remove}, as the object array cannot be modified.
+/**
+ * Итератор с поддержкой упреждающего чтения поверх массива объектов.
+ * Данная реализация не поддерживает удаление элементов итераторов, соответственно метод {@link #remove()} всегда поднимает исключение.
  *
  * @author Anton Sharapov
  */
-public class ObjectArrayIterator<T> implements Iterator<T> {
+public class ObjectArrayIterator<T> implements ReadAheadIterator<T> {
 
     private final T[] array;
     private final int length;
     private int index;
 
     /**
-     * Constructs an ObjectArrayIterator that will iterate over the values in the specified array.
-     * @param array - the array to iterate over
-     * @throws NullPointerException if <code>array</code> is null.
+     * Создает новый экземпляр {@link ObjectArrayIterator} для итерирования по всем элементам массива переданного в аргументе метода.
+     *
+     * @param array массив объектов или примитивов для которых требуется создать итератор.
+     * @throws NullPointerException если <code>array</code> равен <code>null</code>.
      */
     public ObjectArrayIterator(T[] array) {
         this.array = array;
@@ -28,28 +28,37 @@ public class ObjectArrayIterator<T> implements Iterator<T> {
 
 
     /**
-     * Returns true if there are more elements to return from the array.
+     * {@inheritDoc}
      */
     public boolean hasNext() {
         return index < length;
     }
 
     /**
-     * Returns the next element in the array.
-     * @return the next element in the array
-     * @throws NoSuchElementException if all the elements in the array have already been returned
+     * {@inheritDoc}
      */
     public T next() {
-        if (index>=length)
+        if (index >= length)
             throw new NoSuchElementException();
         return array[index++];
     }
 
     /**
-     * Throws {@link UnsupportedOperationException}.
-     * @throws UnsupportedOperationException always
+     * В данной реализации метод всегда бросает исключение {@link UnsupportedOperationException}.
+     *
+     * @throws UnsupportedOperationException при каждом вызове метода
      */
     public void remove() {
         throw new UnsupportedOperationException("remove() method is not supported for an ObjectArrayIterator");
     }
+
+    /**
+     * {@inheritDoc}
+     */
+    public T readAhead() {
+        if (index >= length)
+            throw new NoSuchElementException();
+        return array[index];
+    }
+
 }

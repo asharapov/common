@@ -52,6 +52,42 @@ public class StringUtilTest {
     }
 
     @Test
+    public void testGetHead() throws Exception {
+        final String[][] tests = {
+                {null, null},
+                {"", ""},
+                {" ", ""},
+                {"asd", "asd"},
+                {"asd fgh", "asd"},
+                {"asd fgh jkl", "asd"},
+                {"asd ", "asd"},
+                {"asd  ", "asd"}
+        };
+        final char separator = ' ';
+        for (String[] test : tests) {
+            Assert.assertEquals(test[1], StringUtil.getHead(test[0],separator));
+        }
+    }
+
+    @Test
+    public void testGetTail() throws Exception {
+        final String[][] tests = {
+                {null, null},
+                {"", null},
+                {" ", ""},
+                {"asd", null},
+                {"asd fgh", "fgh"},
+                {"asd fgh jkl", "fgh jkl"},
+                {"asd ", ""},
+                {"asd  ", " "}
+        };
+        final char separator = ' ';
+        for (String[] test : tests) {
+            Assert.assertEquals(test[1], StringUtil.getTail(test[0],separator));
+        }
+    }
+
+    @Test
     public void testParseDate() throws Exception {
         final SimpleDateFormat formatter = new SimpleDateFormat("dd.MM.yyyy");
         Assert.assertNull( StringUtil.parseDate(null) );

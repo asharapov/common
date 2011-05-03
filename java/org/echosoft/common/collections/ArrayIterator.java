@@ -1,30 +1,28 @@
 package org.echosoft.common.collections;
 
 import java.lang.reflect.Array;
-import java.util.Iterator;
 import java.util.NoSuchElementException;
 
-/** 
- * Implements an {@link Iterator} over any array.<br/>
- * The array can be either an array of object or of primitives. If you know  that you have an object array, the
- * {@link ObjectArrayIterator} class is a better choice, as it will perform better.
- * 
+/**
+ * Простая реализация итератора поверх массива объектов или примитивов.
+ * Если заведомо известно что имеется массив объектов, то предпочтительнее использовать класс {@link ObjectArrayIterator} по соображениям производительности.
+ * Данная реализация не поддерживает удаление элементов итераторов, соответственно метод {@link #remove()} всегда поднимает исключение.
+ *
  * @author Anton Sharapov
  */
-public class ArrayIterator implements Iterator {
+public class ArrayIterator implements ReadAheadIterator {
 
     private final Object array;
-	private final int length;
-	private int index;
-    
-   
+    private final int length;
+    private int index;
+
+
     /**
-     * Constructs an ArrayIterator that will iterate over the values in the
-     * specified array.
+     * Создает новый экземпляр {@link ArrayIterator} для итерирования по всем элементам массива переданного в аргументе метода.
      *
-     * @param array the array to iterate over.
-     * @throws IllegalArgumentException if <code>array</code> is not an array.
-     * @throws NullPointerException if <code>array</code> is <code>null</code>
+     * @param array массив объектов или примитивов для которых требуется создать итератор.
+     * @throws IllegalArgumentException если <code>array</code> не является массивом.
+     * @throws NullPointerException     если <code>array</code> равен <code>null</code>.
      */
     public ArrayIterator(final Object array) {
         this.array = array;
@@ -33,9 +31,8 @@ public class ArrayIterator implements Iterator {
     }
 
 
-
     /**
-     * Returns true if there are more elements to return from the array.
+     * {@inheritDoc}
      */
     public boolean hasNext() {
         return index < length;
@@ -43,22 +40,30 @@ public class ArrayIterator implements Iterator {
 
 
     /**
-     * Returns the next element in the array.
-     * @throws NoSuchElementException if all the elements in the array have already been returned.
+     * {@inheritDoc}
      */
     public Object next() {
-        if (index>=length)
+        if (index >= length)
             throw new NoSuchElementException();
         return Array.get(array, index++);
     }
 
 
     /**
-     * Throws {@link UnsupportedOperationException}.
-     * @throws UnsupportedOperationException always
+     * В данной реализации метод всегда бросает исключение {@link UnsupportedOperationException}.
+     *
+     * @throws UnsupportedOperationException при каждом вызове метода
      */
     public void remove() {
         throw new UnsupportedOperationException("remove() method is not supported");
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    public Object readAhead() {
+        if (index >= length)
+            throw new NoSuchElementException();
+        return Array.get(array, index);
+    }
 }
