@@ -67,13 +67,13 @@ public class Options implements Serializable {
     /**
      * Регистрирует новую опцию в коллекции.
      * @param option  описание новой опции.
-     * @throws CLParserException  поднимается в случае когда опция с таким кратким или полным именем уже зарегистрирована в коллекции.
+     * @throws IllegalArgumentException  поднимается в случае когда опция с таким кратким или полным именем уже зарегистрирована в коллекции.
      */
-    public void addOption( final Option option ) throws CLParserException {
+    public void addOption( final Option option ) {
         if (option.getShortName()!=null && index.containsKey(option.getShortName().toString()))
-            throw new CLParserException("Option '"+option.getShortName()+"' already registered in the collection");
+            throw new IllegalArgumentException("Option '"+option.getShortName()+"' already registered in the collection");
         if (option.getFullName()!=null && index.containsKey(option.getFullName()))
-            throw new CLParserException("Option '"+option.getFullName()+"' already registered in the collection");
+            throw new IllegalArgumentException("Option '"+option.getFullName()+"' already registered in the collection");
         options.add( option );
         if (option.getShortName()!=null)
             index.put(option.getShortName().toString(), option);

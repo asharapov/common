@@ -1,7 +1,9 @@
 package org.echosoft.common.cli.parser;
 
 import java.io.Serializable;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -9,6 +11,7 @@ import java.util.Set;
 
 /**
  * Содержит результат разбора аргументов командной строки.
+ *
  * @author Anton Sharapov
  */
 public class CommandLine implements Serializable {
@@ -25,14 +28,16 @@ public class CommandLine implements Serializable {
 
     /**
      * Если <code>true</code> то сигнализирует о наличии в командной строке нераспознанных в процессе парсинга токенов.
+     *
      * @return <code>true</code> при наличии в командной строке нераспознанных токенов.
      */
     public boolean hasUnresolvedArgs() {
-        return unresolvedArgs.size()>0;
+        return unresolvedArgs.size() > 0;
     }
 
     /**
      * Возвращает неразобранную часть аргументов командной строки. Если таковая отсутствует, то метод вернет пустой список.
+     *
      * @return часть аргументов командной строки оставшихся неразобранными.
      */
     public String[] getUnresolvedArgs() {
@@ -41,7 +46,8 @@ public class CommandLine implements Serializable {
 
     /**
      * Возвращает множество всех опций которые были указаны в аргументах командной строки.
-     * @return  множество опций которые были указаны в аргументах командной строки.
+     *
+     * @return множество опций которые были указаны в аргументах командной строки.
      */
     public Set<Option> getOptions() {
         return values.keySet();
@@ -49,10 +55,11 @@ public class CommandLine implements Serializable {
 
     /**
      * Определяет была ли указана в аргументах командной строки указанная опция.
-     * @param option  опция.
+     *
+     * @param option опция.
      * @return <code>true</code> если указанная опция была указана в аргументах командной строки.
-     * @throws UnknownOptionException  поднимается в случае когда указанная в аргументе опция не была предварительно задекларирована в списке допустимых,
-     *    т.е. данная опция отсутствовала в списке опций, переданных парсеру командной строки.
+     * @throws UnknownOptionException поднимается в случае когда указанная в аргументе опция не была предварительно задекларирована в списке допустимых,
+     *                                т.е. данная опция отсутствовала в списке опций, переданных парсеру командной строки.
      */
     public boolean hasOption(final Option option) throws CLParserException {
         if (!options.hasOption(option))
@@ -62,60 +69,138 @@ public class CommandLine implements Serializable {
 
     /**
      * Возвращает <code>true</code> если опция с указанным именем присутствует в командной строке.
-     * @param optionName  краткое либо полное название опции.
+     *
+     * @param optionName краткое либо полное название опции.
      * @return <code>true</code> если указанная опция присутствует в командной строке.
-     * @throws UnknownOptionException  поднимается в случае когда указанная в аргументе опция не была предварительно задекларирована в списке допустимых,
-     *    т.е. данная опция отсутствовала в списке опций, переданных парсеру командной строки.
+     * @throws UnknownOptionException поднимается в случае когда указанная в аргументе опция не была предварительно задекларирована в списке допустимых,
+     *                                т.е. данная опция отсутствовала в списке опций, переданных парсеру командной строки.
      */
     public boolean hasOption(final String optionName) throws CLParserException {
         final Option opt = options.getOption(optionName);
-        if (opt==null)
+        if (opt == null)
             throw new UnknownOptionException(optionName);
         return values.containsKey(opt);
     }
 
     /**
      * Возвращает значение опции если она присутствует в разобранной командной строке.
-     * @param option  опция чье значение требуется возвратить.
-     * @param defaultValue  значение по умолчанию, возвращается данным методом если указанная опция отсутствовала в разобранной командной строке.
+     *
+     * @param option       опция чье значение требуется возвратить.
+     * @param defaultValue значение по умолчанию, возвращается данным методом если указанная опция отсутствовала в разобранной командной строке.
      * @return значение указанной опции в командной строке либо значение по умолчанию если указанная опция в командной строке не присутствовала.
-     * @throws UnknownOptionException  поднимается в случае когда указанная в аргументе опция не была предварительно задекларирована в списке допустимых,
-     *    т.е. данная опция отсутствовала в списке опций, переданных парсеру командной строки.
+     * @throws UnknownOptionException поднимается в случае когда указанная в аргументе опция не была предварительно задекларирована в списке допустимых,
+     *                                т.е. данная опция отсутствовала в списке опций, переданных парсеру командной строки.
      */
     public String getOptionValue(final Option option, final String defaultValue) throws CLParserException {
         if (!options.hasOption(option))
             throw new UnknownOptionException(option);
         final String result = values.get(option);
-        return result!=null ? result : defaultValue;
+        return result != null ? result : defaultValue;
     }
 
     /**
      * Возвращает значение опции если она присутствует в разобранной командной строке.
-     * @param optionName  краткое либо полное название опции чье значение в командной строке требуется возвратить.
-     * @param defaultValue  значение по умолчанию, возвращается данным методом если указанная опция отсутствовала в разобранной командной строке.
+     *
+     * @param optionName   краткое либо полное название опции чье значение в командной строке требуется возвратить.
+     * @param defaultValue значение по умолчанию, возвращается данным методом если указанная опция отсутствовала в разобранной командной строке.
      * @return значение указанной опции в командной строке либо значение по умолчанию если указанная опция в командной строке не присутствовала.
-     * @throws UnknownOptionException  поднимается в случае когда указанная в аргументе опция не была предварительно задекларирована в списке допустимых,
-     *    т.е. данная опция отсутствовала в списке опций, переданных парсеру командной строки.
+     * @throws UnknownOptionException поднимается в случае когда указанная в аргументе опция не была предварительно задекларирована в списке допустимых,
+     *                                т.е. данная опция отсутствовала в списке опций, переданных парсеру командной строки.
      */
     public String getOptionValue(final String optionName, final String defaultValue) throws CLParserException {
         final Option opt = options.getOption(optionName);
-        if (opt==null)
+        if (opt == null)
             throw new UnknownOptionException(optionName);
         final String result = values.get(opt);
-        return result!=null ? result : defaultValue;
+        return result != null ? result : defaultValue;
+    }
+
+    /**
+     * Возвращает значение опции в виде целого числа.
+     *
+     * @param optionName   краткое либо полное название опции чье значение в командной строке требуется возвратить.
+     * @param defaultValue значение по умолчанию, возвращается данным методом если указанная опция отсутствовала в разобранной командной строке.
+     * @return значение указанной опции в командной строке либо значение по умолчанию если указанная опция в командной строке не присутствовала.
+     * @throws UnknownOptionException поднимается в случае когда указанная в аргументе опция не была предварительно задекларирована в списке допустимых,
+     *                                т.е. данная опция отсутствовала в списке опций, переданных парсеру командной строки.
+     * @throws CLParserException      поднимается в случае ошибок конвертации строки со значением опции в целое число.
+     */
+    public Integer getOptionIntValue(final String optionName, final Integer defaultValue) throws CLParserException {
+        final Option opt = options.getOption(optionName);
+        if (opt == null)
+            throw new UnknownOptionException(optionName);
+        final String result = values.get(opt);
+        if (result != null) {
+            try {
+                return Integer.parseInt(result);
+            } catch (NumberFormatException e) {
+                throw new CLParserException(e.getMessage(), e);
+            }
+        } else
+            return defaultValue;
+    }
+
+    /**
+     * Возвращает значение опции в виде числа с плавающей запятой.
+     *
+     * @param optionName   краткое либо полное название опции чье значение в командной строке требуется возвратить.
+     * @param defaultValue значение по умолчанию, возвращается данным методом если указанная опция отсутствовала в разобранной командной строке.
+     * @return значение указанной опции в командной строке либо значение по умолчанию если указанная опция в командной строке не присутствовала.
+     * @throws UnknownOptionException поднимается в случае когда указанная в аргументе опция не была предварительно задекларирована в списке допустимых,
+     *                                т.е. данная опция отсутствовала в списке опций, переданных парсеру командной строки.
+     * @throws CLParserException      поднимается в случае ошибок конвертации строки со значением опции в число.
+     */
+    public Double getOptionDoubleValue(final String optionName, final Double defaultValue) throws CLParserException {
+        final Option opt = options.getOption(optionName);
+        if (opt == null)
+            throw new UnknownOptionException(optionName);
+        final String result = values.get(opt);
+        if (result != null) {
+            try {
+                return Double.parseDouble(result);
+            } catch (NumberFormatException e) {
+                throw new CLParserException(e.getMessage(), e);
+            }
+        } else
+            return defaultValue;
+    }
+
+    /**
+     * Возвращает значение опции в виде даты определенного формата.
+     *
+     * @param optionName   краткое либо полное название опции чье значение в командной строке требуется возвратить.
+     * @param dateFormat   формат даты. Значение по умолчанию: <code>dd.MM.yyyy</code>.
+     * @param defaultValue значение по умолчанию, возвращается данным методом если указанная опция отсутствовала в разобранной командной строке.
+     * @return значение указанной опции в командной строке либо значение по умолчанию если указанная опция в командной строке не присутствовала.
+     * @throws UnknownOptionException поднимается в случае когда указанная в аргументе опция не была предварительно задекларирована в списке допустимых,
+     *                                т.е. данная опция отсутствовала в списке опций, переданных парсеру командной строки.
+     * @throws CLParserException      поднимается в случае ошибок конвертации строки в дату указанного формата
+     */
+    public Date getOptionDateValue(final String optionName, final String dateFormat, final Date defaultValue) throws CLParserException {
+        final Option opt = options.getOption(optionName);
+        if (opt == null)
+            throw new UnknownOptionException(optionName);
+        final String result = values.get(opt);
+        if (result != null) {
+            try {
+                final SimpleDateFormat formatter = new SimpleDateFormat(dateFormat != null ? dateFormat : "dd.MM.yyyy");
+                return formatter.parse(dateFormat);
+            } catch (Exception e) {
+                throw new CLParserException(e.getMessage(), e);
+            }
+        } else
+            return defaultValue;
     }
 
 
-
     void addUnresolvedArg(final String token) {
-        if (token!=null && !token.isEmpty())
-            unresolvedArgs.add( token );
+        if (token != null && !token.isEmpty())
+            unresolvedArgs.add(token);
     }
 
     void setOptionValue(final Option option, final String value) throws CLParserException {
         if (!options.hasOption(option))
             throw new UnknownOptionException(option);
-
         values.put(option, value);
     }
 

@@ -20,17 +20,21 @@ public class Option implements Serializable, Cloneable {
     private String argName;
     private String description;
 
-    public Option(final Character shortName, final String fullName, final boolean hasArgs, final String description) {
-        this(shortName, fullName, false, hasArgs, hasArgs, description);
+    public Option(final Character shortName, final String fullName, final String description) {
+        this(shortName, fullName, false, false, false, null, description);
     }
 
-    public Option(final Character shortName, final String fullName, boolean required, boolean hasArgs, boolean requiredArgs, String description) throws IllegalArgumentException {
+    public Option(final Character shortName, final String fullName, final boolean required, final String argName, final String description) {
+        this(shortName, fullName, required, argName!=null && !argName.trim().isEmpty(), true, argName, description);
+    }
+
+    public Option(final Character shortName, final String fullName, final boolean required, final boolean hasArgs, final boolean argsRequired, final String argName, final String description) {
         this.shortName = shortName;
         this.fullName = StringUtil.trim(fullName);
         this.required = required;
         this.hasArgs = hasArgs;
-        this.required = requiredArgs;
-        this.argName = DEFAULT_ARG_NAME;
+        this.argsRequired = argsRequired;
+        this.argName = argName!=null && !argName.trim().isEmpty() ? argName.trim() : DEFAULT_ARG_NAME;
         this.description = StringUtil.trim(description);
         if (this.shortName==null && this.fullName==null)
             throw new IllegalArgumentException("Option names not specified");
@@ -104,7 +108,7 @@ public class Option implements Serializable, Cloneable {
         return argName;
     }
     public Option setArgName(final String argName) {
-        this.argName = argName!=null ?argName.trim() : DEFAULT_ARG_NAME;
+        this.argName = argName!=null && !argName.trim().isEmpty() ? argName.trim() : DEFAULT_ARG_NAME;
         return this;
     }
 
