@@ -1,6 +1,7 @@
 package org.echosoft.common.cli.parser;
 
 import java.io.Serializable;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -169,27 +170,40 @@ public class CommandLine implements Serializable {
      * Возвращает значение опции в виде даты определенного формата.
      *
      * @param optionName   краткое либо полное название опции чье значение в командной строке требуется возвратить.
-     * @param dateFormat   формат даты. Значение по умолчанию: <code>dd.MM.yyyy</code>.
      * @param defaultValue значение по умолчанию, возвращается данным методом если указанная опция отсутствовала в разобранной командной строке.
+     * @param patterns   массив допустимых форматов даты. Если ни один из форматов не указан по умолчанию используется: <code>dd.MM.yyyy</code>.
      * @return значение указанной опции в командной строке либо значение по умолчанию если указанная опция в командной строке не присутствовала.
      * @throws UnknownOptionException поднимается в случае когда указанная в аргументе опция не была предварительно задекларирована в списке допустимых,
      *                                т.е. данная опция отсутствовала в списке опций, переданных парсеру командной строки.
      * @throws CLParserException      поднимается в случае ошибок конвертации строки в дату указанного формата
      */
-    public Date getOptionDateValue(final String optionName, final String dateFormat, final Date defaultValue) throws CLParserException {
+    public Date getOptionDateValue(final String optionName, final Date defaultValue, String... patterns) throws CLParserException {
         final Option opt = options.getOption(optionName);
         if (opt == null)
             throw new UnknownOptionException(optionName);
         final String result = values.get(opt);
         if (result != null) {
             try {
-                final SimpleDateFormat formatter = new SimpleDateFormat(dateFormat != null ? dateFormat : "dd.MM.yyyy");
-                return formatter.parse(dateFormat);
+                if (patterns.length==0)
+                    patterns = new String[]{"dd.MM.yyyy"};
+                Throwable lastCause = null;
+                for (String pattern : patterns ) {
+                    final SimpleDateFormat formatter = new SimpleDateFormat(pattern);
+                    try {
+                        return formatter.parse(result);
+                    } catch (ParseException e) {
+                        lastCause = e;
+                    }
+                }
+                if (lastCause!=null)
+                    throw new CLParserException(lastCause.getMessage(), lastCause);
+            } catch (CLParserException e) {
+                throw e;
             } catch (Exception e) {
                 throw new CLParserException(e.getMessage(), e);
             }
-        } else
-            return defaultValue;
+        }
+        return defaultValue;
     }
 
 

@@ -10,6 +10,10 @@ import org.echosoft.common.utils.StringUtil;
 public class CLPrintUtils {
 
     public static void printHelp(final Options options, final PrintStream out) {
+        printHelp(options, out, 0);
+    }
+
+    public static void printHelp(final Options options, final PrintStream out, int width) {
         final String prefix = "  ";
         final String CRLF = "\n";
         final StringBuilder buf = new StringBuilder(4096);
@@ -18,48 +22,56 @@ public class CLPrintUtils {
         final int prefixLength = prefix.length();
         int maxSize = prefixLength;
         for (Option opt : options.getOptions()) {
-            if (opt.getShortName()!=null) {
-                int size = prefixLength + 3;
-                if (opt.hasArgs()) {
-                    size += 6 + opt.getArgName().length();
-                }
-                maxSize = Math.max(maxSize, size);
-            }
+            int size = prefixLength + 4;
             if (opt.getFullName()!=null) {
-                int size = prefixLength + 2 + opt.getFullName().length();
-                if (opt.hasArgs()) {
-                    size += 6 + opt.getArgName().length();
-                }
-                maxSize = Math.max(maxSize, size);
+                size += 2 + opt.getFullName().length();
             }
+            if (opt.hasArgs()) {
+                size += 5 + opt.getArgName().length();
+            }
+            size++;
+            maxSize = Math.max(maxSize, size);
         }
 
         // начинаем отрисовку описания опций ...
         for (Option opt : options.getOptions()) {
+            final StringBuilder ob = new StringBuilder(maxSize);
+            ob.append(prefix);
             if (opt.getShortName()!=null) {
-                buf.append(prefix).append(" -").append(opt.getShortName());
-                if (opt.hasArgs() && opt.getFullName()==null) {
-                    buf.append(" = <").append(opt.getArgName()).append("> ");
-                } else {
-                    buf.append(CRLF);
+                ob.append('-').append(opt.getShortName());
+                if (opt.getFullName()!=null) {
+                    ob.append(", ");
                 }
+            } else {
+                ob.append("    ");
             }
             if (opt.getFullName()!=null) {
-                buf.append(prefix).append("--").append(opt.getFullName());
-                if (opt.hasArgs()) {
-                    buf.append(" = <").append(opt.getArgName()).append("> ");
-                }
+                ob.append("--").append(opt.getFullName());
             }
+            if (opt.hasArgs()) {
+                ob.append(" = <").append(opt.getArgName()).append(">");
+            }
+            ob.append(' ');
 
-            final int d1 = buf.lastIndexOf("\n");
-            final int len1 = d1>=0
-                    ? maxSize - buf.toString().length() + d1 + 1
-                    : maxSize - buf.toString().length() + 1;
-            buf.append( StringUtil.leadRight("", ' ', len1) );
+            while (ob.length()<maxSize)
+                ob.append(' ');
 
-            if (opt.getDescription()!=null)
-                buf.append(' ').append(opt.getDescription());
-            buf.append(CRLF);
+            if (opt.getDescription()!=null) {
+                width = width>maxSize ? width : Integer.MAX_VALUE;
+                for (int i=0,l=opt.getDescription().length(); i<l; ) {
+                    if (i>0) {
+                        for (int j=0; j<maxSize; j++)
+                            ob.append(' ');
+                    }
+                    final int end = i + width - maxSize;
+                    ob.append( end < l ? opt.getDescription().substring(i, end) : opt.getDescription().substring(i));
+                    ob.append(CRLF);
+                    i = end;
+                }
+            } else {
+                ob.append(CRLF);
+            }
+            buf.append(ob);
         }
 
         out.append(buf);

@@ -37,7 +37,7 @@ public class CLParser {
             final String token = it.next();
 
             if (!token.startsWith("-") || "-".equals(token)) {
-                processUnknownToken(cmd, token);
+                processUnknownToken(cmd, token, it);
                 continue;
             }
             if ("--".equals(token)) {
@@ -53,7 +53,7 @@ public class CLParser {
                 final Option opt = options.getOption( eqp>=0 ? token.substring(2,eqp) : token.substring(2) );
                 final String value = eqp>=0 ? token.substring(eqp+1) : null;
                 if (opt==null) {
-                    processUnknownToken(cmd, token);
+                    processUnknownToken(cmd, token, it);
                 } else
                 if (value!=null) {
                     cmd.setOptionValue(opt, value);
@@ -69,7 +69,7 @@ public class CLParser {
                 for (int i = 1; i < token.length(); i++) {
                     final Option opt = options.getOption(token.charAt(i));
                     if (opt == null) {
-                        processUnknownToken(cmd, token);
+                        processUnknownToken(cmd, '-' + token.substring(i), it);
                     } else
                     if (opt.isArgsRequired()) {
                         throw new MissingArgumentException(token.charAt(i));
@@ -81,7 +81,7 @@ public class CLParser {
                 // обрабатываем вариант -a
                 final Option opt = options.getOption(token.charAt(1));
                 if (opt == null) {
-                    processUnknownToken(cmd, token);
+                    processUnknownToken(cmd, token, it);
                 } else
                 if (opt.hasArgs()) {
                     processOptionValue(cmd, opt, it);
@@ -117,11 +117,14 @@ public class CLParser {
         }
     }
 
-    protected void processUnknownToken(final CommandLine cmd, final String token) throws CLParserException {
+    protected void processUnknownToken(final CommandLine cmd, final String token, final ReadAheadIterator<String> it) throws CLParserException {
         if (stopAtNonOption) {
             throw new UnknownOptionException(token);
         } else {
             cmd.addUnresolvedArg(token);
+            while (it.hasNext()) {
+                cmd.addUnresolvedArg(it.next());
+            }
         }
     }
 
