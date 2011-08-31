@@ -14,10 +14,12 @@ public class TableModel implements Serializable {
 
     private final List<Column> columns;
     private boolean headersVisible;
+    private NewLineFormat nlf;
 
     public TableModel() {
         this.columns = new ArrayList<Column>();
         this.headersVisible = true;
+        this.nlf = NewLineFormat.UNIX;
     }
 
     public boolean isHeadersVisible() {
@@ -25,6 +27,13 @@ public class TableModel implements Serializable {
     }
     public void setHeadersVisible(final boolean headersVisible) {
         this.headersVisible = headersVisible;
+    }
+
+    public NewLineFormat getNewLineFormat() {
+        return nlf;
+    }
+    public void setNewLineFormat(final NewLineFormat nlf) {
+        this.nlf = nlf!=null ? nlf : NewLineFormat.UNIX;
     }
 
     public List<Column> getColumns() {
@@ -140,5 +149,20 @@ public class TableModel implements Serializable {
 
     public static enum Alignment {
         LEFT, CENTER, RIGHT
+    }
+
+    public static enum NewLineFormat {
+        DOS(new char[]{'\r', '\n'}),
+        UNIX(new char[]{'\n'});
+
+        private final char[] chars;
+
+        private NewLineFormat(final char[] newline) {
+            this.chars = newline;
+        }
+
+        public char[] getChars() {
+            return chars;
+        }
     }
 }

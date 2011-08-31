@@ -12,14 +12,13 @@ import org.echosoft.common.utils.ObjectUtil;
  */
 public class TableProcessor {
 
-    private static final char[] CRLF = new char[]{'\n'};
-
     public static String render(final TableModel model, final Object data) throws InvocationTargetException, NoSuchMethodException, IllegalAccessException {
         final int widths[] = calculateColumnWidths(model, data);
         int totalWidth = 1 + widths.length;
         for (int width : widths) totalWidth += width;
 
         final StringBuilder out = new StringBuilder(4096);
+        final char[] CRLF = model.getNewLineFormat().getChars();
         if (model.isHeadersVisible()) {
             // Отрисовка заголовка таблицы ...
             fill(out, '-', totalWidth);

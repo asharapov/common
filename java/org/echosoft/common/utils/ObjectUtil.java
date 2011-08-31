@@ -193,6 +193,27 @@ public class ObjectUtil {
         }
     }
 
+    /**
+     * Сравнивает два объекта, реализующих интерфейс Comparable, каждый из которых может быть <code>null</code>.
+     * @param obj1  первый объект для сравнения.
+     * @param obj2  второй объект для сравнения.
+     * @param nullsFirst <code>true</code> - соответствует режиму сортировки при котором значения <code>null</code> идут в начале списка.
+     *      <code>false</code> - соответствует режиму при котором значения <code>null</code> идут в конце списка.
+     * @return
+     *  <ul>
+     *   <li> <code>-1</code>  если первый объект меньше второго или только первый объект равен <code>null</code>.
+     *   <li> <code>0</code>  если оба объекта одинаковы или оба равны <code>null</code>.
+     *   <li> <code>1</code>  если первый объект больше второго или только второй объект равен <code>null</code>.
+     *  </ul>
+     */
+    public static <T> int compareNullableObjects(final Comparable<T> obj1, final T obj2, final boolean nullsFirst) {
+        final int factor = nullsFirst ? 1 : -1;
+        if (obj1==null) {
+            return obj2==null ? 0 : -1 * factor;
+        } else {
+            return obj2==null ? factor : obj1.compareTo(obj2);
+        }
+    }
 
     /**
      * Формирует строковое представление переданного в аргументе массива байт, где каждый байт представлен в шестнадцатиричном формате,
