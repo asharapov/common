@@ -11,16 +11,16 @@ public interface BeanLoader<T> {
     /**
      * Returns name of the sql query field for specified property name of the bean.
      * This method may be used for making sql queries.
-     * @param fieldName name of the bean's attribute
+     * @param attrName name of the bean's attribute
      * @return name of the sql query field
      */
-    public String getMappedField(String fieldName);
+    public String getMappedField(String attrName);
 
     /**
      * Returns fields metadata for the specified bean class and sql result set.
      * @return fields metadata for the specified bean class and sql result set.
      */
-    public FieldMetaData[] getMetadata();
+    public AttrMetaData[] getMetadata();
 
     /**
      * Makes and populates new instance of bean from result set.

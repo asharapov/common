@@ -29,24 +29,24 @@ public class StringUtilTest {
 
     @Test
     public void testLeadRight() throws Exception {
-        Assert.assertEquals("", StringUtil.leadRight("",' ', 0));
-        Assert.assertEquals("", StringUtil.leadRight(null,' ', 0));
-        Assert.assertEquals("abc", StringUtil.leadRight("abc",' ', 2));
-        Assert.assertEquals("abc", StringUtil.leadRight("abc",' ', 3));
-        Assert.assertEquals("abc ", StringUtil.leadRight("abc",' ', 4));
-        Assert.assertEquals("ab  ", StringUtil.leadRight("ab",' ', 4));
-        Assert.assertEquals("a   ", StringUtil.leadRight("a",' ', 4));
-        Assert.assertEquals("    ", StringUtil.leadRight("",' ', 4));
-        Assert.assertEquals("    ", StringUtil.leadRight(null,' ', 4));
+        Assert.assertEquals("", StringUtil.leadRight("", ' ', 0));
+        Assert.assertEquals("", StringUtil.leadRight(null, ' ', 0));
+        Assert.assertEquals("abc", StringUtil.leadRight("abc", ' ', 2));
+        Assert.assertEquals("abc", StringUtil.leadRight("abc", ' ', 3));
+        Assert.assertEquals("abc ", StringUtil.leadRight("abc", ' ', 4));
+        Assert.assertEquals("ab  ", StringUtil.leadRight("ab", ' ', 4));
+        Assert.assertEquals("a   ", StringUtil.leadRight("a", ' ', 4));
+        Assert.assertEquals("    ", StringUtil.leadRight("", ' ', 4));
+        Assert.assertEquals("    ", StringUtil.leadRight(null, ' ', 4));
     }
 
     @Test
     public void testIndexOf() throws Exception {
         final String text = "abcdefgh";
-        Assert.assertEquals(0, StringUtil.indexOf(text, 0, 'b','a'));
-        Assert.assertEquals(1, StringUtil.indexOf(text, 1, 'b','a'));
-        Assert.assertEquals(-1, StringUtil.indexOf(text, 2, 'b','a'));
-        Assert.assertEquals(3, StringUtil.indexOf(text, 0, 'd','h'));
+        Assert.assertEquals(0, StringUtil.indexOf(text, 0, 'b', 'a'));
+        Assert.assertEquals(1, StringUtil.indexOf(text, 1, 'b', 'a'));
+        Assert.assertEquals(-1, StringUtil.indexOf(text, 2, 'b', 'a'));
+        Assert.assertEquals(3, StringUtil.indexOf(text, 0, 'd', 'h'));
         Assert.assertEquals(-1, StringUtil.indexOf(text, 0));
         Assert.assertEquals(-1, StringUtil.indexOf(text, 0));
     }
@@ -83,7 +83,7 @@ public class StringUtilTest {
         };
         final char separator = ' ';
         for (String[] test : tests) {
-            Assert.assertEquals(test[1], StringUtil.getTail(test[0],separator));
+            Assert.assertEquals(test[1], StringUtil.getTail(test[0], separator));
         }
     }
 
@@ -169,6 +169,69 @@ public class StringUtilTest {
             try {
                 final Date date = formatter.parse(txt);
                 System.err.println("WARN: potentially correct pattern ("+formatter.toPattern()+") failed: "+txt+"  -->  "+StringUtil.formatDateTime2(date));
+            } catch (ParseException e) {
+            }
+        }
+    }
+
+    @Test
+    public void testParseISODate() throws Exception {
+        final SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
+        Assert.assertNull( StringUtil.parseDate(null) );
+        Assert.assertNull( StringUtil.parseDate("") );
+        final String[] validTestCases = {"2010-02-01", "1976-12-30", "2009-12-31xxxx"};
+        for (String txt : validTestCases) {
+            final Date date = StringUtil.parseISODate(txt);
+            Assert.assertNotNull(date);
+            Assert.assertEquals(txt.substring(0,10), StringUtil.formatISODate(date));
+            Assert.assertEquals(date, formatter.parse(txt));
+        }
+        final String[] invalidTestCases = {"2009", "2009-12-", "2009-12", "2009", "-12.30", "2009--30", "xxxx-12-30", "2009-xx-30", "2009-12-xx"};
+        for (String txt : invalidTestCases) {
+            try {
+                StringUtil.parseISODate(txt);
+                Assert.fail("incorrect pattern parsed: "+txt);
+            } catch (ParseException e) {
+            }
+            try {
+                final Date date = formatter.parse(txt);
+                System.err.println("WARN: potentially correct pattern ("+formatter.toPattern()+") failed: "+txt+"  -->  "+StringUtil.formatISODate(date));
+            } catch (ParseException e) {
+            }
+        }
+    }
+
+    @Test
+    public void testParseISODateTime() throws Exception {
+        final SimpleDateFormat formatter1 = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
+        Assert.assertNull( StringUtil.parseDate(null) );
+        Assert.assertNull( StringUtil.parseDate("") );
+        final String[] validTestCases1 = {"2010-02-01T21:00:00", "2010-12-31T23:59:59", "2011-12-31T00:00:00", "2009-12-31T13:27:45xxxx"};
+        for (String txt : validTestCases1) {
+            final Date date = StringUtil.parseISODateTime(txt);
+            Assert.assertNotNull(date);
+            Assert.assertEquals(txt.substring(0,19), StringUtil.formatISODateTime(date));
+            Assert.assertEquals(date, formatter1.parse(txt));
+        }
+        final SimpleDateFormat formatter2 = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        final String[] validTestCases2 = {"2010-02-01 21:00:00", "2010-12-31 23:59:59", "2011-12-31 00:00:00", "2009-12-31 13:27:45xxxx"};
+        for (String txt : validTestCases2) {
+            final Date date = StringUtil.parseISODateTime(txt);
+            Assert.assertNotNull(date);
+            Assert.assertEquals(txt.substring(0,19), StringUtil.formatISODateTime(date).replace('T',' '));
+            Assert.assertEquals(date, formatter2.parse(txt));
+        }
+        final String[] invalidTestCases = {"2009", "2009-12-", "2009-12", "2009", "-12.30", "2009--30", "xxxx-12-30", "2009-xx-30", "2009-12-xx",
+                                           "2011-10-10T12", "2011-10-10T12:", "2011-10-10-T12:12", "2011-10-10T:12:12:"};
+        for (String txt : invalidTestCases) {
+            try {
+                StringUtil.parseISODateTime(txt);
+                Assert.fail("incorrect pattern parsed: "+txt);
+            } catch (ParseException e) {
+            }
+            try {
+                final Date date = formatter1.parse(txt);
+                System.err.println("WARN: potentially correct pattern ("+formatter1.toPattern()+") failed: "+txt+"  -->  "+StringUtil.formatISODate(date));
             } catch (ParseException e) {
             }
         }

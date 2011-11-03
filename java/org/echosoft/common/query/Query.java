@@ -48,11 +48,11 @@ public final class Query implements Serializable, Cloneable {
      * @param query  query instance which will be encoded to string
      * @return serialized form of query
      */
-    public static String serialize(Query query) {
+    public static String serialize(final Query query) {
         return serialize(query, false);
     }
 
-    public static String serialize(Query query, boolean archive) {
+    public static String serialize(final Query query, final boolean archive) {
         if (query==null)
             return null;
         try {
@@ -173,7 +173,7 @@ public final class Query implements Serializable, Cloneable {
      * @param pageNo  current page number
      * @param pageSize  page size. If size lesser than 1 then no paging will be applied.
      */
-    public Query(int pageNo, int pageSize) {
+    public Query(final int pageNo, final int pageSize) {
         this.constraints = new ArrayList<QueryConstraint>(2);
         this.sortCriteria = new SortCriteria();
         this.params = EMPTY_PARAMS;
@@ -190,7 +190,7 @@ public final class Query implements Serializable, Cloneable {
     public int getPageNumber() {
         return pageNo;
     }
-    public void setPageNumber(int pageNo) {
+    public void setPageNumber(final int pageNo) {
         this.pageNo = pageNo<0 ? 0 : pageNo;
     }
 
@@ -202,7 +202,7 @@ public final class Query implements Serializable, Cloneable {
     public int getPageSize() {
         return pageSize;
     }
-    public void setPageSize(int pageSize) {
+    public void setPageSize(final int pageSize) {
         this.pageSize = pageSize<0 ? 0 : pageSize;
     }
 
@@ -217,7 +217,7 @@ public final class Query implements Serializable, Cloneable {
     public int getEstimatedTotalSize() {
         return estimatedTotalSize;
     }
-    public void setEstimatedTotalSize(int estimatedTotalSize) {
+    public void setEstimatedTotalSize(final int estimatedTotalSize) {
         this.estimatedTotalSize = estimatedTotalSize;
     }
 
@@ -251,7 +251,7 @@ public final class Query implements Serializable, Cloneable {
      * Set anonymous parameters for given query
      * @param params  an array of parameters values.
      */
-    public void setParams(Object[] params) {
+    public void setParams(final Object[] params) {
         this.params = params == null ? EMPTY_PARAMS : params;
     }
 
@@ -259,7 +259,7 @@ public final class Query implements Serializable, Cloneable {
      * Append new anonymous parameter to query to end of parameters list.
      * @param param  new anonymous parameter.
      */
-    public void addParam(Object param) {
+    public void addParam(final Object param) {
         final Object newparams[] = new Object[params.length+1];
         System.arraycopy(params, 0, newparams, 0, params.length);
         newparams[params.length] = param;
@@ -342,7 +342,7 @@ public final class Query implements Serializable, Cloneable {
      * Add new constraint for something attribute of the entity.
      * @param constraint  constraint which will be added.
      */
-    public void addConstraint(QueryConstraint constraint) {
+    public void addConstraint(final QueryConstraint constraint) {
         if (!constraints.contains(constraint))
             constraints.add( constraint );
     }
@@ -351,7 +351,7 @@ public final class Query implements Serializable, Cloneable {
      * Removes all constraints for the specified attribute
      * @param attrName  name of the attribute
      */
-    public void removeConstraintsFor(String attrName) {
+    public void removeConstraintsFor(final String attrName) {
         for (int i=constraints.size()-1; i>=0; i--) {
             final QueryConstraint qc = constraints.get(i);
             if (qc.getAttrName().equals(attrName))
@@ -373,7 +373,7 @@ public final class Query implements Serializable, Cloneable {
      * @param defaultValue  method returns this value if no constraints will be finded for given attribute.
      * @return value of first constraint in list (for given attribute) or <code>defaultValue</code> if such constraints was not found.
      */
-    public Object getConstraintValue(String attrName, Object defaultValue) {
+    public Object getConstraintValue(final String attrName, final Object defaultValue) {
         final Iterator it = constraints(attrName);
         return it.hasNext() ? ((QueryConstraint)it.next()).getValue() : defaultValue;
     }
@@ -385,7 +385,7 @@ public final class Query implements Serializable, Cloneable {
      * @param defaultValue  method returns this value if no constraints will be finded for given attribute.
      * @return value of first constraint from list of removed or <code>defaultValue</code> if such constraints was not found.
      */
-    public Object removeConstraintValue(String attrName, Object defaultValue) {
+    public Object removeConstraintValue(final String attrName, final Object defaultValue) {
         final Iterator it = constraints(attrName);
         final Object result = it.hasNext() ? ((QueryConstraint)it.next()).getValue() : defaultValue;
         removeConstraintsFor(attrName);
@@ -394,6 +394,7 @@ public final class Query implements Serializable, Cloneable {
 
 
 
+    @Override
     public Object clone() {
         final Query result = new Query(pageNo, pageSize);
         result.setEstimatedTotalSize(estimatedTotalSize);
@@ -412,7 +413,7 @@ public final class Query implements Serializable, Cloneable {
         return result;
     }
 
-
+    @Override
     public int hashCode() {
         if (hashcode==0) {
             // we use local variable 'result' to prevent potential problems with concurent calls...
@@ -425,7 +426,8 @@ public final class Query implements Serializable, Cloneable {
         return hashcode;
     }
 
-    public boolean equals(Object obj) {
+    @Override
+    public boolean equals(final Object obj) {
         if (!(obj instanceof Query) || hashCode()!=obj.hashCode())
             return false;
         final Query other = (Query)obj;
@@ -437,6 +439,7 @@ public final class Query implements Serializable, Cloneable {
                namedParams.equals(other.namedParams);
     }
 
+    @Override
     public String toString() {
         final StringBuilder out = new StringBuilder(255);
         out.append(Integer.toString(pageNo));

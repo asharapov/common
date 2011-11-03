@@ -342,7 +342,7 @@ public class StringUtil {
 
     /**
      * Разбивает исходную строку на несколько подстрок трактуя указанный символ как разделитель.
-     * примеры использования метода когда в качестве подстроки используется символ '_' :
+     * Примеры использования метода когда в качестве подстроки используется символ '_' :
      * <ol>
      * <li> исходная строка <code>a_b_c</code> будет разбита на три подстроки: {"a", "b", "c"}.
      * <li> исходная строка <code>a_b_</code> будет разбита на две подстроки: {"a", "b"}.
@@ -369,6 +369,46 @@ public class StringUtil {
         }
         if (pos<length)
             buf.add( text.substring(pos, length) );
+        return buf.toArray(new String[buf.size()]);
+    }
+
+    /**
+     * Разбивает исходную строку на несколько подстрок трактуя указанный символ как разделитель.
+     * В полученных после разбиения подстроках удаляются концевые пробелы и если полученная подстрока будет не пустой то она будет включена в результат данной функции.
+     * Примеры использования метода когда в качестве подстроки используется символ '_' :
+     * <ol>
+     * <li> исходная строка <code>a_b_c</code> будет разбита на три подстроки: {"a", "b", "c"}.
+     * <li> исходная строка <code>a_b_</code> будет разбита на две подстроки: {"a", "b"}.
+     * <li> исходная строка <code>a__c</code> будет разбита на три подстроки: {"a", "c"}.
+     * <li> исходная строка <code>_ b _c</code> будет разбита на две подстроки: {"b", "c"}.
+     * <li> исходная строка <code>a</code> будет оставлена как есть: {"a"}.
+     * <li> исходная строка <code>__</code> будет представлена в виде пустого множества: {}.
+     * <li> исходная строка <code>  </code></code> будет представлена в виде пустого множества: {}.
+     * </ol>
+     * @param text  исходная строка.
+     * @param separator  символ используемый в качестве разделителя.
+     * @return  массив непустых строк полученных в результате разделения исходной строки на подстроки используя указанный символ-разделитель.
+     * Метод возвращает <code>null</code> если исходная строка равна <code>null</code>.
+     */
+    public static String[] splitIgnoringEmpty(final String text, final char separator) {
+        if (text==null)
+            return null;
+        final ArrayList<String> buf = new ArrayList<String>();
+        final int length = text.length();
+        int pos = 0;
+        for (int i=0; i<length; i++) {
+            if (text.charAt(i)==separator) {
+                final String token = text.substring(pos, i).trim();
+                if (!token.isEmpty())
+                    buf.add(token);
+                pos = i+1;
+            }
+        }
+        if (pos<length) {
+            final String token = text.substring(pos, length).trim();
+            if (!token.isEmpty())
+                buf.add(token);
+        }
         return buf.toArray(new String[buf.size()]);
     }
 
@@ -1008,6 +1048,67 @@ public class StringUtil {
         cal.set(Calendar.YEAR, parseInt(text,6,10));
         cal.set(Calendar.HOUR_OF_DAY, parseInt(text, 11,13));
         cal.set(Calendar.MINUTE, parseInt(text, 14,16));
+        return cal.getTime();
+    }
+
+    /**
+     * Осуществляет разбор даты из строки даты в формате <code>yyyy-MM-dd</code>. Если исходная строка равна null или имеет нулевую длину то метод вернет <code>null</code>.
+     *
+     * @param text  строка в формате <code>yyyy-MM-dd</code>.
+     * @return разобранную из строки дату или <code>null</code> если строковой аргумент равен <code>null</code> или имеет нулевую длину.
+     * @throws ParseException  в случае несоответствия переданной в аргументе строки требуемому формату.
+     */
+    public static Date parseISODate(final CharSequence text) throws ParseException {
+        final int length;
+        if (text == null || (length = text.length()) == 0)
+            return null;
+        if (length < 10)
+            throw new ParseException("length of the string in argument must be at least 10", 0);
+        final Calendar cal = getCalendarInstanceForThread();
+        cal.clear();
+        if (text.charAt(4) != '-')
+            throw new ParseException("Delimiter not finded", 4);
+        if (text.charAt(7) != '-')
+            throw new ParseException("Delimiter not finded", 7);
+        cal.set(Calendar.YEAR, parseInt(text, 0, 4));
+        cal.set(Calendar.MONTH, parseInt(text, 5, 7) - 1);
+        cal.set(Calendar.DAY_OF_MONTH, parseInt(text, 8, 10));
+        return cal.getTime();
+    }
+
+    /**
+     * Осуществляет разбор даты из строки даты в одном из форматов: <code>yyyy-MM-dd HH:mm:ss</code>, <code>yyyy-MM-dd'T'HH:mm:ss</code>.
+     * Если исходная строка равна null или имеет нулевую длину то метод вернет <code>null</code>.
+     *
+     * @param text  строка в формате <code>yyyy-MM-dd HH:mm:ss</code> или <code>yyyy-MM-dd'T'HH:mm:ss</code>.
+     * @return разобранную из строки дату или <code>null</code> если строковой аргумент равен <code>null</code> или имеет нулевую длину.
+     * @throws ParseException  в случае несоответствия переданной в аргументе строки требуемому формату.
+     */
+    public static Date parseISODateTime(final CharSequence text) throws ParseException {
+        final int length;
+        if (text == null || (length = text.length()) == 0)
+            return null;
+        if (length < 19)
+            throw new ParseException("length of the string in argument must be at least 19", 0);
+        final Calendar cal = getCalendarInstanceForThread();
+        cal.clear();
+        if (text.charAt(4) != '-')
+            throw new ParseException("Delimiter not finded", 4);
+        if (text.charAt(7) != '-')
+            throw new ParseException("Delimiter not finded", 7);
+        final char dt = text.charAt(10);
+        if (dt != ' ' && dt != 'T')
+            throw new ParseException("Delimiter not finded", 10);
+        if (text.charAt(13) != ':')
+            throw new ParseException("Delimiter not finded", 13);
+        if (text.charAt(16) != ':')
+            throw new ParseException("Delimiter not finded", 16);
+        cal.set(Calendar.YEAR, parseInt(text, 0, 4));
+        cal.set(Calendar.MONTH, parseInt(text, 5, 7) - 1);
+        cal.set(Calendar.DAY_OF_MONTH, parseInt(text, 8, 10));
+        cal.set(Calendar.HOUR_OF_DAY, parseInt(text, 11, 13));
+        cal.set(Calendar.MINUTE, parseInt(text, 14, 16));
+        cal.set(Calendar.SECOND, parseInt(text, 17, 19));
         return cal.getTime();
     }
 

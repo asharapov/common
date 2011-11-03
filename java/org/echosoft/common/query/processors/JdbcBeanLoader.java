@@ -10,7 +10,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.echosoft.common.query.BeanLoader;
-import org.echosoft.common.query.FieldMetaData;
+import org.echosoft.common.query.AttrMetaData;
 import org.echosoft.common.utils.ObjectUtil;
 
 /**
@@ -19,7 +19,7 @@ import org.echosoft.common.utils.ObjectUtil;
  */
 public class JdbcBeanLoader implements BeanLoader<Map<String,Object>> {
 
-    private FieldMetaData[] meta;
+    private AttrMetaData[] meta;
 
     public JdbcBeanLoader() {
     }
@@ -34,7 +34,7 @@ public class JdbcBeanLoader implements BeanLoader<Map<String,Object>> {
             return;
         }
 
-        this.meta = new FieldMetaData[rsm.getColumnCount()];
+        this.meta = new AttrMetaData[rsm.getColumnCount()];
         for (int i=1; i<=meta.length; i++) {
             Class fieldClass;
             try {
@@ -49,18 +49,18 @@ public class JdbcBeanLoader implements BeanLoader<Map<String,Object>> {
                 // workaround of bug in the some JDBC drivers with BLOB fields.
                 precision = 0;
             }
-            meta[i-1] = new FieldMetaData(rsm.getColumnName(i).toUpperCase(), fieldClass, precision, rsm.getScale(i));
+            meta[i-1] = new AttrMetaData(rsm.getColumnName(i).toUpperCase(), fieldClass, precision, rsm.getScale(i));
         }
     }
 
     /**
      * Returns name of the sql query field for specified property name of the bean.
      * This method may be used for making sql queries.
-     * @param fieldName name of the bean's attribute
+     * @param attrName name of the bean's attribute
      * @return name of the sql query field
      */
-    public String getMappedField(final String fieldName) {
-        return fieldName;
+    public String getMappedField(final String attrName) {
+        return attrName;
     }
 
 
@@ -68,7 +68,7 @@ public class JdbcBeanLoader implements BeanLoader<Map<String,Object>> {
      * Returns fields metadata for the specified bean class and sql result set.
      * @return fields metadata for the specified bean class and sql result set.
      */
-    public FieldMetaData[] getMetadata() {
+    public AttrMetaData[] getMetadata() {
         return meta;
     }
 

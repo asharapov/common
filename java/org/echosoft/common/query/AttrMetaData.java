@@ -3,7 +3,7 @@ package org.echosoft.common.query;
 import java.io.Serializable;
 
 /**
- * Describes one field in the row.
+ * Содержит описание отдельного атрибута объекта.
  *
  * @author Anton Sharapov
  */
@@ -40,34 +40,32 @@ public class AttrMetaData implements Serializable {
     }
 
     /**
-     * @return Название атрибута объекта
+     * @return Название атрибута.
      */
     public String getAttrName() {
         return attrName;
     }
 
     /**
-     * Gets the Java class of the object stored for this field definition.
-     *
-     * @return Имя класса атрибута объекта.
+     * @return класс атрибута.
      */
     public Class getAttrClass() {
         return attrClass;
     }
 
     /**
-     * Gets the number of decimal digits for this field definition.
+     * Применяется для числовых типов.
      *
-     * @return number of decimal digits
+     * @return максимально допустимое кол-во цифр перед запятой.
      */
     public int getAttrPrecision() {
         return attrPrecision;
     }
 
     /**
-     * Gets the designated column's number of digits to right of the decimal point.
+     * Применяется для числовых типов.
      *
-     * @return number of digits to right og the decimal point
+     * @return максимально допустимое кол-во цифр после запятой.
      */
     public int getAttrScale() {
         return attrScale;
@@ -85,12 +83,14 @@ public class AttrMetaData implements Serializable {
     }
 
 
+    @Override
     public int hashCode() {
         return attrName.hashCode();
     }
 
+    @Override
     public boolean equals(Object obj) {
-        if (obj == null || !AttrMetaData.class.equals(obj.getClass()))
+        if (obj == null || !getClass().equals(obj.getClass()))
             return false;
         final AttrMetaData other = (AttrMetaData) obj;
         return attrName.equals(other.attrName) && attrClass.equals(other.attrClass) &&
@@ -98,7 +98,8 @@ public class AttrMetaData implements Serializable {
                 (mappedFieldName != null ? mappedFieldName.equals(other.mappedFieldName) : other.mappedFieldName == null);
     }
 
+    @Override
     public String toString() {
-        return "[FieldMetaData{name:" + attrName + ", class:" + attrClass + ", precision:" + attrPrecision + ", scale:" + attrScale + ", mapped:" + mappedFieldName + "}]";
+        return "[AttrMeta{name:" + attrName + ", class:" + attrClass + ", precision:" + attrPrecision + ", scale:" + attrScale + ", mapped:" + mappedFieldName + "}]";
     }
 }

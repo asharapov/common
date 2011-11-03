@@ -2,6 +2,7 @@ package org.echosoft.common.query;
 
 import java.beans.PropertyDescriptor;
 import java.io.Serializable;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.Map;
 
@@ -15,73 +16,70 @@ import org.echosoft.common.utils.BeanUtil;
 public class BeanMetaData implements Serializable {
 
     public static BeanMetaData resolveMetaData(final Object bean) {
-        final FieldMetaData[] fields;
-        if (bean==null) {
-            fields = FieldMetaData.EMPTY_ARRAY;
+        final AttrMetaData[] attrs;
+        if (bean == null) {
+            attrs = AttrMetaData.EMPTY_ARRAY;
         } else
-        if (bean instanceof Map) {
-            final Map map = (Map)bean;
-            fields = new FieldMetaData[map.size()];
-            int i=0;
-            for (Iterator it=map.entrySet().iterator(); it.hasNext(); ) {
-                final Map.Entry entry = (Map.Entry)it.next();
-                if (!(entry.getKey() instanceof String))
-                    continue;
-                fields[i++] = new FieldMetaData((String)entry.getKey(), entry.getValue()!=null ? entry.getValue().getClass() : String.class);
+            if (bean instanceof Map) {
+                final Map map = (Map) bean;
+                attrs = new AttrMetaData[map.size()];
+                int i = 0;
+                for (Iterator it = map.entrySet().iterator(); it.hasNext(); ) {
+                    final Map.Entry entry = (Map.Entry)it;
+                    if (!(entry.getKey() instanceof String))
+                        continue;
+                    attrs[i++] = new AttrMetaData((String) entry.getKey(), entry.getValue() != null ? entry.getValue().getClass() : String.class);
+                }
+            } else {
+                final PropertyDescriptor desc[] = BeanUtil.getPropertyDescriptors(bean.getClass());
+                attrs = new AttrMetaData[desc.length];
+                for (int i = 0; i < desc.length; i++) {
+                    final Class cls = desc[i].getPropertyType();
+                    attrs[i] = new AttrMetaData(desc[i].getName(), cls != null ? cls : Object.class);
+                }
             }
-        } else {
-            final PropertyDescriptor desc[] = BeanUtil.getPropertyDescriptors(bean.getClass());
-            fields = new FieldMetaData[desc.length];
-            for (int i=0; i<desc.length; i++) {
-                final Class cls = desc[i].getPropertyType();
-                fields[i] = new FieldMetaData(desc[i].getName(), cls!=null ? cls : Object.class);
-            }
-        }
-        return new BeanMetaData(fields);
+        return new BeanMetaData(attrs);
     }
 
 
-    private final FieldMetaData[] fields;
+    private final AttrMetaData[] attrs;
 
-    public BeanMetaData(FieldMetaData[] fields) {
-        if (fields==null)
+    public BeanMetaData(final AttrMetaData[] attrs) {
+        if (attrs == null)
             throw new IllegalArgumentException("Fields metadata must be specified");
-        this.fields = fields;
+        this.attrs = attrs;
     }
 
-    public FieldMetaData[] getFields() {
-        return fields;
+    public AttrMetaData[] getAttrs() {
+        return attrs;
     }
 
-    public FieldMetaData getField(String name) {
-        for (int i=0; i<fields.length; i++) {
-            if (fields[i].getFieldName().equals(name))
-                return fields[i];
+    public AttrMetaData getAttribute(final String name) {
+        for (final AttrMetaData attr : attrs) {
+            if (attr.getAttrName().equals(name))
+                return attr;
         }
         return null;
     }
 
-    public boolean containsField(String name) {
-        for (int i=0; i<fields.length; i++) {
-            if (fields[i].getFieldName().equals(name))
+    public boolean containsAttribute(final String name) {
+        for (final AttrMetaData attr : attrs) {
+            if (attr.getAttrName().equals(name))
                 return true;
         }
         return false;
     }
 
 
+    @Override
     public int hashCode() {
-        return fields.length;
+        return attrs.length;
     }
 
-    public boolean equals(Object obj) {
-        if (!(obj instanceof BeanMetaData))
+    @Override
+    public boolean equals(final Object obj) {
+        if (obj == null || !getClass().equals(obj.getClass()))
             return false;
-        final FieldMetaData other[] = ((BeanMetaData)obj).fields;
-        for (int i=0; i<fields.length; i++) {
-            if (!fields[i].equals(other[i]))
-                return false;
-        }
-        return true;
+        return Arrays.equals(attrs, ((BeanMetaData) obj).attrs);
     }
 }

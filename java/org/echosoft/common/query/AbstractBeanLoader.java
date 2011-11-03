@@ -7,7 +7,7 @@ import java.sql.ResultSet;
  */
 public abstract class AbstractBeanLoader<T> implements BeanLoader<T> {
 
-    private final FieldMetaData metadata[];
+    private final AttrMetaData metadata[];
 
     public AbstractBeanLoader() {
         metadata = init();
@@ -17,13 +17,13 @@ public abstract class AbstractBeanLoader<T> implements BeanLoader<T> {
      * Returns name of the sql query field for specified property name of the bean.
      * This method may be used for making sql queries.
      *
-     * @param fieldName name of the bean's attribute
+     * @param attrName name of the bean's attribute
      * @return name of the sql query field
      */
-    public String getMappedField(String fieldName) {
-        for (FieldMetaData fm : metadata) {
-            if (fm.getFieldName().equals(fieldName)) {
-                return fm.getMappedName();
+    public String getMappedField(String attrName) {
+        for (AttrMetaData fm : metadata) {
+            if (fm.getAttrName().equals(attrName)) {
+                return fm.getMappedFieldName();
             }
         }
         return null;
@@ -34,7 +34,7 @@ public abstract class AbstractBeanLoader<T> implements BeanLoader<T> {
      *
      * @return fields metadata for the specified bean class and sql result set.
      */
-    public FieldMetaData[] getMetadata() {
+    public AttrMetaData[] getMetadata() {
         return metadata;
     }
 
@@ -47,6 +47,6 @@ public abstract class AbstractBeanLoader<T> implements BeanLoader<T> {
      */
     public abstract T load(ResultSet rs) throws Exception;
 
-    protected abstract FieldMetaData[] init();
+    protected abstract AttrMetaData[] init();
 
 }
