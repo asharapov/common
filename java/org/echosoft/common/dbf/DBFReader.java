@@ -9,6 +9,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
+ * Выполняет чтение содержимого .DBF файла из потока.
  * @author Anton Sharapov
  */
 public class DBFReader {
@@ -26,10 +27,17 @@ public class DBFReader {
         this(stream, Charset.defaultCharset());
     }
 
+    /**
+     * Инициирует чтение содержимого заданного .DBF файла. Немедленно будет прочитан заголовок таблицы и получена вся информация о ее структуре.
+     * @param stream  поток на чтение данных из DBF файла.
+     * @param defaultCharset  кодировка в которой будет выполняться попытка чтения содержимого .DBF файла, в случае если программа не сможет определить кодировку файла самостоятельно.
+     * @throws IOException  в случае каких-либо проблем при чтении данных.
+     * @throws DBFException  в случае каких-либо проблем при анализе прочтенных данных.
+     */
     public DBFReader(final InputStream stream, final Charset defaultCharset) throws IOException, DBFException {
         this.stream = stream;
         final byte[] data1 = new byte[32];
-        if (stream.read(data1) < data1.length)
+        if (readFromStream(data1) < data1.length)
             throw new DBFException("Premature end of stream: can't read DBF header.");
         this.descriptor = new TableDescriptor(data1);
 
@@ -39,7 +47,7 @@ public class DBFReader {
 
         this.fields = new Field[(descriptor.getHeaderSize() - 33) / 32];
         final byte[] data2 = new byte[descriptor.getHeaderSize() - 32];
-        if (stream.read(data2) < data2.length)
+        if (readFromStream(data2) < data2.length)
             throw new DBFException("Premature end of stream: can't read DBF fields headers.");
         int offset = 0, fieldOffset = 1;
         for (int i = 0, cnt = fields.length; i < cnt; i++) {
@@ -81,29 +89,52 @@ public class DBFReader {
         positioned = false;
     }
 
+    /**
+     * Возввращает список всех полей в том порядке в котором они определены в таблице..
+     * @return  список полей таблицы.
+     */
     public Field[] getFields() {
         return fields;
     }
 
+    /**
+     * Возвращает кодировку используемую при чтении данных из таблцы.
+     * @return  применяемая кодировка.
+     */
     public Charset getCharset() {
         return effectiveCharset;
     }
 
+    /**
+     * Возвращает общее количество строк в таблице (инфорамция получается из заголовка таблицы).
+     * @return  общее количество строк в таблице.
+     */
     public int getRecordsCount() {
         return descriptor.getRecordsCount();
     }
 
+    /**
+     * Порядковый номер текущей обрабатываемой строки. Первая строка идет с номером <code>1</code>.
+     * @return  порядковый номер текущей обрабатываемой строки.
+     */
     public int getCurrentRecord() {
         return currentRecord;
     }
 
 
+    /**
+     * Читает из потока содержимое следующей строки.
+     * @return <code>true</code> в случае когда была получена очередная строка данных,
+     *         <code>false</code> после того как была прочитана последняя строка данных.
+     * @throws IOException  в случае каких-либо пробелм при чтении данных из потока.
+     * @throws DBFException  в случае окончания данных до расчетного момента.
+     */
     public boolean next() throws IOException, DBFException {
         if (currentRecord >= descriptor.getRecordsCount())
             return false;
         currentRecord++;
         positioned = false;
-        final int readed = stream.read(recordBuf);
+        final int readed = readFromStream(recordBuf);
         if (readed == 1 && recordBuf[0] == 0x1A) {
             throw new DBFException("Premature end of stream: wrong information about total records count");
 //            return false;
@@ -114,15 +145,20 @@ public class DBFReader {
         return true;
     }
 
-    public boolean isRecordDeleted() {
+    /**
+     * Возвращает <code>true</code> если текущая строка была помечена как удаленная.
+     * @return  <code>true</code>  если текущая строка помечена как удаленная.
+     * @throws DBFException в случае если либо не была прочитана еще ни одна строка таблицы либо уже все строки таблицы были прочитаны ранее.
+     */
+    public boolean isRecordDeleted() throws DBFException {
         if (!positioned)
-            throw new IllegalStateException("Illegal state");
+            throw new DBFException("Illegal state");
         return recordBuf[0] == 0x2A;
     }
 
     public Object getObject(final String fieldName) throws DBFException {
         if (!positioned)
-            throw new IllegalStateException("Illegal state");
+            throw new DBFException("Illegal state");
         final Field field = fieldsMap.get(fieldName);
         if (field == null)
             throw new DBFException("Field '" + fieldName + "' not found");
@@ -131,7 +167,7 @@ public class DBFReader {
 
     public Object getObject(final int fieldNum) throws DBFException {
         if (!positioned)
-            throw new IllegalStateException("Illegal state");
+            throw new DBFException("Illegal state");
         if (fieldNum >= fields.length)
             throw new DBFException("Field with index '" + fieldNum + "' not exists");
         final Field field = fields[fieldNum];
@@ -140,7 +176,7 @@ public class DBFReader {
 
     public String getString(final String fieldName) throws DBFException {
         if (!positioned)
-            throw new IllegalStateException("Illegal state");
+            throw new DBFException("Illegal state");
         final Field field = fieldsMap.get(fieldName);
         if (field == null)
             throw new DBFException("Field '" + fieldName + "' not found");
@@ -149,7 +185,7 @@ public class DBFReader {
 
     public String getString(final int fieldNum) throws DBFException {
         if (!positioned)
-            throw new IllegalStateException("Illegal state");
+            throw new DBFException("Illegal state");
         if (fieldNum >= fields.length)
             throw new DBFException("Field with index '" + fieldNum + "' not exists");
         final Field field = fields[fieldNum];
@@ -158,7 +194,7 @@ public class DBFReader {
 
     public Boolean getBoolean(final String fieldName) throws DBFException {
         if (!positioned)
-            throw new IllegalStateException("Illegal state");
+            throw new DBFException("Illegal state");
         final Field field = fieldsMap.get(fieldName);
         if (field == null)
             throw new DBFException("Field '" + fieldName + "' not found");
@@ -167,7 +203,7 @@ public class DBFReader {
 
     public Boolean getBoolean(final int fieldNum) throws DBFException {
         if (!positioned)
-            throw new IllegalStateException("Illegal state");
+            throw new DBFException("Illegal state");
         if (fieldNum >= fields.length)
             throw new DBFException("Field with index '" + fieldNum + "' not exists");
         final Field field = fields[fieldNum];
@@ -176,7 +212,7 @@ public class DBFReader {
 
     public Integer getInteger(final String fieldName) throws DBFException {
         if (!positioned)
-            throw new IllegalStateException("Illegal state");
+            throw new DBFException("Illegal state");
         final Field field = fieldsMap.get(fieldName);
         if (field == null)
             throw new DBFException("Field '" + fieldName + "' not found");
@@ -185,7 +221,7 @@ public class DBFReader {
 
     public Integer getInteger(final int fieldNum) throws DBFException {
         if (!positioned)
-            throw new IllegalStateException("Illegal state");
+            throw new DBFException("Illegal state");
         if (fieldNum >= fields.length)
             throw new DBFException("Field with index '" + fieldNum + "' not exists");
         final Field field = fields[fieldNum];
@@ -194,7 +230,7 @@ public class DBFReader {
 
     public Long getLong(final String fieldName) throws DBFException {
         if (!positioned)
-            throw new IllegalStateException("Illegal state");
+            throw new DBFException("Illegal state");
         final Field field = fieldsMap.get(fieldName);
         if (field == null)
             throw new DBFException("Field '" + fieldName + "' not found");
@@ -203,7 +239,7 @@ public class DBFReader {
 
     public Long getLong(final int fieldNum) throws DBFException {
         if (!positioned)
-            throw new IllegalStateException("Illegal state");
+            throw new DBFException("Illegal state");
         if (fieldNum >= fields.length)
             throw new DBFException("Field with index '" + fieldNum + "' not exists");
         final Field field = fields[fieldNum];
@@ -212,7 +248,7 @@ public class DBFReader {
 
     public BigDecimal getBigDecimal(final String fieldName) throws DBFException {
         if (!positioned)
-            throw new IllegalStateException("Illegal state");
+            throw new DBFException("Illegal state");
         final Field field = fieldsMap.get(fieldName);
         if (field == null)
             throw new DBFException("Field '" + fieldName + "' not found");
@@ -221,7 +257,7 @@ public class DBFReader {
 
     public BigDecimal getBigDecimal(final int fieldNum) throws DBFException {
         if (!positioned)
-            throw new IllegalStateException("Illegal state");
+            throw new DBFException("Illegal state");
         if (fieldNum >= fields.length)
             throw new DBFException("Field with index '" + fieldNum + "' not exists");
         final Field field = fields[fieldNum];
@@ -230,7 +266,7 @@ public class DBFReader {
 
     public Date getDate(final String fieldName) throws DBFException {
         if (!positioned)
-            throw new IllegalStateException("Illegal state");
+            throw new DBFException("Illegal state");
         final Field field = fieldsMap.get(fieldName);
         if (field == null)
             throw new DBFException("Field '" + fieldName + "' not found");
@@ -239,10 +275,23 @@ public class DBFReader {
 
     public Date getDate(final int fieldNum) throws DBFException {
         if (!positioned)
-            throw new IllegalStateException("Illegal state");
+            throw new DBFException("Illegal state");
         if (fieldNum >= fields.length)
             throw new DBFException("Field with index '" + fieldNum + "' not exists");
         final Field field = fields[fieldNum];
         return field.getAsDate(recordBuf);
+    }
+
+    private int readFromStream(final byte[] buf) throws IOException {
+        final int length = buf.length;
+        int readed = 0;
+        for (; ; ) {
+            final int n = stream.read(buf, readed, length - readed);
+            if (n < 0)
+                return readed;
+            readed += n;
+            if (readed >= length)
+                return readed;
+        }
     }
 }

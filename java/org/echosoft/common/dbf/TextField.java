@@ -66,7 +66,11 @@ class TextField extends Field {
         try {
             return StringUtil.parseDate(value);
         } catch (ParseException e) {
-            throw new DBFException("Can't convert string '" + value + "' to date", e);
+            try {
+                return StringUtil.parseISODate(value);
+            } catch (ParseException ee) {
+                throw new DBFException("Can't convert string '" + value + "' to date", ee);
+            }
         }
     }
 }
