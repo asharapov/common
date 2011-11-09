@@ -536,6 +536,8 @@ public class StringUtil {
                                 dst.append( i+1<length && value.charAt(i+1)=='{' ? "&" : "&amp;" );
                                 break;
                             }
+                case '<'  : dst.append("&lt;"); break;
+                case '>'  : dst.append("&gt;"); break;
                 case '\'' : dst.append("&#39;"); break;
                 default   : dst.append( ch );
             }
@@ -561,6 +563,8 @@ public class StringUtil {
                                 out.write( i+1<length && value.charAt(i+1)=='{' ? "&" : "&amp;" );
                                 break;
                             }
+                case '<'  : out.write("&lt;"); break;
+                case '>'  : out.write("&gt;"); break;
                 case '\'' : out.write("&#39;"); break;
                 default   : out.write( ch );
             }
