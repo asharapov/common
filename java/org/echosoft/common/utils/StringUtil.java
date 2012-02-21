@@ -481,15 +481,44 @@ public class StringUtil {
      */
     public static String encodeHTMLText(final CharSequence text) {
         final int length;
-        if (text==null || (length=text.length())==0)
+        if (text == null || (length = text.length()) == 0)
             return "";
-        final StringBuilder dst = new StringBuilder( length );
-        for (int i=0; i<length; i++) {
+        final StringBuilder dst = new StringBuilder(length);
+        for (int i = 0; i < length; i++) {
             final char ch = text.charAt(i);
             switch (ch) {
                 case '&' : dst.append("&amp;"); break;
                 case '<' : dst.append("&lt;"); break;
                 case '>' : dst.append("&gt;"); break;
+                case '\u001F' :
+                case '\u001E' :
+                case '\u001D' :
+                case '\u001C' :
+                case '\u001B' :
+                case '\u001A' :
+                case '\u0019' :
+                case '\u0018' :
+                case '\u0017' :
+                case '\u0016' :
+                case '\u0015' :
+                case '\u0014' :
+                case '\u0013' :
+                case '\u0012' :
+                case '\u0011' :
+                case '\u0010' :
+                case '\u000F' :
+                case '\u000E' :
+                case '\u000C' :
+                case '\u000B' :
+                case '\u0008' :
+                case '\u0007' :
+                case '\u0006' :
+                case '\u0005' :
+                case '\u0004' :
+                case '\u0003' :
+                case '\u0002' :
+                case '\u0001' :
+                case '\u0000' : break;
                 default  : dst.append(ch);
             }
         }
@@ -503,15 +532,44 @@ public class StringUtil {
      * @throws IOException  в случае каких-либо проблем вывода данных в поток.
      */
     public static void encodeHTMLText(final Writer out, final CharSequence text) throws IOException {
-        if (text==null)
+        if (text == null)
             return;
         final int length = text.length();
-        for (int i=0; i<length; i++) {
+        for (int i = 0; i < length; i++) {
             final char ch = text.charAt(i);
             switch (ch) {
                 case '&' : out.write("&amp;"); break;
                 case '<' : out.write("&lt;"); break;
                 case '>' : out.write("&gt;"); break;
+                case '\u001F' :
+                case '\u001E' :
+                case '\u001D' :
+                case '\u001C' :
+                case '\u001B' :
+                case '\u001A' :
+                case '\u0019' :
+                case '\u0018' :
+                case '\u0017' :
+                case '\u0016' :
+                case '\u0015' :
+                case '\u0014' :
+                case '\u0013' :
+                case '\u0012' :
+                case '\u0011' :
+                case '\u0010' :
+                case '\u000F' :
+                case '\u000E' :
+                case '\u000C' :
+                case '\u000B' :
+                case '\u0008' :
+                case '\u0007' :
+                case '\u0006' :
+                case '\u0005' :
+                case '\u0004' :
+                case '\u0003' :
+                case '\u0002' :
+                case '\u0001' :
+                case '\u0000' : break;
                 default  : out.write(ch);
             }
         }
@@ -525,10 +583,10 @@ public class StringUtil {
      */
     public static String encodeHTMLAttribute(final CharSequence value) {
         final int length;
-        if (value==null || (length=value.length())==0)
+        if (value == null || (length = value.length()) == 0)
             return "";
         final StringBuilder dst = new StringBuilder(length);
-        for (int i=0; i<length; i++) {
+        for (int i = 0; i < length; i++) {
             final char ch = value.charAt(i);
             switch( ch ) {
                 case '\"' : dst.append("&quot;"); break;
@@ -539,6 +597,35 @@ public class StringUtil {
                 case '<'  : dst.append("&lt;"); break;
                 case '>'  : dst.append("&gt;"); break;
                 case '\'' : dst.append("&#39;"); break;
+                case '\u001F' :
+                case '\u001E' :
+                case '\u001D' :
+                case '\u001C' :
+                case '\u001B' :
+                case '\u001A' :
+                case '\u0019' :
+                case '\u0018' :
+                case '\u0017' :
+                case '\u0016' :
+                case '\u0015' :
+                case '\u0014' :
+                case '\u0013' :
+                case '\u0012' :
+                case '\u0011' :
+                case '\u0010' :
+                case '\u000F' :
+                case '\u000E' :
+                case '\u000C' :
+                case '\u000B' :
+                case '\u0008' :
+                case '\u0007' :
+                case '\u0006' :
+                case '\u0005' :
+                case '\u0004' :
+                case '\u0003' :
+                case '\u0002' :
+                case '\u0001' :
+                case '\u0000' : break;
                 default   : dst.append( ch );
             }
         }
@@ -552,10 +639,10 @@ public class StringUtil {
      * @throws IOException  в случае каких-либо проблем вывода данных в поток.
      */
     public static void encodeHTMLAttribute(final Writer out, final CharSequence value) throws IOException {
-        if (value==null)
+        if (value == null)
             return;
         final int length = value.length();
-        for (int i=0; i<length; i++) {
+        for (int i = 0; i < length; i++) {
             final char ch = value.charAt(i);
             switch ( ch ) {
                 case '\"' : out.write("&quot;"); break;
@@ -566,6 +653,35 @@ public class StringUtil {
                 case '<'  : out.write("&lt;"); break;
                 case '>'  : out.write("&gt;"); break;
                 case '\'' : out.write("&#39;"); break;
+                case '\u001F' :
+                case '\u001E' :
+                case '\u001D' :
+                case '\u001C' :
+                case '\u001B' :
+                case '\u001A' :
+                case '\u0019' :
+                case '\u0018' :
+                case '\u0017' :
+                case '\u0016' :
+                case '\u0015' :
+                case '\u0014' :
+                case '\u0013' :
+                case '\u0012' :
+                case '\u0011' :
+                case '\u0010' :
+                case '\u000F' :
+                case '\u000E' :
+                case '\u000C' :
+                case '\u000B' :
+                case '\u0008' :
+                case '\u0007' :
+                case '\u0006' :
+                case '\u0005' :
+                case '\u0004' :
+                case '\u0003' :
+                case '\u0002' :
+                case '\u0001' :
+                case '\u0000' : break;
                 default   : out.write( ch );
             }
         }
