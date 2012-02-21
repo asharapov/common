@@ -111,7 +111,7 @@ public class ParametrizedSQL implements Serializable {
                             break;
                         }
                         case PARAMS_HEADER: {
-                            if (Character.isSpaceChar(pc) && i < lastPos && Character.isJavaIdentifierStart(namedSql.charAt(i + 1))) {
+                            if ((!Character.isLetterOrDigit(pc)) && i < lastPos && Character.isJavaIdentifierStart(namedSql.charAt(i + 1))) {
                                 state = State.PARAM_NAME;
                                 buf.append('?');
                             } else {
@@ -155,6 +155,7 @@ public class ParametrizedSQL implements Serializable {
                     } else {
                         paramNames.add(pbuf.toString());
                         pbuf.setLength(0);
+                        buf.append(c);
                         state = State.GENERAL;
                     }
                     break;
@@ -162,6 +163,8 @@ public class ParametrizedSQL implements Serializable {
             }
             pc = c;
         }
+        if (state == State.PARAM_NAME)
+            paramNames.add(pbuf.toString());
         return buf.toString();
     }
 }
