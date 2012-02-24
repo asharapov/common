@@ -1,9 +1,9 @@
 package org.echosoft.common.query.processors;
 
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import java.util.*;
 
 /**
  * Преобразует SQL выражения вида
@@ -55,6 +55,16 @@ public class ParametrizedSQL implements Serializable {
      */
     public List<String> getParamNames() {
         return paramNames;
+    }
+    
+    public void applyParams(final PreparedStatement pstmt, final Map<String,Object> params) throws SQLException {
+        int num = 1;
+        for (String paramName : paramNames) {
+            final Object value = params.get(paramName);
+            if (value == null && !params.containsKey(paramName))
+                throw new SQLException("Parameter '" + paramName + "' not specified in the arguments");
+            pstmt.setObject(num++, value);
+        }
     }
     
 
