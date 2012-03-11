@@ -1,5 +1,7 @@
 package org.echosoft.common.dbf;
 
+import org.echosoft.common.utils.ObjectUtil;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigDecimal;
@@ -10,6 +12,7 @@ import java.util.Map;
 
 /**
  * Выполняет чтение содержимого .DBF файла из потока.
+ *
  * @author Anton Sharapov
  */
 public class DBFReader {
@@ -29,15 +32,16 @@ public class DBFReader {
 
     /**
      * Инициирует чтение содержимого заданного .DBF файла. Немедленно будет прочитан заголовок таблицы и получена вся информация о ее структуре.
-     * @param stream  поток на чтение данных из DBF файла.
-     * @param defaultCharset  кодировка в которой будет выполняться попытка чтения содержимого .DBF файла, в случае если программа не сможет определить кодировку файла самостоятельно.
+     *
+     * @param stream         поток на чтение данных из DBF файла.
+     * @param defaultCharset кодировка в которой будет выполняться попытка чтения содержимого .DBF файла, в случае если программа не сможет определить кодировку файла самостоятельно.
      * @throws IOException  в случае каких-либо проблем при чтении данных.
-     * @throws DBFException  в случае каких-либо проблем при анализе прочтенных данных.
+     * @throws DBFException в случае каких-либо проблем при анализе прочтенных данных.
      */
     public DBFReader(final InputStream stream, final Charset defaultCharset) throws IOException, DBFException {
         this.stream = stream;
         final byte[] data1 = new byte[32];
-        if (readFromStream(data1) < data1.length)
+        if (ObjectUtil.readFromStream(stream, data1) < data1.length)
             throw new DBFException("Premature end of stream: can't read DBF header.");
         this.descriptor = new TableDescriptor(data1);
 
@@ -47,7 +51,7 @@ public class DBFReader {
 
         this.fields = new Field[(descriptor.getHeaderSize() - 33) / 32];
         final byte[] data2 = new byte[descriptor.getHeaderSize() - 32];
-        if (readFromStream(data2) < data2.length)
+        if (ObjectUtil.readFromStream(stream, data2) < data2.length)
             throw new DBFException("Premature end of stream: can't read DBF fields headers.");
         int offset = 0, fieldOffset = 1;
         for (int i = 0, cnt = fields.length; i < cnt; i++) {
@@ -91,7 +95,8 @@ public class DBFReader {
 
     /**
      * Возввращает список всех полей в том порядке в котором они определены в таблице..
-     * @return  список полей таблицы.
+     *
+     * @return список полей таблицы.
      */
     public Field[] getFields() {
         return fields;
@@ -99,7 +104,8 @@ public class DBFReader {
 
     /**
      * Возвращает кодировку используемую при чтении данных из таблцы.
-     * @return  применяемая кодировка.
+     *
+     * @return применяемая кодировка.
      */
     public Charset getCharset() {
         return effectiveCharset;
@@ -107,7 +113,8 @@ public class DBFReader {
 
     /**
      * Возвращает общее количество строк в таблице (инфорамция получается из заголовка таблицы).
-     * @return  общее количество строк в таблице.
+     *
+     * @return общее количество строк в таблице.
      */
     public int getRecordsCount() {
         return descriptor.getRecordsCount();
@@ -115,7 +122,8 @@ public class DBFReader {
 
     /**
      * Порядковый номер текущей обрабатываемой строки. Первая строка идет с номером <code>1</code>.
-     * @return  порядковый номер текущей обрабатываемой строки.
+     *
+     * @return порядковый номер текущей обрабатываемой строки.
      */
     public int getCurrentRecord() {
         return currentRecord;
@@ -124,17 +132,18 @@ public class DBFReader {
 
     /**
      * Читает из потока содержимое следующей строки.
+     *
      * @return <code>true</code> в случае когда была получена очередная строка данных,
      *         <code>false</code> после того как была прочитана последняя строка данных.
      * @throws IOException  в случае каких-либо пробелм при чтении данных из потока.
-     * @throws DBFException  в случае окончания данных до расчетного момента.
+     * @throws DBFException в случае окончания данных до расчетного момента.
      */
     public boolean next() throws IOException, DBFException {
         if (currentRecord >= descriptor.getRecordsCount())
             return false;
         currentRecord++;
         positioned = false;
-        final int readed = readFromStream(recordBuf);
+        final int readed = ObjectUtil.readFromStream(stream, recordBuf);
         if (readed == 1 && recordBuf[0] == 0x1A) {
             throw new DBFException("Premature end of stream: wrong information about total records count");
 //            return false;
@@ -147,7 +156,8 @@ public class DBFReader {
 
     /**
      * Возвращает <code>true</code> если текущая строка была помечена как удаленная.
-     * @return  <code>true</code>  если текущая строка помечена как удаленная.
+     *
+     * @return <code>true</code>  если текущая строка помечена как удаленная.
      * @throws DBFException в случае если либо не была прочитана еще ни одна строка таблицы либо уже все строки таблицы были прочитаны ранее.
      */
     public boolean isRecordDeleted() throws DBFException {
@@ -282,16 +292,4 @@ public class DBFReader {
         return field.getAsDate(recordBuf);
     }
 
-    private int readFromStream(final byte[] buf) throws IOException {
-        final int length = buf.length;
-        int readed = 0;
-        for (; ; ) {
-            final int n = stream.read(buf, readed, length - readed);
-            if (n < 0)
-                return readed;
-            readed += n;
-            if (readed >= length)
-                return readed;
-        }
-    }
 }
