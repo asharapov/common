@@ -105,7 +105,7 @@ public class ObjectUtil {
     }
 
     /**
-     * Заполняет указанный в аргументе массив байт содержимым входного потока.
+     * Читает содержимое потока в указанный массив байт.
      * @param stream  входной поток.
      * @param buf буфер куда помещается прочитанные из потока байты..
      * @return реальное количество прочитанных байт. Может изменяться в диапазоне от 0 до N, где N - размер массива.
@@ -118,6 +118,28 @@ public class ObjectUtil {
         int readed = 0;
         for (; ; ) {
             final int n = stream.read(buf, readed, length - readed);
+            if (n < 0)
+                return readed;
+            readed += n;
+            if (readed >= length)
+                return readed;
+        }
+    }
+
+    /**
+     * Читает содержимое потока в указанный массив символов.
+     * @param reader  входной поток.
+     * @param buf буфер куда помещается прочитанные из потока байты..
+     * @return реальное количество прочитанных байт. Может изменяться в диапазоне от 0 до N, где N - размер массива.
+     *  Если возвращаемое методом значение меньшее чем N значит поток был исчерпан полностью,
+     *  в противном случае - возможно (!) в потоке есть еще непрочитанное нами содержимое.
+     * @throws IOException  в случае возникновения каких-либо ошибок ввода-вывода.
+     */
+    public static int readFromReader(final Reader reader, final char[] buf) throws IOException {
+        final int length = buf.length;
+        int readed = 0;
+        for (; ; ) {
+            final int n = reader.read(buf, readed, length - readed);
             if (n < 0)
                 return readed;
             readed += n;
