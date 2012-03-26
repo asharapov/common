@@ -1,14 +1,12 @@
 package org.echosoft.common.cli.parser;
 
+import org.echosoft.common.utils.DateUtil;
+import org.echosoft.common.utils.StringUtil;
+
 import java.io.Serializable;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Содержит результат разбора аргументов командной строки.
@@ -17,14 +15,20 @@ import java.util.Set;
  */
 public class CommandLine implements Serializable {
 
+    protected static final String[] DEFAULT_DATE_PATTERNS = {"dd.MM.yyyy'T'HH:mm", "dd.MM.yyyy HH:mm", "dd.MM.yyyy", "yyyy-MM-dd'T'HH:mm", "yyyy-MM-dd HH:mm", "yyyy-MM-dd"};
+
     private final Options options;
     private final List<String> unresolvedArgs;
     private final Map<Option, String> values;
+    private final Collection<String> datePatterns;
+    private boolean extendedDateFormatAllowed;
 
     CommandLine(final Options options) {
         this.options = options;
         this.unresolvedArgs = new ArrayList<String>();
         this.values = new HashMap<Option, String>();
+        this.datePatterns = new ArrayList<String>(Arrays.asList(DEFAULT_DATE_PATTERNS));
+        this.extendedDateFormatAllowed = false;
     }
 
     /**
@@ -171,31 +175,37 @@ public class CommandLine implements Serializable {
      *
      * @param optionName   краткое либо полное название опции чье значение в командной строке требуется возвратить.
      * @param defaultValue значение по умолчанию, возвращается данным методом если указанная опция отсутствовала в разобранной командной строке.
-     * @param patterns   массив допустимых форматов даты. Если ни один из форматов не указан по умолчанию используется: <code>dd.MM.yyyy</code>.
      * @return значение указанной опции в командной строке либо значение по умолчанию если указанная опция в командной строке не присутствовала.
      * @throws UnknownOptionException поднимается в случае когда указанная в аргументе опция не была предварительно задекларирована в списке допустимых,
      *                                т.е. данная опция отсутствовала в списке опций, переданных парсеру командной строки.
      * @throws CLParserException      поднимается в случае ошибок конвертации строки в дату указанного формата
      */
-    public Date getOptionDateValue(final String optionName, final Date defaultValue, String... patterns) throws CLParserException {
+    public Date getOptionDateValue(final String optionName, final Date defaultValue) throws CLParserException {
         final Option opt = options.getOption(optionName);
         if (opt == null)
             throw new UnknownOptionException(optionName);
-        final String result = values.get(opt);
-        if (result != null) {
+        final String textValue = values.get(opt);
+        if (textValue != null) {
             try {
-                if (patterns.length==0)
-                    patterns = new String[]{"dd.MM.yyyy"};
                 Throwable lastCause = null;
-                for (String pattern : patterns ) {
+                for (String pattern : datePatterns) {
                     final SimpleDateFormat formatter = new SimpleDateFormat(pattern);
                     try {
-                        return formatter.parse(result);
+                        return formatter.parse(textValue);
                     } catch (ParseException e) {
                         lastCause = e;
                     }
                 }
-                if (lastCause!=null)
+                if (extendedDateFormatAllowed) {
+                    try {
+                        final Date result = DateUtil.calculate(new Date(), textValue);
+                        if (result != null)
+                            return result;
+                    } catch (ParseException e) {
+                        lastCause = e;
+                    }
+                }
+                if (lastCause != null)
                     throw new CLParserException(lastCause.getMessage(), lastCause);
             } catch (CLParserException e) {
                 throw e;
@@ -206,6 +216,26 @@ public class CommandLine implements Serializable {
         return defaultValue;
     }
 
+    public Collection<String> getDatePatterns() {
+        return datePatterns;
+    }
+    public void setDatePatterns(final String... patterns) {
+        datePatterns.clear();
+        for (String pattern : patterns) {
+            pattern = StringUtil.trim(pattern);
+            if (pattern != null)
+                datePatterns.add(pattern);
+        }
+        if (datePatterns.isEmpty())
+            datePatterns.addAll(Arrays.asList(DEFAULT_DATE_PATTERNS));
+    }
+
+    public boolean isExtendedDateFormatAllowed() {
+        return extendedDateFormatAllowed;
+    }
+    public void setExtendedDateFormatAllowed(final boolean extendedDateFormatAllowed) {
+        this.extendedDateFormatAllowed = extendedDateFormatAllowed;
+    }
 
     void addUnresolvedArg(final String token) {
         if (token != null && !token.isEmpty())
