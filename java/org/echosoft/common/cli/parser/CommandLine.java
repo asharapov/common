@@ -146,6 +146,31 @@ public class CommandLine implements Serializable {
     }
 
     /**
+     * Возвращает значение опции в виде большого целого числа.
+     *
+     * @param optionName   краткое либо полное название опции чье значение в командной строке требуется возвратить.
+     * @param defaultValue значение по умолчанию, возвращается данным методом если указанная опция отсутствовала в разобранной командной строке.
+     * @return значение указанной опции в командной строке либо значение по умолчанию если указанная опция в командной строке не присутствовала.
+     * @throws UnknownOptionException поднимается в случае когда указанная в аргументе опция не была предварительно задекларирована в списке допустимых,
+     *                                т.е. данная опция отсутствовала в списке опций, переданных парсеру командной строки.
+     * @throws CLParserException      поднимается в случае ошибок конвертации строки со значением опции в целое число.
+     */
+    public Long getOptionLongValue(final String optionName, final Long defaultValue) throws CLParserException {
+        final Option opt = options.getOption(optionName);
+        if (opt == null)
+            throw new UnknownOptionException(optionName);
+        final String result = values.get(opt);
+        if (result != null) {
+            try {
+                return Long.parseLong(result);
+            } catch (NumberFormatException e) {
+                throw new CLParserException(e.getMessage(), e);
+            }
+        } else
+            return defaultValue;
+    }
+
+    /**
      * Возвращает значение опции в виде числа с плавающей запятой.
      *
      * @param optionName   краткое либо полное название опции чье значение в командной строке требуется возвратить.

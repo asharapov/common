@@ -2,9 +2,7 @@ package org.echosoft.common.json;
 
 import java.io.StringWriter;
 import java.math.BigDecimal;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.TreeMap;
+import java.util.*;
 
 import org.echosoft.common.json.beans.Component;
 import org.echosoft.common.json.beans.Data;
@@ -205,6 +203,21 @@ public class CompactJsonWriterTest {
         final JsonWriter jw = new CompactJsonWriter(new JsonContext(), new StringWriter());
         jw.writeObject(Data.ctr11);
         System.out.println(jw.getOutputWriter().toString());
+    }
+
+    @Test
+    public void testList() throws Exception {
+        final List<Map<String,String>> records = new ArrayList<Map<String, String>>();
+        final Map<String,String> row1 = new HashMap<String, String>();
+        row1.put("name", "Vasya");
+        row1.put("lastName", "Ivanov");
+        final Map<String,String> row2 = new HashMap<String, String>();
+        row2.put("name", "Boris");
+        row2.put("lastName", "Razor");
+        records.add(row1);
+        records.add(row2);
+        jw.writeObject(records);
+        Assert.assertEquals("[{\"lastName\":\"Ivanov\",\"name\":\"Vasya\"},{\"lastName\":\"Razor\",\"name\":\"Boris\"}]", sw.getBuffer().toString());
     }
 
     @Test
