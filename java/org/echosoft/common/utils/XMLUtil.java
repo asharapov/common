@@ -36,8 +36,7 @@ import org.xml.sax.SAXException;
 
 
 /**
- * The class <code>XMLUtil</code> is the small util class that helps work with
- * <code>XML</code> files.
+ * Содержит методы, часто используемые при работе с DOM моделью документов XML.
  *
  * @author  Andrey Ochirov
  * @author  Anton Sharapov

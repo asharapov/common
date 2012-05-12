@@ -20,7 +20,7 @@ public class ObjectArrayIterator<T> implements ReadAheadIterator<T> {
      * @param array массив объектов или примитивов для которых требуется создать итератор.
      * @throws NullPointerException если <code>array</code> равен <code>null</code>.
      */
-    public ObjectArrayIterator(T[] array) {
+    public ObjectArrayIterator(final T... array) {
         this.array = array;
         this.length = array.length;
         this.index = 0;

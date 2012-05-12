@@ -4,7 +4,7 @@ import java.lang.reflect.Array;
 import java.util.NoSuchElementException;
 
 /**
- * Простая реализация итератора поверх массива объектов или примитивов.
+ * Простая реализация итератора поверх массива объектов или примитивов.<br/>
  * Если заведомо известно что имеется массив объектов, то предпочтительнее использовать класс {@link ObjectArrayIterator} по соображениям производительности.
  * Данная реализация не поддерживает удаление элементов итераторов, соответственно метод {@link #remove()} всегда поднимает исключение.
  *
@@ -30,14 +30,12 @@ public class ArrayIterator implements ReadAheadIterator {
         this.index = 0;
     }
 
-
     /**
      * {@inheritDoc}
      */
     public boolean hasNext() {
         return index < length;
     }
-
 
     /**
      * {@inheritDoc}
@@ -47,7 +45,6 @@ public class ArrayIterator implements ReadAheadIterator {
             throw new NoSuchElementException();
         return Array.get(array, index++);
     }
-
 
     /**
      * В данной реализации метод всегда бросает исключение {@link UnsupportedOperationException}.

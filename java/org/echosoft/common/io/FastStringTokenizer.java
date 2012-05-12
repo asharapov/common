@@ -20,21 +20,21 @@ public final class FastStringTokenizer implements Iterator<String> {
     private int lineNumber;
     private String nextToken;
 
-    public FastStringTokenizer(char delimiter) {
+    public FastStringTokenizer(final char delimiter) {
         this("", delimiter, (char)0);
     }
 
-    public FastStringTokenizer(char delimiter, char valueWrapper) {
+    public FastStringTokenizer(final char delimiter, final char valueWrapper) {
         this("", delimiter, valueWrapper);
     }
 
-    public FastStringTokenizer(String text, char delimiter, char valueWrapper) {
+    public FastStringTokenizer(final String text, final char delimiter, final char valueWrapper) {
         this.delimiter = delimiter;
         this.valueWrapper = valueWrapper;
         init(text, 0);
     }
 
-    public void init(String text, int lineNumber) {
+    public void init(final String text, final int lineNumber) {
         this.text = text;
         this.length = text.length();
         this.pos = 0;
@@ -120,8 +120,6 @@ public final class FastStringTokenizer implements Iterator<String> {
     private String scanSimpleToken() {
         if (pos>=length)
             return null;
-//        if (pos+1>=length)
-//            return null;
 
         for (int i=pos; i<length; i++) {
             final int c = text.charAt(i);

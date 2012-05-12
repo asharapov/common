@@ -4,7 +4,10 @@ import java.util.Iterator;
 import java.util.NoSuchElementException;
 
 /**
- * Простая реализация интерфейса <code>ReadAheadIterator</code>.
+ * Простая реализация интерфейса {@link ReadAheadIterator}.<br/>
+ * Ее важной особенностью, о которой требуется постоянно помнить, является то
+ * что обращение к первому элементу исходного итератора происходит сразу в процессе вызова
+ * конструктора данного класса.
  *
  * @author Anton Sharapov
  */
