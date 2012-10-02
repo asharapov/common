@@ -22,7 +22,7 @@ import org.echosoft.common.json.introspect.BeanSerializer;
  */
 public class JsonContext {
 
-    private final ConcurrentHashMap<Class<?>, JsonSerializer> serializers;
+    private final Map<Class<?>, JsonSerializer> serializers;
     private final HashMap<Class<?>, JsonSerializer> cserializers;
     private final HashMap<Class<?>, JsonSerializer> iserializers;
     private JsonFieldNameSerializer fieldNameSerializer;
@@ -33,17 +33,17 @@ public class JsonContext {
     }
 
     public JsonContext(final JsonContext original) {
-        serializers = new ConcurrentHashMap<Class<?>, JsonSerializer>();
+        serializers = new ConcurrentHashMap<Class<?>, JsonSerializer>(64);
         cserializers = new HashMap<Class<?>, JsonSerializer>();
         iserializers = new HashMap<Class<?>, JsonSerializer>();
-        if (original==null) {
+        if (original == null) {
             registerSerializer(String.class, Serializers.STRING, false);
             registerSerializer(Character.class, Serializers.CHAR, false);
             registerSerializer(Boolean.class, Serializers.BOOLEAN, false);
             registerSerializer(Number.class, Serializers.NUMBER, true);
             registerSerializer(BigDecimal.class, Serializers.BIGDECIMAL, true);
             registerSerializer(Enum.class, Serializers.ENUM, true);
-            registerSerializer(Date.class, Serializers.DATE, true);
+            registerSerializer(Date.class, Serializers.DATE_ISO_FMT, true);
             registerSerializer(char[].class, Serializers.CHAR_ARRAY, false);
             registerSerializer(boolean[].class, Serializers.BOOLEAN_ARRAY, false);
             registerSerializer(byte[].class, Serializers.BYTE_ARRAY, false);
@@ -67,10 +67,10 @@ public class JsonContext {
             registerSerializer(Iterator.class, Serializers.ITERATOR, true);
             registerSerializer(Enumeration.class, Serializers.ENUMERATION, true);
             registerSerializer(Map.class, Serializers.MAP, true);
-            registerSerializer(CharSequence.class, Serializers.STRING, true);
-            registerSerializer(CharSequence[].class, Serializers.STRING_ARRAY, true);
+            registerSerializer(CharSequence.class, Serializers.CHAR_SEQUENCE, true);
+            registerSerializer(CharSequence[].class, Serializers.CHAR_SEQUENCE_ARRAY, true);
             registerSerializer(JSExpression.class, Serializers.JSEXPRESSION, true);
-            fieldNameSerializer = Serializers.COMPACT_FIELDNAME_SERIALIZER;
+            fieldNameSerializer = Serializers.STANDARD_FIELD_NAME_SERIALIZER;
             writerFactory = Serializers.COMPACT_JSON_WRITER_FACTORY;
         } else {
             serializers.putAll(original.serializers);
@@ -83,7 +83,8 @@ public class JsonContext {
 
     /**
      * Рекомендуемый способ для создания в приложении новых экземпляров {@link JsonWriter}.
-     * @param out  выходной поток куда должен помещаться результат работы созданного экземпляра {@link JsonWriter}. Не может быть <code>null</code>.
+     *
+     * @param out выходной поток куда должен помещаться результат работы созданного экземпляра {@link JsonWriter}. Не может быть <code>null</code>.
      * @return созданный экземпляр {@link JsonWriter}.
      */
     public JsonWriter makeJsonWriter(final Writer out) {
@@ -94,7 +95,7 @@ public class JsonContext {
         return writerFactory;
     }
     public void setWriterFactory(final JsonWriterFactory factory) {
-        if (factory==null)
+        if (factory == null)
             throw new IllegalArgumentException("Factory should be specified");
         this.writerFactory = factory;
     }
@@ -103,28 +104,30 @@ public class JsonContext {
      * Определяет алгоритм сериализации имен полей javascript объектов.<br/>
      * Есть два основных алгоритма:
      * <ol>
-     *  <li> стандартный - ВСЕ имена полей оборачиваются в кавычки.
-     *  <li> по умолчанию - в кавычки оборачиваются только те имена которые соответствуют зарезервированным словам в javascript.
+     * <li> стандартный - ВСЕ имена полей оборачиваются в кавычки.
+     * <li> по умолчанию - в кавычки оборачиваются только те имена которые соответствуют зарезервированным словам в javascript.
      * </ol>
-     * @return  используемый алгоритм сериализации имен полей javascript объектов.
+     *
+     * @return используемый алгоритм сериализации имен полей javascript объектов.
      */
     public JsonFieldNameSerializer getFieldNameSerializer() {
         return fieldNameSerializer;
     }
     public void setFieldNameSerializer(final JsonFieldNameSerializer serializer) {
-        if (serializer==null)
+        if (serializer == null)
             throw new IllegalArgumentException("Serializer should be specified");
         this.fieldNameSerializer = serializer;
     }
 
     /**
      * Регистрирует сериализер для определенного класса (иерархии классов) или интерфейса.
-     * @param cls  класс для которого регистрируется заданный сериализер.
+     *
+     * @param cls        класс для которого регистрируется заданный сериализер.
      * @param recursive  если <code>true</code> то данный сериализер будет автоматически применяться и для всех классов унаследованных от указанного в аргументе.
-     * @param serializer  сериализер ассоциируемый c указанным классом (иерархией классов).
+     * @param serializer сериализер ассоциируемый c указанным классом (иерархией классов).
      */
     public void registerSerializer(final Class<?> cls, final JsonSerializer serializer, final boolean recursive) {
-        if (cls==null || serializer==null)
+        if (cls == null || serializer == null)
             throw new IllegalArgumentException("All arguments should be specified");
         if (cls.isInterface()) {
             iserializers.put(cls, serializer);
@@ -137,7 +140,7 @@ public class JsonContext {
     }
 
     public int removeSerializer(final Class<?> cls, final boolean recursive) {
-        if (cls==null)
+        if (cls == null)
             throw new IllegalArgumentException("Class must be specified");
 
         int removed = 0;
@@ -164,11 +167,11 @@ public class JsonContext {
                 }
             }
         } else {
-            if (iserializers.remove(cls)!=null)
+            if (iserializers.remove(cls) != null)
                 removed++;
-            if (cserializers.remove(cls)!=null)
+            if (cserializers.remove(cls) != null)
                 removed++;
-            if (serializers.remove(cls)!=null)
+            if (serializers.remove(cls) != null)
                 removed++;
         }
         return removed;
@@ -176,12 +179,13 @@ public class JsonContext {
 
     /**
      * Возвращает подходящий сериализер для указанного в аргументе класса.
-     * @param cls  класс для которого должен быть найден соответствующий сериализатор в JSON формат.
-     * @return  наиболее подходящий сериализатор или <code>null</code>.
+     *
+     * @param cls класс для которого должен быть найден соответствующий сериализатор в JSON формат.
+     * @return наиболее подходящий сериализатор или <code>null</code>.
      */
     public <T> JsonSerializer<T> getSerializer(final Class<? extends T> cls) {
         JsonSerializer result = serializers.get(cls);
-        if (result==null) {
+        if (result == null) {
             result = resolveSerializer(cls);
             serializers.put(cls, result);
         }
@@ -190,8 +194,9 @@ public class JsonContext {
 
     /**
      * Осуществляет поиск подходящего сериализера для указанного класса. Выполняется один раз для каждого класса чьи объекты участвуют в сериализации в JSON.
-     * @param cls  класс для которого требуется подобрать сериализер.
-     * @return  соответствующий сериализер. Метод никогда не возвращает <code>null</code>.
+     *
+     * @param cls класс для которого требуется подобрать сериализер.
+     * @return соответствующий сериализер. Метод никогда не возвращает <code>null</code>.
      */
     private JsonSerializer resolveSerializer(final Class<?> cls) {
         if (cls.isArray()) {
@@ -199,19 +204,19 @@ public class JsonContext {
             return Serializers.OBJECT_ARRAY;
         }
         // ищем прямые указания как сериализовать данный класс или один из его предков (только с пометкой что это правило применимо к классам-потомкам)ю
-        for (Class<?> c = cls; c!=null && c.getSuperclass()!=null; c=c.getSuperclass()) {
+        for (Class<?> c = cls; c != null && c.getSuperclass() != null; c = c.getSuperclass()) {
             JsonSerializer result = cserializers.get(c);
-            if (result!=null)
+            if (result != null)
                 return result;
             final JsonUseSeriazer an = JsonUtil.getDeclaredAnnotation(c, JsonUseSeriazer.class);
-            if (an!=null && (an.recursive() || c==cls)) {
+            if (an != null && (an.recursive() || c == cls)) {
                 // либо эта аннотация пришпилена непосредственно к требуемому классу
                 // либо к одному из его предков с пометкой что она действительна для всех его потомков.
-                return JsonUtil.makeInstance( an.value() );
+                return JsonUtil.makeInstance(an.value());
             }
         }
         // А может требуемый класс реализует какие-либо знакомые нам интерфейсы ?
-        for (Map.Entry<Class<?>,JsonSerializer> entry : iserializers.entrySet()) {
+        for (Map.Entry<Class<?>, JsonSerializer> entry : iserializers.entrySet()) {
             if (entry.getKey().isAssignableFrom(cls)) {
                 return entry.getValue();
             }
@@ -219,5 +224,4 @@ public class JsonContext {
         // Если никакие иные рецепты не помогли то остается трактовать данный класс как просто очередной java bean.
         return new BeanSerializer(cls);
     }
-
 }

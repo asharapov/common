@@ -33,14 +33,14 @@ public class JSExpression implements Serializable, Cloneable {
 
 
     public int hashCode() {
-        return expression!=null ? expression.hashCode() : 0;
+        return expression != null ? expression.hashCode() : 0;
     }
 
     public boolean equals(final Object obj) {
-        if (obj==null || !getClass().equals(obj.getClass()))
+        if (obj == null || !getClass().equals(obj.getClass()))
             return false;
-        final JSExpression other = (JSExpression)obj;
-        return (expression!=null ? expression.equals(other.expression) : other.expression==null);
+        final JSExpression other = (JSExpression) obj;
+        return (expression != null ? expression.equals(other.expression) : other.expression == null);
     }
 
     public Object clone() throws CloneNotSupportedException {
@@ -48,6 +48,6 @@ public class JSExpression implements Serializable, Cloneable {
     }
 
     public String toString() {
-        return "[JSExpression{"+getExpression()+"}]";
+        return "[JSExpression{" + getExpression() + "}]";
     }
 }

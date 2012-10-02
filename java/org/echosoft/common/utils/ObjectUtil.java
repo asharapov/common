@@ -94,7 +94,9 @@ public class ObjectUtil {
      * @param in  входной поток данных.
      * @return  массив байт что были прочитаны из потока.
      * @throws IOException  в случае возникновения каких-либо ошибок ввода-вывода.
+     * @deprecated см. одноименный метод в классе {@link StreamUtil}
      */
+    @Deprecated
     public static byte[] streamToBytes(final InputStream in) throws IOException {
         final ByteArrayOutputStream out = new ByteArrayOutputStream(READ_STREAM_BUFFER_SIZE);
         final byte[] buf = new byte[READ_STREAM_BUFFER_SIZE];
@@ -112,7 +114,9 @@ public class ObjectUtil {
      *  Если возвращаемое методом значение меньшее чем N значит поток был исчерпан полностью,
      *  в противном случае - возможно (!) в потоке есть еще непрочитанное нами содержимое.
      * @throws IOException  в случае возникновения каких-либо ошибок ввода-вывода.
+     * @deprecated см. одноименный метод в классе {@link StreamUtil}
      */
+    @Deprecated
     public static int readFromStream(final InputStream stream, final byte[] buf) throws IOException {
         final int length = buf.length;
         int readed = 0;
@@ -134,7 +138,9 @@ public class ObjectUtil {
      *  Если возвращаемое методом значение меньшее чем N значит поток был исчерпан полностью,
      *  в противном случае - возможно (!) в потоке есть еще непрочитанное нами содержимое.
      * @throws IOException  в случае возникновения каких-либо ошибок ввода-вывода.
+     * @deprecated см. одноименный метод в классе {@link StreamUtil}
      */
+    @Deprecated
     public static int readFromReader(final Reader reader, final char[] buf) throws IOException {
         final int length = buf.length;
         int readed = 0;
@@ -154,7 +160,9 @@ public class ObjectUtil {
      * @param in  входной поток некоторых бинарных данных.
      * @param out  выходной поток некоторых бинарных данных.
      * @throws IOException  в случае возникновения каких-либо ошибок ввода-вывода.
+     * @deprecated
      */
+    @Deprecated
     public static void pipeData(final InputStream in, final OutputStream out) throws IOException {
         if (in == null)
             return;
@@ -170,7 +178,9 @@ public class ObjectUtil {
      * @param in  входной поток некоторых символьных данных.
      * @param out  выходной поток некоторых символьных данных.
      * @throws IOException  в случае возникновения каких-либо ошибок ввода-вывода.
+     * @deprecated см. одноименный метод в классе {@link StreamUtil}
      */
+    @Deprecated
     public static void pipeData(final Reader in, final Writer out) throws IOException {
         if (in == null)
             return;

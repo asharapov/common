@@ -21,12 +21,14 @@ public final class DereferencedMembersAccessor implements MemberAccessor {
         this.method = method;
         this.field = null;
         this.cache = new ConcurrentHashMap<Class<?>, MemberAccessor[]>();
+        method.setAccessible(true);
     }
 
     public DereferencedMembersAccessor(final Field field) {
         this.method = null;
         this.field = field;
         this.cache = new ConcurrentHashMap<Class<?>, MemberAccessor[]>();
+        field.setAccessible(true);
     }
 
     /**
@@ -34,12 +36,12 @@ public final class DereferencedMembersAccessor implements MemberAccessor {
      */
     @Override
     public void serialize(final Object src, final JsonWriter jw) throws IOException, InvocationTargetException, IllegalAccessException {
-        final Object bean = method!=null ? method.invoke(src) : field.get(src);
-        if (bean==null)
+        final Object bean = method != null ? method.invoke(src) : field.get(src);
+        if (bean == null)
             return;
         final Class<?> cl = bean.getClass();
         MemberAccessor[] members = cache.get(cl);
-        if (members==null) {
+        if (members == null) {
             members = BeanSerializer.getMembers(cl);
             cache.put(cl, members);
         }
@@ -50,19 +52,19 @@ public final class DereferencedMembersAccessor implements MemberAccessor {
 
     @Override
     public int hashCode() {
-        return method!=null ? method.hashCode() : field.hashCode();
+        return method != null ? method.hashCode() : field.hashCode();
     }
 
     @Override
     public boolean equals(final Object obj) {
-        if (obj==null || !getClass().equals(obj.getClass()))
+        if (obj == null || !getClass().equals(obj.getClass()))
             return false;
-        final DereferencedMembersAccessor other = (DereferencedMembersAccessor)obj;
-        return method!=null ? method.equals(other.method) : field.equals(other.field);
+        final DereferencedMembersAccessor other = (DereferencedMembersAccessor) obj;
+        return method != null ? method.equals(other.method) : field.equals(other.field);
     }
 
     @Override
     public String toString() {
-        return "[DereferencedMembersAccessor{"+(method!=null ? "method: "+method.getName() : "field: "+field.getName())+"}]";
+        return "[DereferencedMembersAccessor{" + (method != null ? "method: " + method.getName() : "field: " + field.getName()) + "}]";
     }
 }

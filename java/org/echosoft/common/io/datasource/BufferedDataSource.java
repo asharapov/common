@@ -6,6 +6,8 @@ import java.io.*;
 import java.util.Arrays;
 import java.util.ConcurrentModificationException;
 
+import org.echosoft.common.utils.StreamUtil;
+
 /**
  * Реализация интерфейса {@link DataSource} которая до достижения определенного размера хранит
  * обрабатываемые данные в памяти, а при превышении заданного предела сбрасывает их во временный файл.
@@ -99,11 +101,13 @@ public class BufferedDataSource implements DataSource {
 
     @Override
     public InputStream getInputStream() throws IOException {
-        if (buf != null) {
+        if (buf != null)
             return new MemoryBufferInputStream();
-        } else {
+
+        if (file != null)
             return new FileBufferInputStream();
-        }
+
+        return StreamUtil.EMPTY_INPUT_STREAM;
     }
 
     @Override
@@ -241,9 +245,6 @@ public class BufferedDataSource implements DataSource {
         private OutputStream fileStream;
 
         private BufferedOutputStream() throws IOException {
-            if (buf == null) {
-                fileStream = new FileOutputStream(file, true);
-            }
         }
 
         @Override

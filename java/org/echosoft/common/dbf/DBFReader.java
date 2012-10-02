@@ -1,7 +1,5 @@
 package org.echosoft.common.dbf;
 
-import org.echosoft.common.utils.ObjectUtil;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigDecimal;
@@ -9,6 +7,8 @@ import java.nio.charset.Charset;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+
+import org.echosoft.common.utils.StreamUtil;
 
 /**
  * Выполняет чтение содержимого .DBF файла из потока.
@@ -41,7 +41,7 @@ public class DBFReader {
     public DBFReader(final InputStream stream, final Charset defaultCharset) throws IOException, DBFException {
         this.stream = stream;
         final byte[] data1 = new byte[32];
-        if (ObjectUtil.readFromStream(stream, data1) < data1.length)
+        if (StreamUtil.readFromStream(stream, data1) < data1.length)
             throw new DBFException("Premature end of stream: can't read DBF header.");
         this.descriptor = new TableDescriptor(data1);
 
@@ -51,7 +51,7 @@ public class DBFReader {
 
         this.fields = new Field[(descriptor.getHeaderSize() - 33) / 32];
         final byte[] data2 = new byte[descriptor.getHeaderSize() - 32];
-        if (ObjectUtil.readFromStream(stream, data2) < data2.length)
+        if (StreamUtil.readFromStream(stream, data2) < data2.length)
             throw new DBFException("Premature end of stream: can't read DBF fields headers.");
         int offset = 0, fieldOffset = 1;
         for (int i = 0, cnt = fields.length; i < cnt; i++) {
@@ -143,7 +143,7 @@ public class DBFReader {
             return false;
         currentRecord++;
         positioned = false;
-        final int readed = ObjectUtil.readFromStream(stream, recordBuf);
+        final int readed = StreamUtil.readFromStream(stream, recordBuf);
         if (readed == 1 && recordBuf[0] == 0x1A) {
             throw new DBFException("Premature end of stream: wrong information about total records count");
 //            return false;

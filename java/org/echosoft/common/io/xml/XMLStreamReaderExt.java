@@ -68,6 +68,8 @@ public class XMLStreamReaderExt implements XMLStreamReader {
             buf.append(tag.qName.getLocalPart());
             if (parentTag != null) {
                 buf.append('[').append(parentTag.children.get(tag.qName)).append(']');
+            } else {
+                buf.append("[1]");
             }
             parentTag = tag;
         }

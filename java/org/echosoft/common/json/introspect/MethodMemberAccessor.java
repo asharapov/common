@@ -19,6 +19,7 @@ public final class MethodMemberAccessor implements MemberAccessor {
         this.name = name;
         this.writeNulls = writeNulls;
         this.method = method;
+        method.setAccessible(true);
     }
 
     /**
@@ -26,8 +27,8 @@ public final class MethodMemberAccessor implements MemberAccessor {
      */
     @Override
     public void serialize(final Object bean, final JsonWriter jw) throws IOException, InvocationTargetException, IllegalAccessException {
-        final  Object value = method.invoke(bean);
-        if (value!=null || writeNulls) {
+        final Object value = method.invoke(bean);
+        if (value != null || writeNulls) {
             jw.writeProperty(name, value);
         }
     }
@@ -39,14 +40,14 @@ public final class MethodMemberAccessor implements MemberAccessor {
 
     @Override
     public boolean equals(final Object obj) {
-        if (obj==null || !getClass().equals(obj.getClass()))
+        if (obj == null || !getClass().equals(obj.getClass()))
             return false;
-        final MethodMemberAccessor other = (MethodMemberAccessor)obj;
+        final MethodMemberAccessor other = (MethodMemberAccessor) obj;
         return name.equals(other.name) && method.equals(other.method);
     }
 
     @Override
     public String toString() {
-        return "[MethodMemberAccessor{name:"+name+", method:"+method+", writeNulls:"+writeNulls+"}]";
+        return "[MethodMemberAccessor{name:" + name + ", method:" + method + ", writeNulls:" + writeNulls + "}]";
     }
 }

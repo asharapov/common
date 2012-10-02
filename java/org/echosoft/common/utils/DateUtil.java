@@ -91,19 +91,19 @@ public class DateUtil {
         amTokens.put("ten", 10);
     }
 
-    protected static enum Tense {
+    public static enum Tense {
         PAST, FUTURE
     }
 
-    protected static enum TimeUnit {
+    public static enum TimeUnit {
         YEAR, QUARTER, MONTH, WEEK, DAY, HOUR, MINUTE, SECOND
     }
 
-    protected static enum TimeUnitBound {
+    public static enum TimeUnitBound {
         LOW, NEUTRAL, HIGH
     }
 
-    protected static Date calculate(final Date base, final int amount, final TimeUnit unit, final Tense tense, final TimeUnitBound bound) {
+    public static Date calculate(final Date base, final int amount, final TimeUnit unit, final Tense tense, final TimeUnitBound bound) {
         final Calendar cal = Calendar.getInstance();
         if (base != null)
             cal.setTime(base);

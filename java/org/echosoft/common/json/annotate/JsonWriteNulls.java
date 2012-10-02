@@ -9,8 +9,8 @@ import java.lang.annotation.Target;
  * Данная аннотация определяет должны ли сериализоваться те свойства бинов которые имеют значение <code>null</code>.
  * По умолчанию сериализуются все свойства бинов.
  *
- * @see org.echosoft.common.json.introspect.BeanSerializer
  * @author Anton Sharapov
+ * @see org.echosoft.common.json.introspect.BeanSerializer
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.TYPE})

@@ -9,9 +9,9 @@ import java.sql.Types;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.echosoft.common.query.BeanLoader;
 import org.echosoft.common.query.AttrMetaData;
-import org.echosoft.common.utils.ObjectUtil;
+import org.echosoft.common.query.BeanLoader;
+import org.echosoft.common.utils.StreamUtil;
 
 /**
  * Simple instance of the {@link BeanLoader}.
@@ -92,7 +92,7 @@ public class JdbcBeanLoader implements BeanLoader<Map<String,Object>> {
                 final InputStream in = rs.getBinaryStream(i);
                 if (in!=null) {
                     try {
-                        data = ObjectUtil.streamToBytes(in);
+                        data = StreamUtil.streamToBytes(in);
                     } finally {
                         in.close();
                     }

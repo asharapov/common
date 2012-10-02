@@ -1,5 +1,6 @@
 package org.echosoft.common.utils;
 
+import java.io.StringWriter;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -339,6 +340,47 @@ public class StringUtilTest {
         }
         for (String str : invalidcases) {
             Assert.assertEquals(str, false, StringUtil.isJavaIdentifier(str));
+        }
+    }
+
+    @Test
+    public void testEncodeHtmlText() throws Exception {
+        final String[][] testcases = {
+                {null, ""},
+                {"", ""},
+                {"abc", "abc"},
+                {"a&b", "a&amp;b"},
+                {"<&>", "&lt;&amp;&gt;"},
+                {"a&", "a&amp;"},
+                {"a&{}", "a&amp;{}"}
+        };
+        for (String[] testcase : testcases) {
+            final String encodedValue = StringUtil.encodeHTMLText(testcase[0]);
+            Assert.assertEquals(testcase[1], encodedValue);
+            final StringWriter buf = new StringWriter();
+            StringUtil.encodeHTMLText(buf, testcase[0]);
+            Assert.assertEquals(testcase[1], buf.toString());
+        }
+    }
+
+    @Test
+    public void testEncodeHtmlAttribute() throws Exception {
+        final String[][] testcases = {
+                {null, ""},
+                {"", ""},
+                {"abc", "abc"},
+                {"a&b", "a&amp;b"},
+                {"<&>", "&lt;&amp;&gt;"},
+                {"a&", "a&amp;"},
+                {"a&{}", "a&amp;{}"},
+                {"ab\"cd\'", "ab&quot;cd&apos;"}
+        };
+        for (String[] testcase : testcases) {
+            final String encodedValue = StringUtil.encodeHTMLAttribute(testcase[0]);
+            Assert.assertEquals(testcase[1], encodedValue);
+            final StringWriter buf = new StringWriter();
+            StringUtil.encodeHTMLAttribute(buf, testcase[0]);
+            Assert.assertEquals(testcase[1], buf.toString());
         }
     }
 }

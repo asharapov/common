@@ -32,10 +32,12 @@ public final class BeanSerializer implements JsonSerializer {
         for (final JsonUtil.NamedMethod entry : JsonUtil.findGetters(cl)) {
             final Method method = entry.method;
             final JsonField jfa = method.getAnnotation(JsonField.class);
-            if (jfa!=null) {
-                if (jfa.isTransient())
-                    continue;
+            if (jfa != null) {
                 name = jfa.name().isEmpty() ? entry.name : jfa.name();
+                if (jfa.isTransient()) {
+                    properties.add(name);
+                    continue;
+                }
                 writeNulls = jfa.writeNulls();
                 dereference = jfa.dereference();
             } else {
@@ -44,9 +46,9 @@ public final class BeanSerializer implements JsonSerializer {
                 dereference = false;
             }
             if (dereference) {
-                list.add( new DereferencedMembersAccessor(method) );
+                list.add(new DereferencedMembersAccessor(method));
             } else {
-                list.add( new MethodMemberAccessor(name, method, writeNulls) );
+                list.add(new MethodMemberAccessor(name, method, writeNulls));
             }
             properties.add(name);
         }
@@ -55,7 +57,7 @@ public final class BeanSerializer implements JsonSerializer {
             if (Modifier.isStatic(mod) || Modifier.isTransient(mod))
                 continue;
             final JsonField jfa = field.getAnnotation(JsonField.class);
-            if (jfa!=null) {
+            if (jfa != null) {
                 if (jfa.isTransient())
                     continue;
                 name = jfa.name().isEmpty() ? field.getName() : jfa.name();
@@ -69,9 +71,9 @@ public final class BeanSerializer implements JsonSerializer {
             if (properties.contains(name))
                 continue;
             if (dereference) {
-                list.add( new DereferencedMembersAccessor(field) );
+                list.add(new DereferencedMembersAccessor(field));
             } else {
-                list.add( new FieldMemberAccessor(name, field, writeNulls) );
+                list.add(new FieldMemberAccessor(name, field, writeNulls));
             }
         }
         return list.toArray(new MemberAccessor[list.size()]);
@@ -89,7 +91,7 @@ public final class BeanSerializer implements JsonSerializer {
     @Override
     public void serialize(final Object src, final JsonWriter jw) throws IOException, InvocationTargetException, IllegalAccessException {
         jw.beginObject();
-        for (final MemberAccessor member : accessors) {
+        for (MemberAccessor member : accessors) {
             member.serialize(src, jw);
         }
         jw.endObject();
@@ -103,14 +105,14 @@ public final class BeanSerializer implements JsonSerializer {
 
     @Override
     public boolean equals(final Object obj) {
-        if (obj==null || !getClass().equals(obj.getClass()))
+        if (obj == null || !getClass().equals(obj.getClass()))
             return false;
-        final BeanSerializer other = (BeanSerializer)obj;
+        final BeanSerializer other = (BeanSerializer) obj;
         return cl.equals(other.cl);
     }
 
     @Override
     public String toString() {
-        return "[BeanSerializer{class:"+cl+"}]";
+        return "[BeanSerializer{class:" + cl + "}]";
     }
 }

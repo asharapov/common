@@ -19,6 +19,7 @@ public final class FieldMemberAccessor implements MemberAccessor {
         this.name = name;
         this.field = field;
         this.writeNulls = writeNulls;
+        field.setAccessible(true);
     }
 
     /**
@@ -27,7 +28,7 @@ public final class FieldMemberAccessor implements MemberAccessor {
     @Override
     public void serialize(final Object bean, final JsonWriter jw) throws IOException, InvocationTargetException, IllegalAccessException {
         final Object value = field.get(bean);
-        if (value!=null || writeNulls) {
+        if (value != null || writeNulls) {
             jw.writeProperty(name, value);
         }
     }
@@ -39,15 +40,14 @@ public final class FieldMemberAccessor implements MemberAccessor {
 
     @Override
     public boolean equals(final Object obj) {
-        if (obj==null || !getClass().equals(obj.getClass()))
+        if (obj == null || !getClass().equals(obj.getClass()))
             return false;
-        final FieldMemberAccessor other = (FieldMemberAccessor)obj;
+        final FieldMemberAccessor other = (FieldMemberAccessor) obj;
         return name.equals(other.name) && field.equals(other.field);
     }
 
     @Override
     public String toString() {
-        return "[FieldMemberAccessor{name:"+name+", field:"+field+", writeNulls:"+writeNulls+"}]";
+        return "[FieldMemberAccessor{name:" + name + ", field:" + field + ", writeNulls:" + writeNulls + "}]";
     }
-
 }
