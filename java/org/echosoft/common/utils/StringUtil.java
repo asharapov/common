@@ -35,12 +35,15 @@ public class StringUtil {
         for (int i = 0; i < 32; i++) {
             REPLACEMENT_HTML_TEXTS[i] = empty;
         }
+        REPLACEMENT_HTML_TEXTS['\t'] = null;
         REPLACEMENT_HTML_TEXTS['<'] = "&lt;".toCharArray();
         REPLACEMENT_HTML_TEXTS['>'] = "&gt;".toCharArray();
         REPLACEMENT_HTML_TEXTS['&'] = "&amp;".toCharArray();
         REPLACEMENT_HTML_ATTRS = REPLACEMENT_HTML_TEXTS.clone();
         REPLACEMENT_HTML_ATTRS['\"'] = "&quot;".toCharArray();
         REPLACEMENT_HTML_ATTRS['\''] = "&apos;".toCharArray();
+        REPLACEMENT_HTML_TEXTS['\r'] = null;
+        REPLACEMENT_HTML_TEXTS['\n'] = null;
     }
 
 
@@ -512,7 +515,7 @@ public class StringUtil {
      * @param text оригинальный текст HTML.
      * @return исходный текст в котором символы
      */
-    public static String encodeHTMLText(final CharSequence text) {
+    public static String encodeXMLText(final CharSequence text) {
         final int length;
         if (text == null || (length = text.length()) == 0)
             return "";
@@ -537,7 +540,7 @@ public class StringUtil {
      * @param text оригинальный текст HTML.
      * @throws IOException в случае каких-либо проблем вывода данных в поток.
      */
-    public static void encodeHTMLText(final Writer out, final String text) throws IOException {
+    public static void encodeXMLText(final Writer out, final String text) throws IOException {
         final int length;
         if (text == null || (length = text.length()) == 0)
             return;
@@ -563,7 +566,7 @@ public class StringUtil {
      * @param text оригинальный текст HTML.
      * @return исходный текст в котором символы
      */
-    public static String encodeHTMLAttribute(final CharSequence text) {
+    public static String encodeXMLAttribute(final CharSequence text) {
         final int length;
         if (text == null || (length = text.length()) == 0)
             return "";
@@ -588,7 +591,7 @@ public class StringUtil {
      * @param text оригинальный текст значения атрибута HTML.
      * @throws IOException в случае каких-либо проблем вывода данных в поток.
      */
-    public static void encodeHTMLAttribute(final Writer out, final String text) throws IOException {
+    public static void encodeXMLAttribute(final Writer out, final String text) throws IOException {
         final int length;
         if (text == null || (length = text.length()) == 0)
             return;
@@ -608,6 +611,23 @@ public class StringUtil {
             out.write(text, last, length - last);
     }
 
+
+    @Deprecated
+    public static String encodeHTMLText(final CharSequence text) {
+        return encodeXMLText(text);
+    }
+    @Deprecated
+    public static void encodeHTMLText(final Writer out, final String text) throws IOException {
+        encodeXMLText(out, text);
+    }
+    @Deprecated
+    public static String encodeHTMLAttribute(final CharSequence text) {
+        return encodeXMLAttribute(text);
+    }
+    @Deprecated
+    public static void encodeHTMLAttribute(final Writer out, final String text) throws IOException {
+        encodeXMLAttribute(out, text);
+    }
 
     /**
      * Преобразовывает строки вида <code>aa/bb/dd/../cc</code> в строки вида <code>aa/bb/cc</code>.<br/>

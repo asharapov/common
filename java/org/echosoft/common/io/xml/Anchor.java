@@ -126,6 +126,14 @@ public class Anchor implements Serializable {
         return new Anchor(array);
     }
 
+    public Part getFirstPart() {
+        return parts.length > 0 ? parts[0] : null;
+    }
+
+    public Part getLastPart() {
+        return parts.length > 0 ? parts[parts.length - 1] : null;
+    }
+
     @Override
     public int hashCode() {
         if (hash == 0)

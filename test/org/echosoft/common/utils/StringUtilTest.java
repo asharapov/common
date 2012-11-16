@@ -7,6 +7,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.echosoft.common.io.FastStringWriter;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -344,7 +345,7 @@ public class StringUtilTest {
     }
 
     @Test
-    public void testEncodeHtmlText() throws Exception {
+    public void testEncodeXMLText() throws Exception {
         final String[][] testcases = {
                 {null, ""},
                 {"", ""},
@@ -355,16 +356,16 @@ public class StringUtilTest {
                 {"a&{}", "a&amp;{}"}
         };
         for (String[] testcase : testcases) {
-            final String encodedValue = StringUtil.encodeHTMLText(testcase[0]);
+            final String encodedValue = StringUtil.encodeXMLText(testcase[0]);
             Assert.assertEquals(testcase[1], encodedValue);
             final StringWriter buf = new StringWriter();
-            StringUtil.encodeHTMLText(buf, testcase[0]);
+            StringUtil.encodeXMLText(buf, testcase[0]);
             Assert.assertEquals(testcase[1], buf.toString());
         }
     }
 
     @Test
-    public void testEncodeHtmlAttribute() throws Exception {
+    public void testEncodeXMLAttribute() throws Exception {
         final String[][] testcases = {
                 {null, ""},
                 {"", ""},
@@ -376,11 +377,27 @@ public class StringUtilTest {
                 {"ab\"cd\'", "ab&quot;cd&apos;"}
         };
         for (String[] testcase : testcases) {
-            final String encodedValue = StringUtil.encodeHTMLAttribute(testcase[0]);
+            final String encodedValue = StringUtil.encodeXMLAttribute(testcase[0]);
             Assert.assertEquals(testcase[1], encodedValue);
             final StringWriter buf = new StringWriter();
-            StringUtil.encodeHTMLAttribute(buf, testcase[0]);
+            StringUtil.encodeXMLAttribute(buf, testcase[0]);
             Assert.assertEquals(testcase[1], buf.toString());
         }
+    }
+
+    @Test
+    public void testEncodeXMLText2() throws Exception {
+        final String text =
+                "ORA-01400: невозможно вставить NULL в (\"CBDUIGBAN\".\"FORBIDDEN_LIST\".\"DECISION_REGION_SID\")\r\n" +
+                "ORA-06512: на  \"CBDUIGBAN.PKG_FORBIDDEN_LIST\", line 86\r\n" +
+                "ORA-06512: на  line 1\n";
+        final String encoded = StringUtil.encodeXMLText(text);
+        Assert.assertEquals(text, encoded);
+        final StringWriter buf1 = new StringWriter();
+        StringUtil.encodeXMLText(buf1, text);
+        Assert.assertEquals(encoded, buf1.toString());
+        final FastStringWriter buf2 = new FastStringWriter();
+        StringUtil.encodeXMLText(buf2, text);
+        Assert.assertEquals(encoded, buf2.toString());
     }
 }

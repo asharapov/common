@@ -96,7 +96,7 @@ public final class FastStringWriter extends Writer {
             value[count++] = 'l';
         } else {
             ensureCapacity(length);
-            text.getChars(offset, length, value, count);
+            text.getChars(offset, offset + length, value, count);
             count += length;
         }
     }

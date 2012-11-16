@@ -319,7 +319,7 @@ public class Serializers {
                     for (int i = 0; i < length; i++) {
                         if (i > 0)
                             out.write(',');
-                        out.write(Integer.toString(src[i], 10));
+                        out.write(Integer.toString(src[i]));
                     }
                     out.write(']');
                 }
