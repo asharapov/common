@@ -20,8 +20,8 @@ public class XMLStreamReaderExtTest {
 
     private static XMLInputFactory inputFactory;
     private static XMLOutputFactory outputFactory;
-    private XMLStreamReaderExt stream;
-    private static String xml1 = "<?xml version='1.0' encoding='UTF-8'?>" +
+    private XMLStreamReaderExt xmlr1, xmlr2;
+    private static String test1 = "<?xml version='1.0' encoding='UTF-8'?>" +
             "<data xmlns:xs=\"http://www.w3.org/2001/XMLSchema\" xmlns:ts=\"http://ts.ru/schema\">\n" +
             " <profiles>\n" +
             "  <profile id=\"1\" ts:item=\"&quot;test&quot;\">\n" +
@@ -35,6 +35,7 @@ public class XMLStreamReaderExtTest {
             "    </tags>\n" +
             "  </profile>\n" +
             "  <profile id=\"2\">\n" +
+            "    <![CDATA[ hello world ]]>\n" +
             "    <last-name>Petrov</last-name>\n" +
             "    <first-name>Petr</first-name>\n" +
             "    <age>28</age>\n" +
@@ -55,6 +56,23 @@ public class XMLStreamReaderExtTest {
             " </profiles>\n" +
             "</data>";
 
+    private static String test2 = "<?xml version='1.0' encoding='UTF-8'?>" +
+            //"<!DOCTYPE rdf:RDF SYSTEM \"http://dublincore.org/2000/12/01-dcmes-xml-dtd.dtd\">\n" +
+            "<rdf:RDF xmlns:dc=\"http://purl.org/dc/elements/1.1/\" xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\" rdf:about=\"http://dublincore.org/\">\n" +
+            "<!-- Sample from http://dublincore.org/documents/2002/04/22/dcmes-xml/-->\n" +
+            "    <rdf:Description rdf:about=\"http://dublincore.org/\">\n" +
+            "        <dc:title>Dublin Core Metadata Initiative - Home Page</dc:title>\n" +
+            "        <dc:description>The Dublin Core Metadata Initiative Web site.</dc:description>\n" +
+            "        <dc:date>1998-10-10</dc:date>\n" +
+            "        <dc:format>text/html</dc:format>\n" +
+            "        <dc:language>en</dc:language>\n" +
+            "        <dc:contributor>The Dublin Core Metadata Initiative</dc:contributor>\n" +
+            "        <!-- My guess at the French for the above Dave -->\n" +
+            "        <dc:contributor xml:lang=\"fr\">L'Initiative de métadonnées du Dublin Core</dc:contributor>\n" +
+            "        <dc:contributor xml:lang=\"de\">der Dublin-Core Metadata-Diskussionen</dc:contributor>\n" +
+            "    </rdf:Description>\n" +
+            "</rdf:RDF>";
+
     @BeforeClass
     public static void beforeClass() throws Exception {
         inputFactory = XMLInputFactory.newFactory();
@@ -63,53 +81,94 @@ public class XMLStreamReaderExtTest {
 
     @Before
     public void beforeTest() throws Exception {
-        stream = new XMLStreamReaderExt(inputFactory.createXMLStreamReader(new StringReader(xml1)));
+        xmlr1 = new XMLStreamReaderExt(inputFactory.createXMLStreamReader(new StringReader(test1)));
+        xmlr2 = new XMLStreamReaderExt(inputFactory.createXMLStreamReader(new StringReader(test2)));
     }
 
     @After
     public void afterTest() throws Exception {
-        if (stream != null)
-            stream.close();
+        if (xmlr1 != null)
+            xmlr1.close();
+        if (xmlr2 != null)
+            xmlr2.close();
     }
 
-    //@Test
+    @Test
     public void test1() throws Exception {
-        stream.nextTag();
-        stream.require(XMLStreamConstants.START_ELEMENT, null, "data");
-        stream.nextTag();
-        stream.require(XMLStreamConstants.START_ELEMENT, null, "profiles");
+        xmlr1.nextTag();
+        xmlr1.require(XMLStreamConstants.START_ELEMENT, null, "data");
+        xmlr1.nextTag();
+        xmlr1.require(XMLStreamConstants.START_ELEMENT, null, "profiles");
         main:
         while (true) {
-            int eventType = stream.next();
+            int eventType = xmlr1.next();
             switch (eventType) {
                 case XMLStreamConstants.START_ELEMENT : {
-                    stream.require(XMLStreamConstants.START_ELEMENT, null, "profile");
-                    System.out.println("before: " + stream.getAnchorAsText() + " :  " + stream.getLocation() + "\n");
-                    stream.skipTagBody();
-                    System.out.println("after: " + stream.getAnchorAsText() + " :  " + stream.getLocation() + "\n");
-                    System.out.println("\n-------------------------------------------\n");
+                    xmlr1.require(XMLStreamConstants.START_ELEMENT, null, "profile");
+                    System.out.println(xmlr1.getAnchorAsText());
+                    final Element elem = xmlr1.getElement();
+                    if ("2".equals(elem.getAttribute("id"))) {
+                        final StringBuilder buf = new StringBuilder();
+                        elem.writeOpenTag(buf);
+                        elem.writeCloseTag(buf);
+                        System.out.println(buf);
+                        xmlr1.skipTagBody();
+                    } else {
+                        xmlr1.skipTagBody();
+                    }
                     break;
                 }
                 case XMLStreamConstants.END_ELEMENT : {
-                    stream.require(XMLStreamConstants.END_ELEMENT, null, "profiles");
+                    xmlr1.require(XMLStreamConstants.END_ELEMENT, null, "profiles");
                     break main;
                 }
             }
         }
-        System.out.println(stream);
+        System.out.println(xmlr1);
     }
 
     @Test
     public void test2() throws Exception {
         final StringWriter buf = new StringWriter(1024);
-        final XMLStreamWriter writer = outputFactory.createXMLStreamWriter(buf);
-        writer.writeStartDocument();
-        stream.nextTag();
-        stream.require(XMLStreamConstants.START_ELEMENT, null, "data");
-        stream.serializeTag(writer);
-        stream.require(XMLStreamConstants.END_ELEMENT, null, "data");
-        writer.writeEndDocument();
-        writer.close();
-        Assert.assertEquals(xml1, buf.toString());
+        final XMLStreamWriter xmlw = outputFactory.createXMLStreamWriter(buf);
+        xmlw.writeStartDocument();
+        xmlr1.nextTag();
+        xmlr1.require(XMLStreamConstants.START_ELEMENT, null, "data");
+        xmlr1.serializeTag(xmlw);
+        xmlr1.require(XMLStreamConstants.END_ELEMENT, null, "data");
+        xmlw.writeEndDocument();
+        xmlw.close();
+        Assert.assertEquals(test1, buf.toString());
+    }
+
+    @Test
+    public void test3() throws Exception {
+        final StringWriter buf = new StringWriter(1024);
+        final XMLStreamWriter xmlw = outputFactory.createXMLStreamWriter(buf);
+        xmlw.writeStartDocument();
+        xmlr1.nextTag();
+        xmlr1.require(XMLStreamConstants.START_ELEMENT, null, "data");
+        xmlr1.serializeTag(xmlw);
+        xmlw.writeEndDocument();
+        xmlw.close();
+        Assert.assertEquals(test1, buf.toString());
+    }
+
+    @Test
+    public void test4() throws Exception {
+        final StringWriter buf = new StringWriter(1024);
+        final XMLStreamWriter xmlw = outputFactory.createXMLStreamWriter(buf);
+        xmlw.writeStartDocument();
+        xmlr2.nextTag();
+        xmlr2.require(XMLStreamConstants.START_ELEMENT, "http://www.w3.org/1999/02/22-rdf-syntax-ns#", "RDF");
+        final Element root = xmlr2.getElement();
+        final StringBuilder buf2 = new StringBuilder();
+        root.writeOpenTag(buf2);
+        root.writeCloseTag(buf2);
+        System.out.println(buf2);
+        xmlr2.serializeTag(xmlw);
+        xmlw.writeEndDocument();
+        xmlw.close();
+        Assert.assertEquals(test2, buf.toString());
     }
 }

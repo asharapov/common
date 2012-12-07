@@ -1,5 +1,7 @@
 package org.echosoft.common.io.xml;
 
+import java.io.IOException;
+import java.io.Writer;
 import java.util.ArrayDeque;
 import java.util.Deque;
 import java.util.HashMap;
@@ -14,6 +16,8 @@ import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 import javax.xml.stream.XMLStreamWriter;
 
+import org.echosoft.common.utils.StringUtil;
+
 /**
  * Расширяет возможности стандартного потокового парсера XML, добавляя следующие методы:
  * <ul>
@@ -26,11 +30,11 @@ import javax.xml.stream.XMLStreamWriter;
  */
 public class XMLStreamReaderExt implements XMLStreamReader {
 
-    private final XMLStreamReader proxy;
+    private final XMLStreamReader xmlr;
     private final Deque<TagInfo> stack;
 
-    public XMLStreamReaderExt(final XMLStreamReader proxy) {
-        this.proxy = proxy;
+    public XMLStreamReaderExt(final XMLStreamReader xmlr) {
+        this.xmlr = xmlr;
         this.stack = new ArrayDeque<TagInfo>(32);
     }
 
@@ -86,6 +90,16 @@ public class XMLStreamReaderExt implements XMLStreamReader {
     }
 
     /**
+     * Возвращает информацию об элементе, на котором в настоящий момент спозиционирован поток.
+     *
+     * @return информация о текущем элементе (полное имя, атрибуты, сопоставленные с ним пространства имен).
+     * @throws IllegalStateException в случае если входной поток находится в состоянии отличном от START_ELEMENT или END_ELEMENT.
+     */
+    public Element getElement() {
+        return new Element(xmlr);
+    }
+
+    /**
      * Метод пропускает тело текущего тега со всем его вложенным содержимым.<br/>
      * <strong>Предусловие:</strong> Курсор потока должен указывать на открывающий элемент тега чье содержимое требуется пропустить.
      * Если данное условие не выполняется то метод поднимет исключение.</br/>
@@ -93,7 +107,7 @@ public class XMLStreamReaderExt implements XMLStreamReader {
      *
      * @return тип текщуего узла (всегда {@link XMLStreamConstants#END_ELEMENT}).
      * @throws NoSuchElementException в случае преждевременного завершения читаемого документа XML.
-     * @throws XMLStreamException поднимается в одном из трех случаев:
+     * @throws XMLStreamException     поднимается в одном из трех случаев:
      *   <ol>
      *     <li>в случае если при вызове данного метода курсор потока не указывает на открывающий элемент тега</li>
      *     <li>в случае если при завершении обработки данного метода курсор потока не был спозиционирован на закрывающий элемент тега</li>
@@ -101,10 +115,10 @@ public class XMLStreamReaderExt implements XMLStreamReader {
      *   </ol>
      */
     public int skipTagBody() throws XMLStreamException, NoSuchElementException {
-        proxy.require(START_ELEMENT, null, null);
+        xmlr.require(START_ELEMENT, null, null);
         int delta = 1, eventType = 0;
         while (delta > 0) {
-            eventType = proxy.next();
+            eventType = xmlr.next();
             switch (eventType) {
                 case START_ELEMENT:
                     delta++;
@@ -116,59 +130,60 @@ public class XMLStreamReaderExt implements XMLStreamReader {
                     break;
             }
         }
-        proxy.require(END_ELEMENT, null, null);
+        xmlr.require(END_ELEMENT, null, null);
         return eventType;
     }
 
     /**
-     * Метод читает содержимое данного тега и сериализует его в указанный в аргументе поток.<br/>
-     * <strong>Предусловие:</strong> Курсор потока должен указывать на открывающий элемент тега чье содержимое требуется пропустить.
+     * Метод читает содержимое данного элемента и сериализует его в указанный в аргументе выходной поток.<br/>
+     * <strong>Предусловие:</strong> Курсор потока должен указывать на открывающий элемент тега чье содержимое требуется сериализовать.
      * Если данное условие не выполняется то метод поднимет исключение.</br/>
      * <strong>Постусловие:</strong> По завершении метода курсор будет указывать на закрывающий элемент данного тега.
      *
-     * @param writer поток куда будет осуществляться запись содержимого данного тега.
-     * @return тип текщуего узла (всегда {@link XMLStreamConstants#END_ELEMENT}).
+     * @param xmlw поток куда будет осуществляться запись содержимого данного элемента.
      * @throws NoSuchElementException в случае преждевременного завершения читаемого документа XML.
-     * @throws XMLStreamException поднимается в одном из трех случаев:
+     * @throws XMLStreamException     поднимается в одном из трех случаев:
      *   <ol>
      *     <li>в случае если при вызове данного метода курсор потока не указывает на открывающий элемент тега</li>
      *     <li>в случае если при завершении обработки данного метода курсор потока не был спозиционирован на закрывающий элемент тега</li>
      *     <li>если в процессе итерации по содержимому данного тега возникла какая-либо непредвиденная ошибка связанная с невалидной структурой документа.</li>
      *   </ol>
      */
-    public int serializeTag(final XMLStreamWriter writer) throws XMLStreamException {
-        proxy.require(START_ELEMENT, null, null);
-        serializeStartElement(writer);
-        int delta = 1, eventType = 0;
-        while (delta > 0) {
-            eventType = proxy.next();
-            switch (eventType) {
+    public void serializeTag(final XMLStreamWriter xmlw) throws XMLStreamException {
+        xmlr.require(START_ELEMENT, null, null);
+        serializeStartElement(xmlw);
+        int delta = 1;
+        while (true) {
+            switch (xmlr.next()) {
                 case START_ELEMENT:
+                    serializeStartElement(xmlw);
                     delta++;
-                    serializeStartElement(writer);
                     break;
                 case END_ELEMENT:
+                    xmlw.writeEndElement();
                     delta--;
-                    writer.writeEndElement();
+                    if (delta == 0) {
+                        return;
+                    }
                     break;
                 case PROCESSING_INSTRUCTION:
-                    writer.writeProcessingInstruction(proxy.getPITarget(), proxy.getPIData());
+                    xmlw.writeProcessingInstruction(xmlr.getPITarget(), xmlr.getPIData());
                     break;
                 case SPACE:
                 case CHARACTERS:
-                    writer.writeCharacters(proxy.getText());
+                    xmlw.writeCharacters(xmlr.getText());
                     break;
                 case COMMENT:
-                    writer.writeComment(proxy.getText());
+                    xmlw.writeComment(xmlr.getText());
                     break;
                 case ENTITY_REFERENCE:
-                    writer.writeEntityRef(proxy.getLocalName());
+                    xmlw.writeEntityRef(xmlr.getLocalName());
                     break;
                 case DTD:
-                    writer.writeDTD(proxy.getText());
+                    xmlw.writeDTD(xmlr.getText());
                     break;
                 case CDATA:
-                    writer.writeCData(proxy.getText());
+                    xmlw.writeCData(xmlr.getText());
                     break;
                 case ATTRIBUTE:             // вся работа уже выполнена при обработке события START_ELEMENT.
                 case NAMESPACE:             // вся работа уже выполнена при обработке события START_ELEMENT.
@@ -178,45 +193,132 @@ public class XMLStreamReaderExt implements XMLStreamReader {
                     break;
             }
         }
-        proxy.require(END_ELEMENT, null, null);
-        return eventType;
     }
-    private void serializeStartElement(final XMLStreamWriter writer) throws XMLStreamException {
-        final String uri = proxy.getNamespaceURI();
-        if (uri != null) {
-            final String prefix = proxy.getPrefix();
-            if (prefix != null) {
-                writer.writeStartElement(prefix, proxy.getLocalName(), uri);
-            } else {
-                writer.writeStartElement(uri, proxy.getLocalName());
-            }
-        } else {
-            writer.writeStartElement(proxy.getLocalName());
-        }
-        for (int i = 0, len = proxy.getNamespaceCount(); i < len; i++) {
-            writer.writeNamespace(proxy.getNamespacePrefix(i), proxy.getNamespaceURI(i));
-        }
-        for (int i = 0, len = proxy.getAttributeCount(); i < len; i++) {
-            final String attrUri = proxy.getAttributeNamespace(i);
-            if (attrUri != null) {
-                writer.writeAttribute(proxy.getAttributePrefix(i), attrUri, proxy.getAttributeLocalName(i), proxy.getAttributeValue(i));
-            } else {
-                writer.writeAttribute(proxy.getAttributeLocalName(i), proxy.getAttributeValue(i));
+
+    /**
+     * Метод читает внутреннее содержимое текущего элемента (не включая его открывающие и закрывающие теги) и сериализует его в указанный в аргументе выходной поток.<br/>
+     * <strong>Предусловие:</strong> Курсор потока должен указывать на открывающий элемент тега чье содержимое требуется сериализовать.
+     * Если данное условие не выполняется то метод поднимет исключение.</br/>
+     * <strong>Постусловие:</strong> По завершении метода курсор будет указывать на закрывающий элемент данного тега.
+     *
+     * @param xmlw поток куда будет осуществляться запись содержимого данного элемента.
+     * @throws NoSuchElementException в случае преждевременного завершения читаемого документа XML.
+     * @throws XMLStreamException  поднимается в одном из трех случаев:
+     *   <ol>
+     *     <li>в случае если при вызове данного метода курсор потока не указывает на открывающий элемент тега</li>
+     *     <li>в случае если при завершении обработки данного метода курсор потока не был спозиционирован на закрывающий элемент тега</li>
+     *     <li>если в процессе итерации по содержимому данного тега возникла какая-либо непредвиденная ошибка связанная с невалидной структурой документа.</li>
+     *   </ol>
+     */
+    public void serializeTagBody(final XMLStreamWriter xmlw) throws XMLStreamException {
+        xmlr.require(START_ELEMENT, null, null);
+        int delta = 1;
+        while (true) {
+            switch (xmlr.next()) {
+                case START_ELEMENT:
+                    serializeStartElement(xmlw);
+                    delta++;
+                    break;
+                case END_ELEMENT:
+                    delta--;
+                    if (delta == 0) {
+                        return;
+                    }
+                    xmlw.writeEndElement();
+                    break;
+                case PROCESSING_INSTRUCTION:
+                    xmlw.writeProcessingInstruction(xmlr.getPITarget(), xmlr.getPIData());
+                    break;
+                case SPACE:
+                case CHARACTERS:
+                    xmlw.writeCharacters(xmlr.getText());
+                    break;
+                case COMMENT:
+                    xmlw.writeComment(xmlr.getText());
+                    break;
+                case ENTITY_REFERENCE:
+                    xmlw.writeEntityRef(xmlr.getLocalName());
+                    break;
+                case DTD:
+                    xmlw.writeDTD(xmlr.getText());
+                    break;
+                case CDATA:
+                    xmlw.writeCData(xmlr.getText());
+                    break;
+                case ATTRIBUTE:             // вся работа уже выполнена при обработке события START_ELEMENT.
+                case NAMESPACE:             // вся работа уже выполнена при обработке события START_ELEMENT.
+                case NOTATION_DECLARATION:
+                case ENTITY_DECLARATION:
+                default:
+                    break;
             }
         }
     }
 
+    protected void serializeStartElement(final XMLStreamWriter xmlw) throws XMLStreamException {
+        QName name = xmlr.getName();
+        xmlw.writeStartElement(name.getPrefix(), name.getLocalPart(), name.getNamespaceURI());
+        for (int i = 0, cnt = xmlr.getNamespaceCount(); i < cnt; i++) {
+            xmlw.writeNamespace(xmlr.getNamespacePrefix(i), xmlr.getNamespaceURI(i));
+        }
+        for (int i = 0, cnt = xmlr.getAttributeCount(); i < cnt; i++) {
+            name = xmlr.getAttributeName(i);
+            xmlw.writeAttribute(name.getPrefix(), name.getNamespaceURI(), name.getLocalPart(), xmlr.getAttributeValue(i));
+        }
+    }
+
+    protected void serializeStartElement(final Writer out) throws IOException {
+        QName name = xmlr.getName();
+        out.write('<');
+        if (!name.getPrefix().isEmpty()) {
+            out.append(name.getPrefix()).write(':');
+        }
+        out.write(name.getLocalPart());
+
+        for (int i = 0, cnt = xmlr.getNamespaceCount(); i < cnt; i++) {
+            final String prefix = xmlr.getNamespacePrefix(i);
+            out.write(" xmlns");
+            if (prefix != null && prefix.length() > 0 && !XMLConstants.XMLNS_ATTRIBUTE.equals(prefix)) {
+                out.append(':').write(prefix);
+            }
+            out.write("=\"");
+            StringUtil.encodeXMLAttribute(out, xmlr.getNamespaceURI(i));
+            out.write('\"');
+        }
+
+        for (int i = 0, cnt = xmlr.getAttributeCount(); i < cnt; i++) {
+            name = xmlr.getAttributeName(i);
+            out.write(' ');
+            if (!name.getPrefix().isEmpty()) {
+                out.append(name.getPrefix()).write(':');
+            }
+            out.append(name.getLocalPart()).write("=\"");
+            StringUtil.encodeXMLAttribute(out, xmlr.getAttributeValue(i));
+            out.write('\"');
+        }
+        out.write('>');
+    }
+
+    protected void serializeEndElement(final Writer out) throws IOException {
+        QName name = xmlr.getName();
+        out.write("</");
+        if (!name.getPrefix().isEmpty()) {
+            out.append(name.getPrefix()).write(':');
+        }
+        out.append(name.getLocalPart()).write('>');
+    }
+
     @Override
     public int next() throws XMLStreamException {
-        if (proxy.getEventType() == END_ELEMENT) {
+        if (xmlr.getEventType() == END_ELEMENT) {
             stack.removeLast();
         }
-        final int eventType = proxy.next();
+        final int eventType = xmlr.next();
         if (eventType == START_ELEMENT) {
             final TagInfo parent = stack.peekLast();
             if (parent != null)
-                parent.addChild(proxy.getName());
-            stack.addLast(new TagInfo(proxy.getName()));
+                parent.addChild(xmlr.getName());
+            stack.addLast(new TagInfo(xmlr.getName()));
         }
         return eventType;
     }
@@ -246,217 +348,217 @@ public class XMLStreamReaderExt implements XMLStreamReader {
 
     @Override
     public Object getProperty(final String name) throws IllegalArgumentException {
-        return proxy.getProperty(name);
+        return xmlr.getProperty(name);
     }
 
     @Override
     public void require(final int type, final String namespaceURI, final String localName) throws XMLStreamException {
-        proxy.require(type, namespaceURI, localName);
+        xmlr.require(type, namespaceURI, localName);
     }
 
     @Override
     public String getElementText() throws XMLStreamException {
-        return proxy.getElementText();
+        return xmlr.getElementText();
     }
 
     @Override
     public boolean hasNext() throws XMLStreamException {
-        return proxy.hasNext();
+        return xmlr.hasNext();
     }
 
     @Override
     public void close() throws XMLStreamException {
-        proxy.close();
+        xmlr.close();
     }
 
     @Override
     public String getNamespaceURI(final String prefix) {
-        return proxy.getNamespaceURI(prefix);
+        return xmlr.getNamespaceURI(prefix);
     }
 
     @Override
     public boolean isStartElement() {
-        return proxy.isStartElement();
+        return xmlr.isStartElement();
     }
 
     @Override
     public boolean isEndElement() {
-        return proxy.isEndElement();
+        return xmlr.isEndElement();
     }
 
     @Override
     public boolean isCharacters() {
-        return proxy.isCharacters();
+        return xmlr.isCharacters();
     }
 
     @Override
     public boolean isWhiteSpace() {
-        return proxy.isWhiteSpace();
+        return xmlr.isWhiteSpace();
     }
 
     @Override
     public String getAttributeValue(final String namespaceURI, final String localName) {
-        return proxy.getAttributeValue(namespaceURI, localName);
+        return xmlr.getAttributeValue(namespaceURI, localName);
     }
 
     @Override
     public int getAttributeCount() {
-        return proxy.getAttributeCount();
+        return xmlr.getAttributeCount();
     }
 
     @Override
     public QName getAttributeName(final int index) {
-        return proxy.getAttributeName(index);
+        return xmlr.getAttributeName(index);
     }
 
     @Override
     public String getAttributeNamespace(final int index) {
-        return proxy.getAttributeNamespace(index);
+        return xmlr.getAttributeNamespace(index);
     }
 
     @Override
     public String getAttributeLocalName(final int index) {
-        return proxy.getAttributeLocalName(index);
+        return xmlr.getAttributeLocalName(index);
     }
 
     @Override
     public String getAttributePrefix(final int index) {
-        return proxy.getAttributePrefix(index);
+        return xmlr.getAttributePrefix(index);
     }
 
     @Override
     public String getAttributeType(final int index) {
-        return proxy.getAttributeType(index);
+        return xmlr.getAttributeType(index);
     }
 
     @Override
     public String getAttributeValue(final int index) {
-        return proxy.getAttributeValue(index);
+        return xmlr.getAttributeValue(index);
     }
 
     @Override
     public boolean isAttributeSpecified(final int index) {
-        return proxy.isAttributeSpecified(index);
+        return xmlr.isAttributeSpecified(index);
     }
 
     @Override
     public int getNamespaceCount() {
-        return proxy.getNamespaceCount();
+        return xmlr.getNamespaceCount();
     }
 
     @Override
     public String getNamespacePrefix(final int index) {
-        return proxy.getNamespacePrefix(index);
+        return xmlr.getNamespacePrefix(index);
     }
 
     @Override
     public String getNamespaceURI(final int index) {
-        return proxy.getNamespaceURI(index);
+        return xmlr.getNamespaceURI(index);
     }
 
     @Override
     public NamespaceContext getNamespaceContext() {
-        return proxy.getNamespaceContext();
+        return xmlr.getNamespaceContext();
     }
 
     @Override
     public int getEventType() {
-        return proxy.getEventType();
+        return xmlr.getEventType();
     }
 
     @Override
     public String getText() {
-        return proxy.getText();
+        return xmlr.getText();
     }
 
     @Override
     public char[] getTextCharacters() {
-        return proxy.getTextCharacters();
+        return xmlr.getTextCharacters();
     }
 
     @Override
     public int getTextCharacters(final int sourceStart, final char[] target, final int targetStart, final int length) throws XMLStreamException {
-        return proxy.getTextCharacters(sourceStart, target, targetStart, length);
+        return xmlr.getTextCharacters(sourceStart, target, targetStart, length);
     }
 
     @Override
     public int getTextStart() {
-        return proxy.getTextStart();
+        return xmlr.getTextStart();
     }
 
     @Override
     public int getTextLength() {
-        return proxy.getTextLength();
+        return xmlr.getTextLength();
     }
 
     @Override
     public String getEncoding() {
-        return proxy.getEncoding();
+        return xmlr.getEncoding();
     }
 
     @Override
     public boolean hasText() {
-        return proxy.hasText();
+        return xmlr.hasText();
     }
 
     @Override
     public Location getLocation() {
-        return proxy.getLocation();
+        return xmlr.getLocation();
     }
 
     @Override
     public QName getName() {
-        return proxy.getName();
+        return xmlr.getName();
     }
 
     @Override
     public String getLocalName() {
-        return proxy.getLocalName();
+        return xmlr.getLocalName();
     }
 
     @Override
     public boolean hasName() {
-        return proxy.hasName();
+        return xmlr.hasName();
     }
 
     @Override
     public String getNamespaceURI() {
-        return proxy.getNamespaceURI();
+        return xmlr.getNamespaceURI();
     }
 
     @Override
     public String getPrefix() {
-        return proxy.getPrefix();
+        return xmlr.getPrefix();
     }
 
     @Override
     public String getVersion() {
-        return proxy.getVersion();
+        return xmlr.getVersion();
     }
 
     @Override
     public boolean isStandalone() {
-        return proxy.isStandalone();
+        return xmlr.isStandalone();
     }
 
     @Override
     public boolean standaloneSet() {
-        return proxy.standaloneSet();
+        return xmlr.standaloneSet();
     }
 
     @Override
     public String getCharacterEncodingScheme() {
-        return proxy.getCharacterEncodingScheme();
+        return xmlr.getCharacterEncodingScheme();
     }
 
     @Override
     public String getPITarget() {
-        return proxy.getPITarget();
+        return xmlr.getPITarget();
     }
 
     @Override
     public String getPIData() {
-        return proxy.getPIData();
+        return xmlr.getPIData();
     }
 
 
@@ -520,5 +622,4 @@ public class XMLStreamReaderExt implements XMLStreamReader {
             return buf.toString();
         }
     }
-
 }

@@ -1,10 +1,16 @@
 package org.echosoft.common.io.datasource;
 
-import javax.activation.DataSource;
-import javax.activation.FileTypeMap;
-import java.io.*;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.Arrays;
 import java.util.ConcurrentModificationException;
+import javax.activation.DataSource;
+import javax.activation.FileTypeMap;
 
 import org.echosoft.common.utils.StreamUtil;
 
@@ -25,6 +31,8 @@ public class BufferedDataSource implements DataSource {
     private File file;
     private int count;
     private int modCount;
+    private int openedInputStreams;
+    private int openOutputStreams;
 
     public BufferedDataSource(final File file) {
         this.initBufferSize = 0;
@@ -84,19 +92,43 @@ public class BufferedDataSource implements DataSource {
         return 0;
     }
 
+    public void readFrom(final InputStream in) throws IOException {
+        final OutputStream out = getOutputStream();
+        try {
+            StreamUtil.pipeData(in, out);
+        } finally {
+            out.close();
+        }
+    }
+
+    public void writeOut(final OutputStream out) throws IOException {
+        if (buf != null) {
+            out.write(buf, 0, count);
+        } else
+        if (file != null) {
+            final InputStream in = new FileBufferInputStream();
+            try {
+                StreamUtil.pipeData(in, out);
+            } finally {
+                in.close();
+            }
+        }
+    }
+
     /**
      * Сбрасывает всю информацию, записанную в данный буфер.
      *
-     * @throws IOException
+     * @return true в случае успешной очистки всех занятых ресурсов.
      */
-    public void reset() throws IOException {
+    public boolean close() throws IOException {
         count = 0;
         buf = null;
+        boolean result = true;
         if (file != null) {
-            final File f = file;
+            result = file.delete();
             file = null;
-            f.delete();
         }
+        return result && openedInputStreams == 0 && openOutputStreams == 0;
     }
 
     @Override
@@ -120,10 +152,13 @@ public class BufferedDataSource implements DataSource {
         private final int expectedModCount;
         private int pos;
         private int mark;
+        private boolean closed;
 
         private MemoryBufferInputStream() {
-            this.expectedModCount = modCount;
-            this.pos = 0;
+            expectedModCount = modCount;
+            pos = 0;
+            closed = false;
+            openedInputStreams++;
         }
 
         @Override
@@ -188,6 +223,14 @@ public class BufferedDataSource implements DataSource {
             pos = mark;
         }
 
+        @Override
+        public void close() {
+            if (!closed) {
+                closed = true;
+                openedInputStreams--;
+            }
+        }
+
         private void checkModification() {
             if (expectedModCount != modCount)
                 throw new ConcurrentModificationException();
@@ -197,10 +240,13 @@ public class BufferedDataSource implements DataSource {
 
     private class FileBufferInputStream extends FileInputStream {
         private final int expectedModCount;
+        private boolean closed;
 
         private FileBufferInputStream() throws FileNotFoundException {
             super(file);
-            this.expectedModCount = modCount;
+            expectedModCount = modCount;
+            closed = false;
+            openedInputStreams++;
         }
 
         @Override
@@ -233,6 +279,15 @@ public class BufferedDataSource implements DataSource {
             return super.available();
         }
 
+        @Override
+        public void close() throws IOException {
+            if (!closed) {
+                super.close();
+                closed = true;
+                openedInputStreams--;
+            }
+        }
+
         private void checkModification() {
             if (expectedModCount != modCount)
                 throw new ConcurrentModificationException();
@@ -240,11 +295,14 @@ public class BufferedDataSource implements DataSource {
     }
 
 
-    public class BufferedOutputStream extends OutputStream {
+    private class BufferedOutputStream extends OutputStream {
 
         private OutputStream fileStream;
+        private boolean closed;
 
         private BufferedOutputStream() throws IOException {
+            closed = false;
+            openOutputStreams++;
         }
 
         @Override
@@ -283,9 +341,13 @@ public class BufferedDataSource implements DataSource {
 
         @Override
         public void close() throws IOException {
-            if (fileStream != null) {
-                fileStream.close();
-                modCount++;
+            if (!closed) {
+                if (fileStream != null) {
+                    fileStream.close();
+                    modCount++;
+                }
+                closed = true;
+                openOutputStreams--;
             }
         }
 

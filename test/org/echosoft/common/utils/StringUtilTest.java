@@ -358,9 +358,14 @@ public class StringUtilTest {
         for (String[] testcase : testcases) {
             final String encodedValue = StringUtil.encodeXMLText(testcase[0]);
             Assert.assertEquals(testcase[1], encodedValue);
+
             final StringWriter buf = new StringWriter();
             StringUtil.encodeXMLText(buf, testcase[0]);
             Assert.assertEquals(testcase[1], buf.toString());
+
+            final StringBuilder buf2 = new StringBuilder();
+            StringUtil.encodeXMLText(buf2, testcase[0]);
+            Assert.assertEquals(testcase[1], buf2.toString());
         }
     }
 
@@ -379,9 +384,14 @@ public class StringUtilTest {
         for (String[] testcase : testcases) {
             final String encodedValue = StringUtil.encodeXMLAttribute(testcase[0]);
             Assert.assertEquals(testcase[1], encodedValue);
+
             final StringWriter buf = new StringWriter();
             StringUtil.encodeXMLAttribute(buf, testcase[0]);
             Assert.assertEquals(testcase[1], buf.toString());
+
+            final StringBuilder buf2 = new StringBuilder();
+            StringUtil.encodeXMLAttribute(buf2, testcase[0]);
+            Assert.assertEquals(testcase[1], buf2.toString());
         }
     }
 

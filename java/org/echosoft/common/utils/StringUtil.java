@@ -560,6 +560,32 @@ public class StringUtil {
     }
 
     /**
+     * Конвертирует недопустимые в HTML тексте символы в соответствующие кодовые обозначения принятые в HTML.<br/>
+     * Заменяет символы '&', '<', '>' на соответствующие обозначения принятые в HTML: "&amp;amp;", "&amp;lt;", "&amp;gt;".
+     *
+     * @param out  выходной поток куда будет помещена отконвертированная версия входной строки.
+     * @param text оригинальный текст HTML.
+     */
+    public static void encodeXMLText(final StringBuilder out, final String text) {
+        final int length;
+        if (text == null || (length = text.length()) == 0)
+            return;
+        int last = 0;
+        for (int i = 0; i < length; i++) {
+            final char ch = text.charAt(i);
+            final char[] replacement;
+            if (ch >= 128 || (replacement = REPLACEMENT_HTML_TEXTS[ch]) == null)
+                continue;
+            if (last < i)
+                out.append(text, last, i);
+            out.append(replacement);
+            last = i + 1;
+        }
+        if (last < length)
+            out.append(text, last, length);
+    }
+
+    /**
      * Конвертирует недопустимые в атрибутах тегов HTML символы в соответствующие кодовые обозначения принятые в HTML.<br/>
      * Заменяет символы '&', ' " ', ' ' ' на соответствующие обозначения принятые в HTML: "&amp;amp;", "&amp;quot;", "&amp;#39;".
      *
@@ -611,23 +637,33 @@ public class StringUtil {
             out.write(text, last, length - last);
     }
 
+    /**
+     * Конвертирует недопустимые в атрибутах тегов HTML символы в соответствующие кодовые обозначения принятые в HTML.<br/>
+     * Заменяет символы '&', ' " ', ' ' ' на соответствующие обозначения принятые в HTML: "&amp;amp;", "&amp;quot;", "&amp;#39;".
+     *
+     * @param out   выходной поток куда будет помещена отконвертированная версия входной строки.
+     * @param text оригинальный текст значения атрибута HTML.
+     */
+    public static void encodeXMLAttribute(final StringBuilder out, final String text) {
+        final int length;
+        if (text == null || (length = text.length()) == 0)
+            return;
+        int last = 0;
+        for (int i = 0; i < length; i++) {
+            final char ch = text.charAt(i);
+            final char[] replacement;
+            if (ch >= 128 || (replacement = REPLACEMENT_HTML_ATTRS[ch]) == null)
+                continue;
+            //if (ch == '&' && (i + 1) < length && text.charAt(i + 1) == '{') continue;             // HTML spec B.7.1 (reserved syntax for future script macros)
+            if (last < i)
+                out.append(text, last, i);
+            out.append(replacement);
+            last = i + 1;
+        }
+        if (last < length)
+            out.append(text, last, length);
+    }
 
-    @Deprecated
-    public static String encodeHTMLText(final CharSequence text) {
-        return encodeXMLText(text);
-    }
-    @Deprecated
-    public static void encodeHTMLText(final Writer out, final String text) throws IOException {
-        encodeXMLText(out, text);
-    }
-    @Deprecated
-    public static String encodeHTMLAttribute(final CharSequence text) {
-        return encodeXMLAttribute(text);
-    }
-    @Deprecated
-    public static void encodeHTMLAttribute(final Writer out, final String text) throws IOException {
-        encodeXMLAttribute(out, text);
-    }
 
     /**
      * Преобразовывает строки вида <code>aa/bb/dd/../cc</code> в строки вида <code>aa/bb/cc</code>.<br/>
