@@ -325,4 +325,18 @@ public class CompactJsonWriterTest {
                 "{\"id\":\"c3\",\"rows\":10,\"cells\":20,\"ext\":{\"id\":\"c31\",\"ext\":null}}]", sw.getBuffer().toString());
     }
 
+    @Test
+    public void testMap() throws Exception {
+        final Map<Object, Object> params = new HashMap<Object, Object>();
+        params.put("action", "test");
+        params.put("x.1", 1);
+        params.put("function", 2);
+        params.put("asd", 3);
+
+        final JsonContext jc1 = new JsonContext();
+        jc1.setFieldNameSerializer(Serializers.COMPACT_FIELDNAME_SERIALIZER);
+        final JsonWriter jw1 = new CompactJsonWriter(jc1, sw);
+        jw1.writeObject(params);
+        System.out.println(sw.getBuffer().toString());
+    }
 }

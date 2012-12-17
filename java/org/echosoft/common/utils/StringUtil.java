@@ -27,23 +27,23 @@ import org.echosoft.common.io.FastStringTokenizer;
 public class StringUtil {
 
     public static final String EMPTY_STRING_ARRAY[] = new String[0];
-    private static final char[][] REPLACEMENT_HTML_TEXTS;
-    private static final char[][] REPLACEMENT_HTML_ATTRS;
+    private static final char[][] REPLACEMENT_XML_TEXTS;
+    private static final char[][] REPLACEMENT_XML_ATTRS;
     static {
-        REPLACEMENT_HTML_TEXTS = new char[128][];
+        REPLACEMENT_XML_TEXTS = new char[128][];
         final char[] empty = new char[0];
         for (int i = 0; i < 32; i++) {
-            REPLACEMENT_HTML_TEXTS[i] = empty;
+            REPLACEMENT_XML_TEXTS[i] = empty;
         }
-        REPLACEMENT_HTML_TEXTS['\t'] = null;
-        REPLACEMENT_HTML_TEXTS['<'] = "&lt;".toCharArray();
-        REPLACEMENT_HTML_TEXTS['>'] = "&gt;".toCharArray();
-        REPLACEMENT_HTML_TEXTS['&'] = "&amp;".toCharArray();
-        REPLACEMENT_HTML_ATTRS = REPLACEMENT_HTML_TEXTS.clone();
-        REPLACEMENT_HTML_ATTRS['\"'] = "&quot;".toCharArray();
-        REPLACEMENT_HTML_ATTRS['\''] = "&apos;".toCharArray();
-        REPLACEMENT_HTML_TEXTS['\r'] = null;
-        REPLACEMENT_HTML_TEXTS['\n'] = null;
+        REPLACEMENT_XML_TEXTS['\t'] = null;
+        REPLACEMENT_XML_TEXTS['<'] = "&lt;".toCharArray();
+        REPLACEMENT_XML_TEXTS['>'] = "&gt;".toCharArray();
+        REPLACEMENT_XML_TEXTS['&'] = "&amp;".toCharArray();
+        REPLACEMENT_XML_ATTRS = REPLACEMENT_XML_TEXTS.clone();
+        REPLACEMENT_XML_ATTRS['\"'] = "&quot;".toCharArray();
+        REPLACEMENT_XML_ATTRS['\''] = "&apos;".toCharArray();
+        REPLACEMENT_XML_TEXTS['\r'] = null;
+        REPLACEMENT_XML_TEXTS['\n'] = null;
     }
 
 
@@ -523,7 +523,7 @@ public class StringUtil {
         for (int i = 0; i < length; i++) {
             final char ch = text.charAt(i);
             final char[] replacement;
-            if (ch >= 128 || (replacement = REPLACEMENT_HTML_TEXTS[ch]) == null) {
+            if (ch >= 128 || (replacement = REPLACEMENT_XML_TEXTS[ch]) == null) {
                 dst.append(ch);
             } else {
                 dst.append(replacement);
@@ -548,7 +548,7 @@ public class StringUtil {
         for (int i = 0; i < length; i++) {
             final char ch = text.charAt(i);
             final char[] replacement;
-            if (ch >= 128 || (replacement = REPLACEMENT_HTML_TEXTS[ch]) == null)
+            if (ch >= 128 || (replacement = REPLACEMENT_XML_TEXTS[ch]) == null)
                 continue;
             if (last < i)
                 out.write(text, last, i - last);
@@ -574,7 +574,7 @@ public class StringUtil {
         for (int i = 0; i < length; i++) {
             final char ch = text.charAt(i);
             final char[] replacement;
-            if (ch >= 128 || (replacement = REPLACEMENT_HTML_TEXTS[ch]) == null)
+            if (ch >= 128 || (replacement = REPLACEMENT_XML_TEXTS[ch]) == null)
                 continue;
             if (last < i)
                 out.append(text, last, i);
@@ -600,7 +600,7 @@ public class StringUtil {
         for (int i = 0; i < length; i++) {
             final char ch = text.charAt(i);
             final char[] replacement;
-            if (ch >= 128 || (replacement = REPLACEMENT_HTML_ATTRS[ch]) == null) {
+            if (ch >= 128 || (replacement = REPLACEMENT_XML_ATTRS[ch]) == null) {
                 dst.append(ch);
             } else {
                 dst.append(replacement);
@@ -625,7 +625,7 @@ public class StringUtil {
         for (int i = 0; i < length; i++) {
             final char ch = text.charAt(i);
             final char[] replacement;
-            if (ch >= 128 || (replacement = REPLACEMENT_HTML_ATTRS[ch]) == null)
+            if (ch >= 128 || (replacement = REPLACEMENT_XML_ATTRS[ch]) == null)
                 continue;
             //if (ch == '&' && (i + 1) < length && text.charAt(i + 1) == '{') continue;             // HTML spec B.7.1 (reserved syntax for future script macros)
             if (last < i)
@@ -652,7 +652,7 @@ public class StringUtil {
         for (int i = 0; i < length; i++) {
             final char ch = text.charAt(i);
             final char[] replacement;
-            if (ch >= 128 || (replacement = REPLACEMENT_HTML_ATTRS[ch]) == null)
+            if (ch >= 128 || (replacement = REPLACEMENT_XML_ATTRS[ch]) == null)
                 continue;
             //if (ch == '&' && (i + 1) < length && text.charAt(i + 1) == '{') continue;             // HTML spec B.7.1 (reserved syntax for future script macros)
             if (last < i)
@@ -723,6 +723,39 @@ public class StringUtil {
             buf.append(token);
         }
         return buf.toString();
+    }
+
+    /**
+     * Возвращает строку которая может послужить именем файла или каталога. Она образована от заданной в аргументе строки
+     * путем вырезания всех недопустимых в имени файла/каталога символов.
+     *
+     * @param name предполагаемое имя файла. Допускается пустая строка или null.
+     * @return производная от предполагаемого имени файла которое содержит только допустимые символы или null если после обрезания недопустимых осталась пустая строка.
+     */
+    public static String getFileName(String name) {
+        if (name == null)
+            return null;
+        final int length = name.length();
+        final StringBuilder buf = new StringBuilder(length);
+        for (int i = 0; i < length; i++) {
+            final char c = name.charAt(i);
+            switch (c) {
+                case '<':
+                case '>':
+                case ':':
+                case '?':
+                case '*':
+                case '|':
+                case '\\':
+                case '/':
+                case '\"':
+                    continue;
+                default:
+                    buf.append(c);
+            }
+        }
+        name = buf.toString().trim();
+        return name.isEmpty() ? null : name;
     }
 
     /**

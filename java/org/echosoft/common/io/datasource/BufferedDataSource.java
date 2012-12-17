@@ -13,6 +13,7 @@ import javax.activation.DataSource;
 import javax.activation.FileTypeMap;
 
 import org.echosoft.common.utils.StreamUtil;
+import org.echosoft.common.utils.StringUtil;
 
 /**
  * Реализация интерфейса {@link DataSource} которая до достижения определенного размера хранит
@@ -361,7 +362,8 @@ public class BufferedDataSource implements DataSource {
                 // Если ранее мы уже начали писать в буфер в памяти ...
                 if (desiredSize > buf.length) {
                     if (desiredSize > limitBufferSize) {
-                        file = File.createTempFile(name != null ? name : "tmp", null, tmpDir);
+                        final String tmpfilename = StringUtil.getNonEmpty(StringUtil.getFileName(name), "tmp");
+                        file = File.createTempFile(tmpfilename, null, tmpDir);
                         fileStream = new FileOutputStream(file);
                         fileStream.write(buf, 0, count);
                         buf = null;

@@ -680,8 +680,8 @@ public class Serializers {
             new JsonSerializer() {
                 public void serialize(final Object src, final JsonWriter jw) throws IOException, InvocationTargetException, IllegalAccessException {
                     jw.beginObject();
-                    for (Map.Entry<Object, Object> entry : ((Map<Object, Object>) src).entrySet()) {
-                        final String name = "\"" + entry.getKey() + '\"';  // TODO: баг, такое код не совместим со STANDARD_FIELD_NAME_SERIALIZER
+                    for (Map.Entry entry : ((Map<?, ?>) src).entrySet()) {
+                        final String name = entry.getKey() != null ? entry.getKey().toString() : "";
                         jw.writeProperty(name, entry.getValue());
                     }
                     jw.endObject();
