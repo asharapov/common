@@ -99,8 +99,8 @@
       <path refid="build.classpath"/>
     </path>
     <patternset id="all.config.files">
-      <include name="**/*.xml"/>
-      <include name="**/*.sql"/>
+      <exclude name="**/*.java"/>
+      <exclude name="**/*.properties"/>
     </patternset>
   </target>
 
@@ -114,6 +114,9 @@
     <loadfile property="built.revision" srcfile="revision.info"/>
     <delete file="revision.info" />
     -->
+    <exec executable="${git.exe}" dir="." outputproperty="built.revision">
+      <arg line="describe --long"/>
+    </exec>
     <property name="built.revision" value="0" />
     <echo message="revision: ${built.revision}" />
   </target>
@@ -124,9 +127,13 @@
     <depend srcdir="${srcdir}" destdir="${to}" closure="yes">
       <include name="**/*.java"/>
     </depend>
+    <condition property="compile.fork" value="true" else="false">
+      <isset property="jdk.home"/>
+    </condition>
     <javac srcdir="${srcdir}" destdir="${to}" classpathref="build.classpath" encoding="${build.encoding}"
            source="${build.source}" target="${build.target}" deprecation="${build.deprecation}" nowarn="${build.nowarn}"  
-           debug="${build.debug}" debugLevel="${build.debug.level}" includeAntRuntime="false">
+           debug="${build.debug}" debugLevel="${build.debug.level}"
+           executable="${jdk.home}/bin/javac" fork="${compile.fork}" includeAntRuntime="false">
     </javac>
     <!-- TODO: sometimes we need to copy files from test directory but ${srcdir} parameter does not works here ... -->
     <copy todir="${to}">
