@@ -6,12 +6,15 @@ import java.util.Collections;
 import java.util.List;
 
 /**
+ * <p>Базовый класс предназначенный для задания ограничений на выборку данных из некоторого источника.</p>
+ * <p>В данном классе реализована возможность сортировки и постраничной выборки данных.</p>
+ *
  * @author Anton Sharapov
  */
 public class Query implements Serializable {
 
     private int rangeSize;
-    private int rangeStart;
+    private long rangeStart;
     private List<SortCriterion> criteria;
     private boolean complete;
 
@@ -23,18 +26,20 @@ public class Query implements Serializable {
     public int getRangeSize() {
         return rangeSize;
     }
-    public void setRangeSize(final int rangeSize) {
+    public Query setRangeSize(final int rangeSize) {
         this.rangeSize = rangeSize > 0 ? rangeSize : 0;
+        return this;
     }
 
-    public int getRangeStart() {
+    public long getRangeStart() {
         return rangeStart;
     }
-    public void setRangeStart(final int rangeStart) {
+    public Query setRangeStart(final long rangeStart) {
         this.rangeStart = rangeStart >= 0 ? rangeStart : 0;
+        return this;
     }
 
-    public Query selectPage(final int pageNo, final int pageSize) {
+    public Query selectPage(final long pageNo, final int pageSize) {
         if (pageSize > 0) {
             this.rangeSize = pageSize;
             this.rangeStart = pageNo > 1 ? (pageNo - 1) * pageSize + 1 : 1;
