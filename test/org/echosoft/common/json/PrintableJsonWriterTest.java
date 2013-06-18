@@ -180,10 +180,10 @@ public class PrintableJsonWriterTest {
 
     @Test
     public void testTree() throws Exception {
-        final TreeNode<String> root = new TreeNode<String>("", null);
+        final TreeNode<String, String> root = new TreeNode<String, String>("", null);
         root.addChildNode("n1", "node1");
         root.addChildNode("n2", "node2");
-        root.findNode("n1").addChildNode("n11", "node1.1");
+        root.findNodeById("n1", true).addChildNode("n11", "node1.1");
         System.err.println(root.debugInfo());
         jw.getOutputWriter().write("result = ");
         jw.writeObject(root);

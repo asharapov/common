@@ -1,9 +1,12 @@
-package org.echosoft.common.query.processors;
+package org.echosoft.common.data.sql;
 
 import java.io.Serializable;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Преобразует SQL выражения вида
@@ -18,7 +21,7 @@ import java.util.*;
  *
  * @author Anton Sharapov
  */
-public class ParametrizedSQL implements Serializable {
+public class ParameterizedSQL implements Serializable {
 
     public static final char PARAMS_HEADER = '&';
 
@@ -28,7 +31,7 @@ public class ParametrizedSQL implements Serializable {
     /**
      * @param namedSql текст SQL запроса в котором возможно есть именованные параметры. Параметр не может быть <code>null</code>.
      */
-    public ParametrizedSQL(final String namedSql) {
+    public ParameterizedSQL(final String namedSql) {
         final ArrayList<String> params = new ArrayList<String>();
         this.sql = transform(namedSql, params);
         params.trimToSize();
@@ -77,52 +80,48 @@ public class ParametrizedSQL implements Serializable {
     public boolean equals(final Object obj) {
         if (obj == null || !getClass().equals(obj.getClass()))
             return false;
-        final ParametrizedSQL other = (ParametrizedSQL) obj;
+        final ParameterizedSQL other = (ParameterizedSQL) obj;
         return sql.equals(other.sql) && paramNames.equals(other.paramNames);
     }
 
 
-    private static enum State {
-        GENERAL, TEXT_SQ, TEXT_DQ, COMMENT_SL, COMMENT_ML, PARAM_NAME
-    }
-
     private static String transform(final String namedSql, final List<String> paramNames) {
         if (namedSql.indexOf(PARAMS_HEADER) < 0)
             return namedSql;
-        State state = State.GENERAL;
+        int state = 0;
         final StringBuilder buf = new StringBuilder(namedSql.length());
         final StringBuilder pbuf = new StringBuilder();
         char pc = 0;
         for (int i = 0, len = namedSql.length(), lastPos = len - 1; i < len; i++) {
             final char c = namedSql.charAt(i);
             switch (state) {
-                case GENERAL: {
+                case 0: {
                     switch (c) {
                         case '\'': {
-                            state = State.TEXT_SQ;
+                            state = 1;
                             buf.append(c);
                             break;
                         }
                         case '\"': {
-                            state = State.TEXT_DQ;
+                            state = 2;
                             buf.append(c);
                             break;
                         }
                         case '-': {
                             if (pc == '-')
-                                state = State.COMMENT_SL;
+                                state = 3;
                             buf.append(c);
                             break;
                         }
                         case '*': {
                             if (pc == '/')
-                                state = State.COMMENT_ML;
+                                state = 4;
                             buf.append(c);
                             break;
                         }
                         case PARAMS_HEADER: {
                             if ((!Character.isLetterOrDigit(pc)) && i < lastPos && Character.isJavaIdentifierStart(namedSql.charAt(i + 1))) {
-                                state = State.PARAM_NAME;
+                                state = 5;
                                 buf.append('?');
                             } else {
                                 buf.append(c);
@@ -135,45 +134,45 @@ public class ParametrizedSQL implements Serializable {
                     }
                     break;
                 }
-                case TEXT_SQ: {
+                case 1: {
                     if (c == '\'')
-                        state = State.GENERAL;
+                        state = 0;
                     buf.append(c);
                     break;
                 }
-                case TEXT_DQ: {
+                case 2: {
                     if (c == '\"')
-                        state = State.GENERAL;
+                        state = 0;
                     buf.append(c);
                     break;
                 }
-                case COMMENT_SL: {
+                case 3: {
                     if (c == '\n')
-                        state = State.GENERAL;
+                        state = 0;
                     buf.append(c);
                     break;
                 }
-                case COMMENT_ML: {
-                    if (pc == '*' && c == '/')
-                        state = State.GENERAL;
+                case 4: {
+                    if (c == '/' && pc == '*')
+                        state = 0;
                     buf.append(c);
                     break;
                 }
-                case PARAM_NAME: {
+                case 5: {
                     if (Character.isJavaIdentifierPart(c)) {
                         pbuf.append(c);
                     } else {
                         paramNames.add(pbuf.toString());
                         pbuf.setLength(0);
                         buf.append(c);
-                        state = State.GENERAL;
+                        state = 0;
                     }
                     break;
                 }
             }
             pc = c;
         }
-        if (state == State.PARAM_NAME)
+        if (state == 5)
             paramNames.add(pbuf.toString());
         return buf.toString();
     }

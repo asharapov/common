@@ -15,7 +15,7 @@ public class ObjectArrayEnumeration<T> implements Enumeration<T> {
     private int index;
 
     /**
-     * Создает новый экземпляр {@link org.echosoft.common.collections.ObjectArrayEnumeration} для итерирования по всем элементам массива переданного в аргументе метода.
+     * Создает новый экземпляр {@link ObjectArrayEnumeration} для итерирования по всем элементам массива переданного в аргументе метода.
      *
      * @param array массив объектов или примитивов для которых требуется создать итератор.
      * @throws NullPointerException если <code>array</code> равен <code>null</code>.
@@ -26,20 +26,15 @@ public class ObjectArrayEnumeration<T> implements Enumeration<T> {
         this.index = 0;
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    @Override
     public boolean hasMoreElements() {
         return index < length;
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    @Override
     public T nextElement() {
         if (index >= length)
             throw new NoSuchElementException();
         return array[index++];
     }
-
 }

@@ -1,4 +1,4 @@
-package org.echosoft.common.db;
+package org.echosoft.common.data;
 
 import java.io.Serializable;
 

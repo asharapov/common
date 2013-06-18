@@ -1,4 +1,4 @@
-package org.echosoft.common.db;
+package org.echosoft.common.data;
 
 import java.io.Serializable;
 
@@ -48,7 +48,7 @@ public class SortCriterion implements Serializable {
             return true;
         if (obj == null || !getClass().equals(obj.getClass()))
             return false;
-        final SortCriterion other = (SortCriterion)obj;
+        final SortCriterion other = (SortCriterion) obj;
         return field.equals(other.field) && ascending == other.ascending;
     }
 

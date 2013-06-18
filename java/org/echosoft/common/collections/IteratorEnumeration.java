@@ -17,16 +17,12 @@ public class IteratorEnumeration<T> implements Enumeration<T> {
         this.iterator = iterator;
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    @Override
     public boolean hasMoreElements() {
         return iterator.hasNext();
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    @Override
     public T nextElement() {
         return iterator.next();
     }

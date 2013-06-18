@@ -27,16 +27,12 @@ public class ObjectArrayIterator<T> implements ReadAheadIterator<T> {
     }
 
 
-    /**
-     * {@inheritDoc}
-     */
+    @Override
     public boolean hasNext() {
         return index < length;
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    @Override
     public T next() {
         if (index >= length)
             throw new NoSuchElementException();
@@ -48,13 +44,12 @@ public class ObjectArrayIterator<T> implements ReadAheadIterator<T> {
      *
      * @throws UnsupportedOperationException при каждом вызове метода
      */
+    @Override
     public void remove() {
         throw new UnsupportedOperationException("remove() method is not supported for an ObjectArrayIterator");
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    @Override
     public T readAhead() {
         if (index >= length)
             throw new NoSuchElementException();

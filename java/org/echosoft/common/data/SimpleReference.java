@@ -1,6 +1,6 @@
-package org.echosoft.common.db;
+package org.echosoft.common.data;
 
-import org.echosoft.common.db.spi.ReferenceJsonSerializer;
+import org.echosoft.common.data.spi.SimpleReferenceJsonSerializer;
 import org.echosoft.common.json.annotate.JsonUseSeriazer;
 
 /**
@@ -9,17 +9,17 @@ import org.echosoft.common.json.annotate.JsonUseSeriazer;
  *
  * @author Anton Sharapov
  */
-@JsonUseSeriazer(value = ReferenceJsonSerializer.class, recursive = true)
-public class LongReference implements Reference<Long> {
+@JsonUseSeriazer(value = SimpleReferenceJsonSerializer.class, recursive = true)
+public class SimpleReference implements Reference<Long, String> {
 
     private final long id;
     private final String title;
 
-    public LongReference(final long id) {
+    public SimpleReference(final long id) {
         this.id = id;
         this.title = Long.toString(id);
     }
-    public LongReference(final long id, final String title) {
+    public SimpleReference(final long id, final String title) {
         this.id = id;
         this.title = title;
     }
@@ -30,7 +30,7 @@ public class LongReference implements Reference<Long> {
     }
 
     @Override
-    public String getTitle() {
+    public String getDescription() {
         return title;
     }
 
@@ -44,7 +44,7 @@ public class LongReference implements Reference<Long> {
     public boolean equals(final Object obj) {
         if (obj == null || !getClass().equals(obj.getClass()))
             return false;
-        final LongReference other = (LongReference) obj;
+        final SimpleReference other = (SimpleReference) obj;
         return id == other.id;
     }
 

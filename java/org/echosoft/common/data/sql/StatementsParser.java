@@ -1,4 +1,4 @@
-package org.echosoft.common.db;
+package org.echosoft.common.data.sql;
 
 import java.io.IOException;
 import java.io.Reader;
@@ -16,6 +16,8 @@ public class StatementsParser implements Iterator<String> {
     private boolean nextStmtReaded;     // Указывает был ли уже выполнен разбор очередного SQL выражения (которое должно будет отдано при последующем вызове next()) из входного потока или нет.
     private StringBuilder stmt;         // Прочитанное из потока SQL выражение ожидающее отдачи при последующем вызове метода next().
     private int stmtNum;                // Порядковый номер последней записи из потока которая была возвращена методов {@link #nextRecord()}.
+    private int row;                    // Текущая обрабатываемая строка в скрипте.
+    private int column;                 // Текущая обрабатываемая колонка в скрипте.
     private final char[] charbuf;       // Буфер в который подчитываются данные из потока.
     private int length;                 // Количество символов реально загруженных в буфер. Всегда варьируется от 0 (буфер пуст) до емкости буфера. Имеет значение -1 после полного исчерпания входного потока.
     private int pos;                    // Текущая позиция сканера в буфере. Всегда варьируется от 0 до кол-ва символов загруженных в буфер.
@@ -28,6 +30,8 @@ public class StatementsParser implements Iterator<String> {
         this.pos = 0;
         this.length = 0;
         this.stmtNum = 0;
+        this.row = 0;
+        this.column = 0;
     }
 
     @Override
@@ -76,7 +80,7 @@ public class StatementsParser implements Iterator<String> {
         try {
             if (!nextStmtReaded) {
                 do {
-                    scanRecord0();
+                    scanStatement();
                 } while (stmt != null && stmt.toString().trim().isEmpty());
                 nextStmtReaded = true;
             }
@@ -85,14 +89,65 @@ public class StatementsParser implements Iterator<String> {
         }
     }
 
-    private void scanRecord0() throws IOException {
+    private void scanStatement() throws IOException {
+        final StringBuilder token = new StringBuilder();
+        int depth = 0;
+        boolean lastTokenIsEnd = false;
         stmt.setLength(0);
-        int state = 0, column = 0;
+        int state = 0;
         for (char c = readChar(); c != 0; c = readChar()) {
             stmt.append(c);
-            column = c == '\n' ? 0 : column + 1;
+            if (c == '\n') {
+                row++;
+                column = 0;
+            } else {
+                column++;
+            }
             switch (state) {
-                case 0: {   // находимся в процессе чтения SQL выражения (ожидаем одинарный символ '/') ...
+                case 0: {   // находимся в процессе чтения SQL выражения (основной режим) ...
+
+                    // читаем и анализируем обрабатываемый идентификатор или ключевое слово ...
+                    final int tl = token.length();
+                    if (tl == 0) {
+                        if (Character.isJavaIdentifierStart(c)) {
+                            token.append(c);
+                            break;
+                        } else
+                        if (!Character.isWhitespace(c)) {
+                            lastTokenIsEnd = false;
+                        }
+                    } else {
+                        if (Character.isJavaIdentifierPart(c)) {
+                            token.append(c);
+                            break;
+                        } else {
+                            final String tuc = token.toString().toUpperCase();
+                            boolean currentTokenIsEnd = false;
+                            switch (tl) {
+                                case 2:
+                                    if ("IF".equals(tuc) && !lastTokenIsEnd)
+                                        depth++;
+                                    break;
+                                case 3:
+                                    if ("END".equals(tuc)) {
+                                        depth--;
+                                        currentTokenIsEnd = true;
+                                    }
+                                    break;
+                                case 4:
+                                    if (("CASE".equals(tuc) || "LOOP".equals(tuc)) && !lastTokenIsEnd)
+                                        depth++;
+                                    break;
+                                case 5:
+                                    if ("BEGIN".equals(tuc))
+                                        depth++;
+                                    break;
+                            }
+                            token.setLength(0);
+                            lastTokenIsEnd = currentTokenIsEnd;
+                        }
+                    }
+
                     switch (c) {
                         case '\'':
                             state = 1;
@@ -104,7 +159,8 @@ public class StatementsParser implements Iterator<String> {
                             final char cc = readAheadChar();
                             if (cc == '-') {
                                 stmt.append(cc);
-                                ++this.pos;
+                                pos++;
+                                column++;
                                 state = 3;
                             }
                             break;
@@ -113,7 +169,8 @@ public class StatementsParser implements Iterator<String> {
                             final char cc = readAheadChar();
                             if (cc == '*') {
                                 stmt.append(cc);
-                                ++this.pos;
+                                pos++;
+                                column++;
                                 state = 4;
                             } else
                             if (column == 1) {
@@ -123,8 +180,11 @@ public class StatementsParser implements Iterator<String> {
                             break;
                         }
                         case ';': {
-                            stmt.setLength(stmt.length() - 1);
-                            return;
+                            if (depth == 0) {
+                                stmt.setLength(stmt.length() - 1);
+                                return;
+                            }
+                            break;
                         }
                     }
                     break;
@@ -149,17 +209,19 @@ public class StatementsParser implements Iterator<String> {
                         final char cc = readAheadChar();
                         if (cc == '/') {
                             stmt.append(cc);
-                            ++this.pos;
+                            pos++;
+                            column++;
                             state = 0;
                         }
                     }
                 }
             }
         }
-        if (state != 0 && state != 3) {
+        if (depth != 0 || (state != 0 && state != 3)) {
             throw new IllegalStateException("Неожиданное завершение потока");
         }
-        stmt = null;
+        if (stmt.toString().trim().isEmpty())
+            stmt = null;
     }
 
     /**

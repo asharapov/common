@@ -2,6 +2,7 @@ package org.echosoft.common.model;
 
 /**
  * Содержит ряд общеупотребительных предикатов.
+ *
  * @author Anton Sharapov
  */
 public class Predicates {
@@ -29,19 +30,21 @@ public class Predicates {
 
     /**
      * Метод возвращает параметризированный предикат, возвращающий <code>true</code> для абсолютно всех входных данных.
+     *
      * @return параметризированный предикат, возвращающий <code>true</code> для абсолютно всех входных данных.
      */
     @SuppressWarnings("unchecked")
     public static <T> Predicate<T> all() {
-        return (Predicate<T>)ALL;
+        return (Predicate<T>) ALL;
     }
 
     /**
      * Метод возвращает параметризированный предикат, возвращающий <code>true</code> для абсолютно всех входных данных.
+     *
      * @return параметризированный предикат, возвращающий <code>false</code> для абсолютно всех входных данных.
      */
     @SuppressWarnings("unchecked")
     public static <T> Predicate<T> nothing() {
-        return (Predicate<T>)NOTHING;
+        return (Predicate<T>) NOTHING;
     }
 }

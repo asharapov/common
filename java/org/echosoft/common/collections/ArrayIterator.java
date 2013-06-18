@@ -30,16 +30,12 @@ public class ArrayIterator implements ReadAheadIterator {
         this.index = 0;
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    @Override
     public boolean hasNext() {
         return index < length;
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    @Override
     public Object next() {
         if (index >= length)
             throw new NoSuchElementException();
@@ -51,13 +47,12 @@ public class ArrayIterator implements ReadAheadIterator {
      *
      * @throws UnsupportedOperationException при каждом вызове метода
      */
+    @Override
     public void remove() {
         throw new UnsupportedOperationException("remove() method is not supported");
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    @Override
     public Object readAhead() {
         if (index >= length)
             throw new NoSuchElementException();

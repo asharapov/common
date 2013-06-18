@@ -7,68 +7,78 @@ import org.echosoft.common.model.Predicate;
 
 
 /** 
- * A Proxy {@link Enumeration Enumeration} which takes a {@link Predicate} instance to filter out objects
- * from an underlying {@link Enumeration} instance.
- * Only objects for which the specified <code>Predicate</code> evaluates to <code>true</code> are returned.
- * 
+ * Итератор - прокси выполняющий фильтрацию содержимого исходного итератора.
+ *
  * @author Anton Sharapov
  */
 public class FilterEnumeration<T> implements Enumeration<T> {
     
-    private final Enumeration<T> iterator;
+    private final Enumeration<T> iter;
     private final Predicate<T> predicate;
-    private T nextObject;
-    private boolean hasNextObject = false;
+    private boolean nextCalculated;
+    private boolean hasNext;
+    private T next;
     
     /**
-     *  Constructs a new <Code>FilterIterator</Code> that will use the given iterator and predicate.
-     *  @param iterator  the iterator to use
-     *  @param predicate  the predicate to use
+     * @param iter      исходный итератор из которого надо отбирать только те элементы что соответствуют задаваемому предикату.
+     * @param predicate предикат для отбора элементов из исходного итератора.
      */
-    public FilterEnumeration(Enumeration<T> iterator, Predicate<T> predicate) {
-        this.iterator = iterator;
+    public FilterEnumeration(final Enumeration<T> iter, final Predicate<T> predicate) {
+        this.iter = iter;
         this.predicate = predicate;
+        this.nextCalculated = false;
     }
 
-
-    /** 
-     *  Returns true if the underlying iterator contains an object that matches the predicate.
-     *  @return true if there is another object that matches the predicate 
-     */
-    public boolean hasMoreElements() {
-        return hasNextObject || findNextObject();
-    }
-
-    /** 
-     *  Returns the next object that matches the predicate.
-     *  @return the next object which matches the given predicate
-     *  @throws NoSuchElementException if there are no more elements that match the predicate
-     */
-    public T nextElement() {
-        if ( !hasNextObject ) {
-            if (!findNextObject()) {
-                throw new NoSuchElementException();
-            }
-        }
-        hasNextObject = false;
-        return nextObject;
-    }
-       
 
     /**
-     * Set nextObject to the next object. 
-     * If there are no more objects then return false. Otherwise, return true.
-     * @return <code>true</code> if next object was finded.
+     * Возвращает <code>true</code> если в исходном итераторе содержится как минимум один элемент
+     * удовлетворяющий заданному предикату.
+     *
+     * @return true если итератор содержит как миниму один элемент удовлетворяющий заданному предикату.
      */
-    private boolean findNextObject() {
-        while ( iterator.hasMoreElements() ) {
-            final T object = iterator.nextElement();
-            if ( predicate.accept( object ) ) {
-                nextObject = object;
-                hasNextObject = true;
-                return true;
+    @Override
+    public boolean hasMoreElements() {
+        ensureNextCalculated();
+        return hasNext;
+    }
+
+    /**
+     * Возвращает очередной элемент исходного итератора соответствующий предикату.
+     *
+     * @return очередной элемент итератора.
+     * @throws NoSuchElementException в случае исчерпания элементов в исходном итераторе.
+     */
+    @Override
+    public T nextElement() {
+        ensureNextCalculated();
+        if (!hasNext)
+            throw new NoSuchElementException();
+        final T result = next;
+        nextCalculated = false;
+        next = null;
+        return result;
+    }
+       
+    public T readAhead() {
+        ensureNextCalculated();
+        if (!hasNext)
+            throw new NoSuchElementException();
+        return next;
+    }
+
+    protected void ensureNextCalculated() {
+        if (!nextCalculated) {
+            nextCalculated = true;
+            while (iter.hasMoreElements()) {
+                final T object = iter.nextElement();
+                if (predicate.accept(object)) {
+                    next = object;
+                    hasNext = true;
+                    return;
+                }
             }
+            hasNext = false;
+            next = null;
         }
-        return false;
     }
 }
