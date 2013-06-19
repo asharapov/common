@@ -1,5 +1,6 @@
-package org.echosoft.common.query.processors;
+package org.echosoft.common.data.sql;
 
+import org.echosoft.common.data.sql.ParameterizedSQL;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -19,23 +20,23 @@ public class ParametrizedSQLTest {
                         "SELECT * FROM dual",
                         "SELECT * FROM dual"),
                 new TestCase(
-                        "SELECT * FROM tbl WHERE f1 = &param1 AND f2 = &param2",
-                        "SELECT * FROM tbl WHERE f1 = ? AND f2 = ?",
-                        "param1", "param2"),
+                        "SELECT * FROM tbl WHERE f1 = &param1 AND f2 = &param2 OR f3 = :param2",
+                        "SELECT * FROM tbl WHERE f1 = ? AND f2 = ? OR f3 = ?",
+                        "param1", "param2", "param2"),
                 new TestCase(
                         "SELECT * FROM tbl WHERE f1 = &param1 AND f2 = &param2\r\n AND &param1>&param2",
                         "SELECT * FROM tbl WHERE f1 = ? AND f2 = ?\r\n AND ?>?",
                         "param1", "param2", "param1", "param2"),
                 new TestCase(
-                        "SELECT 2 & 3 as x, 't &p1 ' y, \"&p2\" x&p 3&p (&) +&",
-                        "SELECT 2 & 3 as x, 't &p1 ' y, \"&p2\" x&p 3&p (&) +&"),
+                        "SELECT 2 & 3 as x, 1:2 as y, 't &p1 ' y, \"&p2\" x&p 3&p (&) +&",
+                        "SELECT 2 & 3 as x, 1:2 as y, 't &p1 ' y, \"&p2\" x&p 3&p (&) +&"),
                 new TestCase(
                         "SELECT /* &param */ FROM dual -- WHERE f1>&p\nAND f2<&p2",
                         "SELECT /* &param */ FROM dual -- WHERE f1>&p\nAND f2<?",
                         "p2"),
         };
         for (TestCase test : tests) {
-            final ParametrizedSQL psql = new ParametrizedSQL(test.namedSQL);
+            final ParameterizedSQL psql = new ParameterizedSQL(test.namedSQL);
             Assert.assertEquals(test.namedSQL + "  ", test.unnamedSQL, psql.getQuery());
             Assert.assertEquals(test.namedSQL + "  ", test.params, psql.getParamNames());
         }

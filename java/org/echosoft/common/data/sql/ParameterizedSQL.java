@@ -4,7 +4,6 @@ import java.io.Serializable;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -18,12 +17,11 @@ import java.util.Map;
  *     SELECT a, b, c FROM table WHERE d = ? AND e = ?
  * </pre>
  * Класс корректно обработает содержимое текстовых идентификаторов и примечаний разных видов.
+ * В качестве символа-указателя предшествующего имени параметра могут использоваться символы <b><code>&</code></b> или <b><code>:</code></b>.
  *
  * @author Anton Sharapov
  */
 public class ParameterizedSQL implements Serializable {
-
-    public static final char PARAMS_HEADER = '&';
 
     private final String sql;
     private final List<String> paramNames;
@@ -32,10 +30,8 @@ public class ParameterizedSQL implements Serializable {
      * @param namedSql текст SQL запроса в котором возможно есть именованные параметры. Параметр не может быть <code>null</code>.
      */
     public ParameterizedSQL(final String namedSql) {
-        final ArrayList<String> params = new ArrayList<String>();
-        this.sql = transform(namedSql, params);
-        params.trimToSize();
-        this.paramNames = Collections.unmodifiableList(params);
+        this.paramNames = new ArrayList<String>();
+        this.sql = transform(namedSql, paramNames);
     }
 
     /**
@@ -53,14 +49,14 @@ public class ParameterizedSQL implements Serializable {
      * встречается два и более раза то в возвращаемом списке он будет встречаться соответствующее количество раз в
      * тех позициях которые соответствовали вхождению данного параметра в исходном запросе.
      *
-     * @return неизменяемый список имен параметров в том порядке в котором они встречаются в запросе.
+     * @return список имен параметров в том порядке в котором они встречаются в запросе.
      *         Метод никогда не возвращает <code>null</code>.
      */
     public List<String> getParamNames() {
         return paramNames;
     }
-    
-    public void applyParams(final PreparedStatement pstmt, final Map<String,Object> params) throws SQLException {
+
+    public void applyParams(final PreparedStatement pstmt, final Map<String, Object> params) throws SQLException {
         int num = 1;
         for (String paramName : paramNames) {
             final Object value = params.get(paramName);
@@ -69,7 +65,7 @@ public class ParameterizedSQL implements Serializable {
             pstmt.setObject(num++, value);
         }
     }
-    
+
 
     @Override
     public int hashCode() {
@@ -86,7 +82,7 @@ public class ParameterizedSQL implements Serializable {
 
 
     private static String transform(final String namedSql, final List<String> paramNames) {
-        if (namedSql.indexOf(PARAMS_HEADER) < 0)
+        if (namedSql.indexOf('&') < 0 && namedSql.indexOf(':') < 0)
             return namedSql;
         int state = 0;
         final StringBuilder buf = new StringBuilder(namedSql.length());
@@ -96,40 +92,33 @@ public class ParameterizedSQL implements Serializable {
             final char c = namedSql.charAt(i);
             switch (state) {
                 case 0: {
+                    buf.append(c);
                     switch (c) {
                         case '\'': {
                             state = 1;
-                            buf.append(c);
                             break;
                         }
                         case '\"': {
                             state = 2;
-                            buf.append(c);
                             break;
                         }
                         case '-': {
                             if (pc == '-')
                                 state = 3;
-                            buf.append(c);
                             break;
                         }
                         case '*': {
                             if (pc == '/')
                                 state = 4;
-                            buf.append(c);
                             break;
                         }
-                        case PARAMS_HEADER: {
+                        case ':':
+                        case '&': {
                             if ((!Character.isLetterOrDigit(pc)) && i < lastPos && Character.isJavaIdentifierStart(namedSql.charAt(i + 1))) {
                                 state = 5;
-                                buf.append('?');
-                            } else {
-                                buf.append(c);
+                                buf.setCharAt(buf.length() - 1, '?');
                             }
                             break;
-                        }
-                        default: {
-                            buf.append(c);
                         }
                     }
                     break;

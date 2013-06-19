@@ -3,7 +3,10 @@ package org.echosoft.common.data;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * <p>Базовый класс предназначенный для задания ограничений на выборку данных из некоторого источника.</p>
@@ -15,6 +18,7 @@ public class Query implements Serializable {
 
     private int rangeSize;
     private long rangeStart;
+    private Map<String, Object> params;
     private List<SortCriterion> criteria;
     private boolean complete;
 
@@ -49,6 +53,25 @@ public class Query implements Serializable {
         }
         return this;
     }
+
+
+    public boolean hasParams() {
+        return params != null && !params.isEmpty();
+    }
+
+    public Map<String, Object> getParams() {
+        if (params == null)
+            params = new HashMap<String, Object>();
+        return params;
+    }
+
+    public Query addParam(final String paramName, final Object param) {
+        if (params == null)
+            params = new HashMap<String, Object>();
+        params.put(paramName, param);
+        return this;
+    }
+
 
     public Iterable<SortCriterion> getSortCriteria() {
         return criteria != null ? criteria : Collections.<SortCriterion>emptyList();
