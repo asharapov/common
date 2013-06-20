@@ -3,7 +3,6 @@ package org.echosoft.common.data;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -15,6 +14,8 @@ import java.util.Map;
  * @author Anton Sharapov
  */
 public class Query implements Serializable {
+
+    private static final SortCriterion[] EMPTY_SORT_CRITERIA = new SortCriterion[0];
 
     private int rangeSize;
     private long rangeStart;
@@ -72,9 +73,20 @@ public class Query implements Serializable {
         return this;
     }
 
+    public Query addParams(final Map<String, Object> p) {
+        if (params == null)
+            params = new HashMap<String, Object>(p.size());
+        params.putAll(p);
+        return this;
+    }
+
 
     public Iterable<SortCriterion> getSortCriteria() {
         return criteria != null ? criteria : Collections.<SortCriterion>emptyList();
+    }
+
+    public SortCriterion[] getSortCriteriaAsArray() {
+        return criteria != null && criteria.size() > 0 ? criteria.toArray(new SortCriterion[criteria.size()]) : EMPTY_SORT_CRITERIA;
     }
 
     public boolean hasSortCriteria() {
