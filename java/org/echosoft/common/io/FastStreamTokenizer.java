@@ -1,11 +1,10 @@
 package org.echosoft.common.io;
 
-import org.echosoft.common.collections.ReadAheadIterator;
-
 import java.io.IOException;
 import java.io.Reader;
-import java.util.Iterator;
 import java.util.NoSuchElementException;
+
+import org.echosoft.common.collections.ReadAheadIterator;
 
 
 /**
@@ -24,37 +23,39 @@ public final class FastStreamTokenizer implements ReadAheadIterator<String> {
     private final char[] charbuf;       // Буфер в который подчитываются данные из потока.
     private int length;                 // Количество символов реально загруженных в буфер. Всегда варьируется от 0 (буфер пуст) до емкости буфера. Имеет значение -1 после полного исчерпания входного потока.
     private int pos;                    // Текущая позиция сканера в буфере. Всегда варьируется от 0 до кол-ва символов загруженных в буфер.
+    private boolean nextTokenScanned;   // Признак того что последующий токен уже обработан и ожидает отдачи пользователю.
     private int tokenNumber;            // Порядковый номер последнего разобранного токена.
     private String nextToken;           // Предварительно отсканированный токен, который будет возвращен при последующем вызове метода {@link #nextToken()}.
     private StringBuilder buf;          // Временный буффер, где аккумулируются символы сканируемого в настоящий момент токена.
 
     public FastStreamTokenizer(final Reader reader, final char delimiter) throws IOException {
         this.delimiter = delimiter;
-        this.closeOnEOF = false;
         this.charbuf = new char[DEFAULT_BUF_SIZE];
         this.reader = reader;
         this.length = 0;
         this.pos = 0;
         this.tokenNumber = 0;
         this.buf = new StringBuilder();
-        this.nextToken = scanToken();
+        this.nextTokenScanned = false;
+        this.closeOnEOF = false;
     }
 
     @Deprecated
-    public FastStreamTokenizer(final Reader reader, final char delimiter, final boolean closeOnEOF) throws IOException {
+    public FastStreamTokenizer(final Reader reader, final char delimiter, final boolean closeOnEOF) {
         this.delimiter = delimiter;
-        this.closeOnEOF = closeOnEOF;
         this.charbuf = new char[DEFAULT_BUF_SIZE];
         this.reader = reader;
         this.length = 0;
         this.pos = 0;
         this.tokenNumber = 0;
         this.buf = new StringBuilder();
-        this.nextToken = scanToken();
+        this.nextTokenScanned = false;
+        this.closeOnEOF = closeOnEOF;
     }
 
     @Override
     public boolean hasNext() {
+        ensureNextTokenScanned();
         return nextToken != null;
     }
 
@@ -70,6 +71,7 @@ public final class FastStreamTokenizer implements ReadAheadIterator<String> {
 
     @Override
     public String readAhead() {
+        ensureNextTokenScanned();
         if (nextToken == null)
             throw new NoSuchElementException();
         return nextToken;
@@ -77,16 +79,23 @@ public final class FastStreamTokenizer implements ReadAheadIterator<String> {
 
 
     public String nextToken() {
+        ensureNextTokenScanned();
         final String result = nextToken;
-        if (nextToken != null) {
-            nextToken = scanToken();
-            tokenNumber++;
-        }
+        nextToken = null;
+        nextTokenScanned = false;
         return result;
     }
 
     public int getTokenNumber() {
         return tokenNumber;
+    }
+
+    private void ensureNextTokenScanned() {
+        if (!nextTokenScanned) {
+            nextToken = scanToken();
+            tokenNumber++;
+            nextTokenScanned = true;
+        }
     }
 
     private String scanToken() {

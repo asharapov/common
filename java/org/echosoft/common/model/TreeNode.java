@@ -184,11 +184,11 @@ public class TreeNode<K, T> {
         }
     }
 
-    public Iterable<TreeNode<K, T>> traverseNodes() {
+    public Iterable<TreeNode<K, T>> traverseNodes(final boolean includeRoot) {
         return new Iterable<TreeNode<K, T>>() {
             @Override
             public Iterator<TreeNode<K, T>> iterator() {
-                return new Walker<K, T>(TreeNode.this);
+                return new Walker<K, T>(TreeNode.this, includeRoot);
             }
         };
     }
@@ -207,9 +207,13 @@ public class TreeNode<K, T> {
         private TreeNode<K, T> current;
         private TreeNode<K, T> next;
         private boolean nextCalculated;
-        public Walker(final TreeNode<K, T> root) {
+        public Walker(final TreeNode<K, T> root, final boolean includeRoot) {
             stack = new ArrayList<Iterator<TreeNode<K, T>>>();
-            stack.add(Collections.singletonList(root).iterator());
+            if (includeRoot) {
+                stack.add(Collections.singletonList(root).iterator());
+            } else {
+                stack.add(root.getChildren().iterator());
+            }
         }
 
         @Override

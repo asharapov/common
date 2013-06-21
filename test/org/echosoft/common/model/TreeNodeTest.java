@@ -43,7 +43,7 @@ public class TreeNodeTest {
         n322.addChildNode("n3221", "Data for N3221");
         tree.debugInfo(System.out);
         System.out.println("\ntraverse tree: ");
-        for (TreeNode<String, String> node : tree.traverseNodes()) {
+        for (TreeNode<String, String> node : tree.traverseNodes(false)) {
             System.out.println(node);
         }
     }
