@@ -9,6 +9,7 @@ import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.nio.charset.Charset;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.Iterator;
@@ -171,7 +172,7 @@ public class ObjectUtil {
 
     /**
      * Формирует строковое представление переданного в аргументе массива байт, где каждый байт представлен в шестнадцатиричном формате,
-     * и сохраняет это представление в выходной символьный поток.
+     * и сохраняет это представление в выходной символьный поток используя кодировку по умолчанию.
      * Метод используется как правило в отладочных целях.
      *
      * @param out  поток куда будет помещено отформатированное представление данных.
@@ -181,11 +182,12 @@ public class ObjectUtil {
     public static void dump(final Appendable out, final byte[] data) throws IOException {
         if (data == null || data.length == 0)
             return;
+        final Charset charset = Charset.defaultCharset();
         final StringBuilder buf = new StringBuilder(196);
         for (int i = 0; i < data.length; i++) {
             if (i % 32 == 0) {
                 if (i > 0) {
-                    appendTextExplanation(buf, new String(data, i - 32, 32));
+                    appendTextExplanation(buf, new String(data, i - 32, 32, charset));
                     out.append(buf);
                     buf.setLength(0);
                 }
@@ -202,7 +204,7 @@ public class ObjectUtil {
         int rest = data.length % 32;
         if (rest == 0)
             rest = 32;
-        appendTextExplanation(buf, new String(data, data.length - rest, rest));
+        appendTextExplanation(buf, new String(data, data.length - rest, rest, charset));
         out.append(buf);
         if (out instanceof Flushable) {
             ((Flushable) out).flush();

@@ -10,7 +10,7 @@ import org.echosoft.common.json.annotate.JsonUseSeriazer;
  * @author Anton Sharapov
  */
 @JsonUseSeriazer(value = SimpleReferenceJsonSerializer.class, recursive = true)
-public class SimpleReference implements Reference<Long, String> {
+public class SimpleReference implements Reference<Long, String>, Cloneable {
 
     private final long id;
     private final String title;

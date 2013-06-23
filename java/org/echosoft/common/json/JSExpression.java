@@ -32,10 +32,12 @@ public class JSExpression implements Serializable, Cloneable {
     }
 
 
+    @Override
     public int hashCode() {
         return expression != null ? expression.hashCode() : 0;
     }
 
+    @Override
     public boolean equals(final Object obj) {
         if (obj == null || !getClass().equals(obj.getClass()))
             return false;
@@ -43,10 +45,12 @@ public class JSExpression implements Serializable, Cloneable {
         return (expression != null ? expression.equals(other.expression) : other.expression == null);
     }
 
-    public Object clone() throws CloneNotSupportedException {
-        return super.clone();
+    @Override
+    public JSExpression clone() throws CloneNotSupportedException {
+        return (JSExpression)super.clone();
     }
 
+    @Override
     public String toString() {
         return "[JSExpression{" + getExpression() + "}]";
     }

@@ -114,8 +114,8 @@
     <loadfile property="built.revision" srcfile="revision.info"/>
     <delete file="revision.info" />
     -->
-    <exec executable="${git.exe}" dir="." outputproperty="built.revision">
-      <arg line="describe --long"/>
+    <exec executable="${git.bin}" dir="." outputproperty="built.revision">
+      <arg line="describe --always"/>
     </exec>
     <property name="built.revision" value="0" />
     <echo message="revision: ${built.revision}" />

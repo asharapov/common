@@ -410,4 +410,14 @@ public class StringUtilTest {
         StringUtil.encodeXMLText(buf2, text);
         Assert.assertEquals(encoded, buf2.toString());
     }
+
+    @Test
+    public void testStackTrace() throws Exception {
+        try {
+            throw new Exception("Checked exception");
+        } catch (Exception e) {
+            final String text = StringUtil.stackTrace(e);
+            System.out.println(text);
+        }
+    }
 }

@@ -3,6 +3,7 @@ package org.echosoft.common.utils;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.io.Writer;
 import java.text.ParseException;
 import java.util.ArrayList;
@@ -1450,8 +1451,8 @@ public class StringUtil {
      */
     public static String stackTrace(final Throwable th) {
         try {
-            final ByteArrayOutputStream buf = new ByteArrayOutputStream(128);
-            th.printStackTrace(new PrintWriter(buf, true));
+            final StringWriter buf = new StringWriter(128);
+            th.printStackTrace(new PrintWriter(buf, false));
             return buf.toString();
         } catch (Exception e) {
             return "Runtime error: " + e.getMessage();
@@ -1502,9 +1503,13 @@ public class StringUtil {
     }
 
     public static Set<String> asUnmodifiableSet(final Collection<String> items1, final String... items2) {
-        final int length = items1 != null ? items1.size() + items2.length : items2.length;
-        final Set<String> set = new HashSet<String>(length);
-        set.addAll(items1);
+        final Set<String> set;
+        if (items1 != null) {
+            set = new HashSet<String>(items1.size() + items2.length);
+            set.addAll(items1);
+        } else {
+            set = new HashSet<String>(items2.length);
+        }
         set.addAll(Arrays.asList(items2));
         return Collections.unmodifiableSet(set);
     }

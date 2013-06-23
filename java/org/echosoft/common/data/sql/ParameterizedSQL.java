@@ -120,6 +120,8 @@ public class ParameterizedSQL implements Serializable {
                             }
                             break;
                         }
+                        default: {
+                        }
                     }
                     break;
                 }

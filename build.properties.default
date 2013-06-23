@@ -32,15 +32,17 @@ build.source=1.6
 # Generate class files for specific VM version
 build.target=1.6
 
+# Explicitly specifies path to JDK that should be used for project building.
+jdk.home=/usr/local/java/sdk/6.0
+
+# Explicitly specifies path to Git binary (workaround of ant bug that sometimes occurs on windows platform)
+git.bin=git
 
 #
 # Base configuration parameters
 #
 built.by=Anton Sharapov, asharapov2@yandex.ru
-spec.version=0.8.0
-spec.vendor=echosoft, 2011
+spec.version=1.0
+spec.vendor=echosoft, 2013
 spec.extraversion=
 app.name=echosoft-common
-
-git.exe=git
-jdk.home=/usr/local/java/sdk/6.0.45

@@ -142,6 +142,11 @@ public class Option implements Serializable, Cloneable {
     }
 
     @Override
+    public  Option clone() throws CloneNotSupportedException {
+        return (Option)super.clone();
+    }
+
+    @Override
     public String toString() {
         final StringBuilder buf = new StringBuilder(64);
         buf.append("[Option{full:").append(fullName).append(", alias:").append(shortName).append(", required:").append(required).append(", arg:");

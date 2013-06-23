@@ -7,12 +7,13 @@ import java.util.Iterator;
  * Осуществляет разбор строки на токены. Поддерживаются два алгоритма токенизации:
  * <li> простой способ, аналогичный способу, используемому в {@link java.util.StringTokenizer}.
  * <li> алгоритм, способный обрабатывать токены, обрамленные некоторым определенным символом.
+ *
  * @author Anton Sharapov
  */
 public final class FastStringTokenizer implements Iterator<String> {
 
-    private final int delimiter;
-    private final int valueWrapper;
+    private final char delimiter;
+    private final char valueWrapper;
     private String text;
     private int length;
     private int pos;
@@ -21,7 +22,7 @@ public final class FastStringTokenizer implements Iterator<String> {
     private String nextToken;
 
     public FastStringTokenizer(final char delimiter) {
-        this("", delimiter, (char)0);
+        this("", delimiter, (char) 0);
     }
 
     public FastStringTokenizer(final char delimiter, final char valueWrapper) {
@@ -61,12 +62,12 @@ public final class FastStringTokenizer implements Iterator<String> {
 
 
     public boolean hasMoreTokens() {
-        return nextToken!=null;
+        return nextToken != null;
     }
 
     public String nextToken() {
         final String result = nextToken;
-        if (nextToken!=null) {
+        if (nextToken != null) {
             nextToken = scanToken();
             tokenNumber++;
         }
@@ -87,48 +88,48 @@ public final class FastStringTokenizer implements Iterator<String> {
     }
 
     private String scanWrappedToken() {
-        while (pos<length) {
-            if (text.charAt(pos++)==valueWrapper)
+        while (pos < length) {
+            if (text.charAt(pos++) == valueWrapper)
                 break;
         }
 
-        if (pos+1>=length)
+        if (pos + 1 >= length)
             return null;
 
-        final FastStringWriter out = new FastStringWriter();
+        final StringBuilder buf = new StringBuilder();
 
-        for (; pos<length; pos++) {
-            final int c = text.charAt(pos);
+        for (; pos < length; pos++) {
+            final char c = text.charAt(pos);
 
-            if (c==valueWrapper) {
-                final int cc = pos+1 < length ? text.charAt(pos+1) : -1;
-                if (cc!=valueWrapper) {
+            if (c == valueWrapper) {
+                final int cc = pos + 1 < length ? text.charAt(pos + 1) : -1;
+                if (cc != valueWrapper) {
 
-                    for (; pos<length; pos++) {
-                        if (text.charAt(pos)==delimiter)
+                    for (; pos < length; pos++) {
+                        if (text.charAt(pos) == delimiter)
                             break;
                     }
-                    return out.toString();
+                    return buf.toString();
                 } else
                     pos++;
             }
-            out.write( c );
+            buf.append(c);
         }
         return null;
     }
 
     private String scanSimpleToken() {
-        if (pos>=length)
+        if (pos >= length)
             return null;
 
-        for (int i=pos; i<length; i++) {
-            final int c = text.charAt(i);
-            if (c==delimiter) {
+        for (int i = pos; i < length; i++) {
+            final char c = text.charAt(i);
+            if (c == delimiter) {
                 final String result = text.substring(pos, i);
                 pos = ++i;
                 return result;
             } else
-            if (i+1==length) {
+            if (i + 1 == length) {
                 final String result = text.substring(pos);
                 pos = ++i;
                 return result;
@@ -136,6 +137,4 @@ public final class FastStringTokenizer implements Iterator<String> {
         }
         return null;
     }
-
-
 }

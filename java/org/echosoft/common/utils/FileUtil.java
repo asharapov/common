@@ -36,7 +36,9 @@ public class FileUtil {
                 if (destFile.length() != size) {
                     throw new IOException("Failed to copy full contents from '" + srcFile + "' to '" + destFile + "'.");
                 }
-                destFile.setLastModified(srcFile.lastModified());
+                if (!destFile.setLastModified(srcFile.lastModified())) {
+                    throw new IOException("Can't set last modification time for target path");
+                }
             } finally {
                 out.close();
             }
