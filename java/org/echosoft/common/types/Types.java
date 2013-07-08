@@ -359,7 +359,7 @@ public class Types {
                     if (str.isEmpty())
                         return EMPTY_ARRAY;
                     final ArrayList<Integer> result = new ArrayList<Integer>();
-                    for (FastStringTokenizer it = new FastStringTokenizer(str, ',', (char) 0); it.hasNext(); ) {
+                    for (FastStringTokenizer it = new FastStringTokenizer(str, ','); it.hasNext(); ) {
                         final String token = it.nextToken();
                         result.add(token != null ? Integer.parseInt(token, 10) : null);
                     }
@@ -398,7 +398,7 @@ public class Types {
                     if (str.isEmpty())
                         return EMPTY_ARRAY;
                     final ArrayList<Long> result = new ArrayList<Long>();
-                    for (FastStringTokenizer it = new FastStringTokenizer(str, ',', (char) 0); it.hasNext(); ) {
+                    for (FastStringTokenizer it = new FastStringTokenizer(str, ','); it.hasNext(); ) {
                         final String token = it.nextToken();
                         result.add(token != null ? Long.parseLong(token, 10) : null);
                     }

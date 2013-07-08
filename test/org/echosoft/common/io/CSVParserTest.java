@@ -33,6 +33,7 @@ public class CSVParserTest {
             "\"h\r\nh\",\"\",\"j\",\"k\", \n" +
             "\r\n" +
             "\r\n" +
+            " \r\n" +
             "  \"complex text\" , \"complex test \"\"2\"\"\"\n";
     private static final String[][] TEST2_EXPECTED = {
             {"", "b\"b", "c", null},
@@ -40,6 +41,7 @@ public class CSVParserTest {
             {"h\r\nh", "",  "j", "k", null},
             {},
             {},
+            {null},
             {"complex text", "complex test \"2\""}
 
     };
@@ -85,7 +87,7 @@ public class CSVParserTest {
     }
 
     @Test
-    public void test2() throws Exception {
+    public void test2a() throws Exception {
         final CSVParser parser = new CSVParser(new StringReader(TEST2), ',', true);
         try {
             while (parser.nextLine()) {
@@ -96,6 +98,26 @@ public class CSVParserTest {
                     final String expected = TEST2_EXPECTED[lineNum - 1][tokenNum - 1];
                     Assert.assertEquals(expected, token);
                     //System.out.println(lineNum + "." + tokenNum + ":\t" + token);
+                }
+            }
+        } finally {
+            parser.close();
+        }
+    }
+
+    @Test
+    public void test2b() throws Exception {
+        final CSVParser parser = new CSVParser(new StringReader(TEST2), ',', true);
+        try {
+            parser.nextLine();
+            while (parser.nextLine()) {
+                final int lineNum = parser.getLineNum();
+                while (parser.hasNextToken()) {
+                    final String token = parser.nextToken();
+                    final int tokenNum = parser.getLastTokenNum();
+                    final String expected = TEST2_EXPECTED[lineNum - 1][tokenNum - 1];
+                    Assert.assertEquals(expected, token);
+                    System.out.println(lineNum + "." + tokenNum + ":\t" + token);
                 }
             }
         } finally {

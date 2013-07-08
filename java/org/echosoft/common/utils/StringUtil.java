@@ -1,6 +1,5 @@
 package org.echosoft.common.utils;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -320,7 +319,8 @@ public class StringUtil {
                 final char c = part.charAt(i);
                 if (c == mask) {
                     buf.append(mask).append(mask);
-                } else if (c == separator) {
+                } else
+                if (c == separator) {
                     buf.append(mask).append(separator);
                 } else {
                     buf.append(c);
@@ -356,7 +356,8 @@ public class StringUtil {
                 } else {
                     masked = true;
                 }
-            } else if (c == separator) {
+            } else
+            if (c == separator) {
                 if (masked) {
                     buf.append(separator);
                     masked = false;
@@ -695,13 +696,15 @@ public class StringUtil {
             return context;
         final ArrayList<String> tokens = new ArrayList<String>(10);
         boolean first = true, addContext = true;
-        for (Iterator<String> it = new FastStringTokenizer(path.trim(), '/', (char) 0); it.hasNext(); ) {
+        for (Iterator<String> it = new FastStringTokenizer(path.trim(), '/'); it.hasNext(); ) {
             final String token = it.next();
             if (token.length() == 0) {
                 if (first)
                     addContext = false;
-            } else if (".".equals(token)) {
-            } else if ("..".equals(token)) {
+            } else
+            if (".".equals(token)) {
+            } else
+            if ("..".equals(token)) {
                 tokens.remove(tokens.size() - 1);
             } else {
                 tokens.add(token);

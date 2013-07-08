@@ -13,7 +13,6 @@ import java.util.Iterator;
 public final class FastStringTokenizer implements Iterator<String> {
 
     private final char delimiter;
-    private final char valueWrapper;
     private String text;
     private int length;
     private int pos;
@@ -22,16 +21,12 @@ public final class FastStringTokenizer implements Iterator<String> {
     private String nextToken;
 
     public FastStringTokenizer(final char delimiter) {
-        this("", delimiter, (char) 0);
-    }
-
-    public FastStringTokenizer(final char delimiter, final char valueWrapper) {
-        this("", delimiter, valueWrapper);
-    }
-
-    public FastStringTokenizer(final String text, final char delimiter, final char valueWrapper) {
         this.delimiter = delimiter;
-        this.valueWrapper = valueWrapper;
+        init("", 0);
+    }
+
+    public FastStringTokenizer(final String text, final char delimiter) {
+        this.delimiter = delimiter;
         init(text, 0);
     }
 
@@ -43,7 +38,6 @@ public final class FastStringTokenizer implements Iterator<String> {
         this.lineNumber = lineNumber;
         this.nextToken = scanToken();
     }
-
 
     @Override
     public boolean hasNext() {
@@ -82,43 +76,6 @@ public final class FastStringTokenizer implements Iterator<String> {
     }
 
     private String scanToken() {
-        return valueWrapper > 0
-                ? scanWrappedToken()
-                : scanSimpleToken();
-    }
-
-    private String scanWrappedToken() {
-        while (pos < length) {
-            if (text.charAt(pos++) == valueWrapper)
-                break;
-        }
-
-        if (pos + 1 >= length)
-            return null;
-
-        final StringBuilder buf = new StringBuilder();
-
-        for (; pos < length; pos++) {
-            final char c = text.charAt(pos);
-
-            if (c == valueWrapper) {
-                final int cc = pos + 1 < length ? text.charAt(pos + 1) : -1;
-                if (cc != valueWrapper) {
-
-                    for (; pos < length; pos++) {
-                        if (text.charAt(pos) == delimiter)
-                            break;
-                    }
-                    return buf.toString();
-                } else
-                    pos++;
-            }
-            buf.append(c);
-        }
-        return null;
-    }
-
-    private String scanSimpleToken() {
         if (pos >= length)
             return null;
 
