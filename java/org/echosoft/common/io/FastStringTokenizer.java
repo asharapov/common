@@ -6,8 +6,11 @@ import java.util.Iterator;
 /**
  * Осуществляет разбор строки на токены. Поддерживаются два алгоритма токенизации:
  * <li> простой способ, аналогичный способу, используемому в {@link java.util.StringTokenizer}.
- * <li> алгоритм, способный обрабатывать токены, обрамленные некоторым определенным символом.
  *
+ * <strong>Внимание!</strong> Данный класс считается устаревшим и сохраняется только ради обратной совместимости со старым кодом.
+ * Во всех случаях кроме самых простых настоятельно рекомендуется использовать класс {@link CSVParser}.
+ *
+ * @see CSVParser
  * @author Anton Sharapov
  */
 public final class FastStringTokenizer implements Iterator<String> {
@@ -71,6 +74,7 @@ public final class FastStringTokenizer implements Iterator<String> {
     public int getTokenNumber() {
         return tokenNumber;
     }
+
     public int getLineNumber() {
         return lineNumber;
     }

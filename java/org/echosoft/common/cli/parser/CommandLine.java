@@ -283,5 +283,4 @@ public class CommandLine implements Serializable {
     void setOption(final Option option) throws CLParserException {
         setOptionValue(option, null);
     }
-
 }

@@ -3,7 +3,6 @@ package org.echosoft.common.utils;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.LinkedList;
 
 /**
  * Класс предназначен для проверки строковых выражений на соответствие с определенным шаблоном.
@@ -16,8 +15,9 @@ import java.util.LinkedList;
  * makeMatcher("*.???").match("c.txt")      --> true
  * makeMatcher("*.????").match("c.txt")     --> false
  * </pre>
- *
+ * <p/>
  * Алгоритм взят из проекта Apache Commons-IO.
+ *
  * @author Anton Sharapov
  */
 public class WildcardMatcher implements Serializable {
@@ -27,7 +27,7 @@ public class WildcardMatcher implements Serializable {
     }
 
     public static WildcardMatcher makeMatcher(final boolean caseSensitive, final String template, final String... altTemplates) {
-        final String[] templates = new String[1+altTemplates.length];
+        final String[] templates = new String[1 + altTemplates.length];
         templates[0] = template;
         System.arraycopy(altTemplates, 0, templates, 1, altTemplates.length);
         return new WildcardMatcher(caseSensitive, templates);
@@ -39,7 +39,7 @@ public class WildcardMatcher implements Serializable {
 
 
     public WildcardMatcher(final boolean caseSensitive, final String[] templates) {
-        if (templates==null || templates.length==0)
+        if (templates == null || templates.length == 0)
             throw new IllegalArgumentException("Templates must be specified");
 
         this.caseSensitive = caseSensitive;
@@ -50,26 +50,27 @@ public class WildcardMatcher implements Serializable {
         final StringBuilder buf = new StringBuilder(32);
 
         for (String template : templates) {
-            if (template==null)
+            if (template == null)
                 throw new IllegalArgumentException("Template can't be null");
             if (!caseSensitive)
                 template = template.toUpperCase();
 
-            if (template.indexOf("?") == -1 && template.indexOf("*") == -1) {
-                patterns.add( new String[]{template} );
+            if (template.indexOf('?') == -1 && template.indexOf('*') == -1) {
+                patterns.add(new String[]{template});
             } else {
                 pchunks.clear();
                 buf.setLength(0);
-                for (char c : template.toCharArray()) {
+                for (int i = 0; i < template.length(); i++) {
+                    final char c = template.charAt(i);
                     if (c == '?' || c == '*') {
                         if (buf.length() != 0) {
-                            pchunks.add( buf.toString() );
+                            pchunks.add(buf.toString());
                             buf.setLength(0);
                         }
                         if (c == '?') {
                             pchunks.add("?");
                         } else
-                        if ( pchunks.size()==0 || !"*".equals(pchunks.get(pchunks.size()-1)) ) {
+                        if (pchunks.size() == 0 || !"*".equals(pchunks.get(pchunks.size() - 1))) {
                             pchunks.add("*");
                         }
                     } else {
@@ -79,14 +80,14 @@ public class WildcardMatcher implements Serializable {
                 if (buf.length() != 0) {
                     pchunks.add(buf.toString());
                 }
-                patterns.add( pchunks.toArray(new String[pchunks.size()]) );
+                patterns.add(pchunks.toArray(new String[pchunks.size()]));
             }
         }
-        this.compiledPatterns = patterns.toArray( new String[patterns.size()][] );
+        this.compiledPatterns = patterns.toArray(new String[patterns.size()][]);
     }
 
     public boolean match(String text) {
-        if (text==null)
+        if (text == null)
             return false;
         if (!caseSensitive)
             text = text.toUpperCase();
@@ -100,14 +101,14 @@ public class WildcardMatcher implements Serializable {
 
     private static boolean match0(final String text, final String[] wcs) {
         boolean anyChars = false;
-        int textIdx = 0;
-        int wcsIdx = 0;
-        final LinkedList<int[]> backtrack = new LinkedList<int[]>();
+        int textIdx = 0, wcsIdx = 0;
+
+        final ArrayList<int[]> backtrack = new ArrayList<int[]>();
 
         // loop around a backtrack stack, to handle complex * matching
         do {
             if (backtrack.size() > 0) {
-                final int[] array = backtrack.pop();
+                final int[] array = backtrack.remove(backtrack.size() - 1);
                 wcsIdx = array[0];
                 textIdx = array[1];
                 anyChars = true;
@@ -120,7 +121,6 @@ public class WildcardMatcher implements Serializable {
                 if (pattern.equals("?")) {
                     textIdx++;
                     anyChars = false;
-
                 } else
                 if (pattern.equals("*")) {
                     anyChars = true;
@@ -138,7 +138,7 @@ public class WildcardMatcher implements Serializable {
                         }
                         final int repeat = text.indexOf(pattern, textIdx + 1);
                         if (repeat >= 0) {
-                            backtrack.push(new int[] {wcsIdx, repeat});
+                            backtrack.add(new int[]{wcsIdx, repeat});
                         }
                     } else {
                         // matching from current position
@@ -160,13 +160,13 @@ public class WildcardMatcher implements Serializable {
             if (wcsIdx == wcs.length && textIdx == text.length()) {
                 return true;
             }
-
         } while (backtrack.size() > 0);
 
         return false;
     }
 
+    @Override
     public String toString() {
-        return "[WildcardMatcher{patterns:"+ Arrays.toString(rawPatterns)+"}]";
+        return "[WildcardMatcher{patterns:" + Arrays.toString(rawPatterns) + "}]";
     }
 }

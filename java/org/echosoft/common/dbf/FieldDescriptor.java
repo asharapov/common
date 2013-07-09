@@ -22,8 +22,8 @@ class FieldDescriptor implements Serializable {
             throw new IllegalArgumentException("Invalid buffer size");
         this.name = Util.readZeroBasedString(buf, offset, 11, charset);
         this.type = FieldType.findByCode((char) buf[offset + 11]);
-        if (type==null)
-            throw new DBFException("Unknown DBF field type: '" + (char)buf[offset + 11]);
+        if (type == null)
+            throw new DBFException("Unknown DBF field type: '" + (char) buf[offset + 11]);
         switch (type) {
             case LOGICAL: {
                 size = 1;

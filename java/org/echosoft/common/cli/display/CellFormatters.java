@@ -22,7 +22,7 @@ public class CellFormatters {
             new CellValueFormatter() {
                 @Override
                 public String format(final Object obj) {
-                    if (obj==null)
+                    if (obj == null)
                         return "";
                     final DecimalFormat formatter = new DecimalFormat("##0");
                     return formatter.format(obj);
@@ -33,7 +33,7 @@ public class CellFormatters {
             new CellValueFormatter() {
                 @Override
                 public String format(final Object obj) {
-                    if (obj==null)
+                    if (obj == null)
                         return "";
                     final DecimalFormat formatter = new DecimalFormat(",##0.00");
                     return formatter.format(obj);
@@ -44,7 +44,7 @@ public class CellFormatters {
             new CellValueFormatter() {
                 @Override
                 public String format(final Object obj) {
-                    return StringUtil.formatDate((Date)obj);
+                    return StringUtil.formatDate((Date) obj);
                 }
             };
 
@@ -52,7 +52,7 @@ public class CellFormatters {
             new CellValueFormatter() {
                 @Override
                 public String format(final Object obj) {
-                    return StringUtil.formatDateTime((Date)obj);
+                    return StringUtil.formatDateTime((Date) obj);
                 }
             };
 

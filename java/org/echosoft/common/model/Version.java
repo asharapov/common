@@ -16,28 +16,29 @@ public class Version implements Serializable, Comparable<Version> {
 
     /**
      * Выполняет разбор номера версии из строки.
-     * @param version  строка с номером версии.
-     * @return  разобранный экземпляр {@link Version} или <code>null</code> если переданная в аргументе строка была пустой
-     * @throws ParseException  в случае некорректной строки переданной в аргументе.
+     *
+     * @param version строка с номером версии.
+     * @return разобранный экземпляр {@link Version} или <code>null</code> если переданная в аргументе строка была пустой
+     * @throws ParseException в случае некорректной строки переданной в аргументе.
      */
     public static Version parseVersion(String version) throws ParseException {
-        if (version==null)
+        if (version == null)
             return null;
         version = version.trim();
         final int length = version.length();
-        if (length==0)
+        if (length == 0)
             return null;
 
         final int parts[] = {0, 0, 0};
         String extra;
         int p = 0, s = 0, e = 0;
-        while (p<parts.length) {
+        while (p < parts.length) {
             char c = 0;
-            while (e<length && Character.isDigit(c=version.charAt(e)))  e++;
-            if (e>s) {
-                parts[p++] = Integer.parseInt( version.substring(s,e) );
+            while (e < length && Character.isDigit(c = version.charAt(e))) e++;
+            if (e > s) {
+                parts[p++] = Integer.parseInt(version.substring(s, e));
                 s = e;
-                if (c=='.' && p<parts.length && s+1<length && Character.isDigit(version.charAt(s+1))) {
+                if (c == '.' && p < parts.length && s + 1 < length && Character.isDigit(version.charAt(s + 1))) {
                     s = ++e;
                 } else {
                     break;
@@ -46,10 +47,10 @@ public class Version implements Serializable, Comparable<Version> {
                 break;
             }
         }
-        if (p>0) {
+        if (p > 0) {
             extra = version.substring(s, length).trim();
-        } else 
-            throw new ParseException("Invalid version "+version, s);
+        } else
+            throw new ParseException("Invalid version " + version, s);
         return new Version(parts[0], parts[1], parts[2], extra);
     }
 
@@ -79,15 +80,15 @@ public class Version implements Serializable, Comparable<Version> {
     }
 
     public Version(final int major, final int minor, final int revision, final String extraVersion) {
-        if (major<0 || minor<0 || revision<0)
+        if (major < 0 || minor < 0 || revision < 0)
             throw new IllegalArgumentException("Negative arguments not allowed");
         this.major = major;
         this.minor = minor;
         this.revision = revision;
 
-        if (extraVersion!=null) {
+        if (extraVersion != null) {
             final String ev = extraVersion.trim();
-            this.extraVersion = ev.length()>0 ? ev : null;
+            this.extraVersion = ev.length() > 0 ? ev : null;
         } else {
             this.extraVersion = null;
         }
@@ -112,19 +113,19 @@ public class Version implements Serializable, Comparable<Version> {
 
     @Override
     public int compareTo(final Version other) {
-        if (other==null)
+        if (other == null)
             return 1;
-        if (major!=other.major)
-            return major>other.major ? 1 : -1;
-        if (minor!=other.minor)
-            return minor>other.minor ? 1 : -1;
-        if (revision!=other.revision)
-            return revision>other.revision ? 1 : -1;
+        if (major != other.major)
+            return major > other.major ? 1 : -1;
+        if (minor != other.minor)
+            return minor > other.minor ? 1 : -1;
+        if (revision != other.revision)
+            return revision > other.revision ? 1 : -1;
 
-        if (extraVersion!=null) {
-            return other.extraVersion!=null ? extraVersion.compareTo(other.extraVersion) : -1;
+        if (extraVersion != null) {
+            return other.extraVersion != null ? extraVersion.compareTo(other.extraVersion) : -1;
         } else {
-            return other.extraVersion!=null ? -1 : 0;
+            return other.extraVersion != null ? -1 : 0;
         }
     }
 
@@ -135,11 +136,11 @@ public class Version implements Serializable, Comparable<Version> {
 
     @Override
     public boolean equals(final Object obj) {
-        if (obj==null || !getClass().equals(obj.getClass()))
+        if (obj == null || !getClass().equals(obj.getClass()))
             return false;
-        final Version other = (Version)obj;
-        return major==other.major && minor==other.minor && revision==other.revision &&
-               (extraVersion!=null ? extraVersion.equals(other.extraVersion) : other.extraVersion==null);
+        final Version other = (Version) obj;
+        return major == other.major && minor == other.minor && revision == other.revision &&
+                (extraVersion != null ? extraVersion.equals(other.extraVersion) : other.extraVersion == null);
     }
 
     @Override
@@ -150,7 +151,7 @@ public class Version implements Serializable, Comparable<Version> {
         buf.append(minor);
         buf.append('.');
         buf.append(revision);
-        if (extraVersion!=null)
+        if (extraVersion != null)
             buf.append(extraVersion);
         return buf.toString();
     }

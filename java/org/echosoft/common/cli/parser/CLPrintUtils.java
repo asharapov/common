@@ -23,7 +23,7 @@ public class CLPrintUtils {
         int maxSize = prefixLength;
         for (Option opt : options.getOptions()) {
             int size = prefixLength + 4;
-            if (opt.getFullName()!=null) {
+            if (opt.getFullName() != null) {
                 size += 2 + opt.getFullName().length();
             }
             if (opt.hasArgs()) {
@@ -37,15 +37,15 @@ public class CLPrintUtils {
         for (Option opt : options.getOptions()) {
             final StringBuilder ob = new StringBuilder(maxSize);
             ob.append(prefix);
-            if (opt.getShortName()!=null) {
+            if (opt.getShortName() != null) {
                 ob.append('-').append(opt.getShortName());
-                if (opt.getFullName()!=null) {
+                if (opt.getFullName() != null) {
                     ob.append(", ");
                 }
             } else {
                 ob.append("    ");
             }
-            if (opt.getFullName()!=null) {
+            if (opt.getFullName() != null) {
                 ob.append("--").append(opt.getFullName());
             }
             if (opt.hasArgs()) {
@@ -53,18 +53,18 @@ public class CLPrintUtils {
             }
             ob.append(' ');
 
-            while (ob.length()<maxSize)
+            while (ob.length() < maxSize)
                 ob.append(' ');
 
-            if (opt.getDescription()!=null) {
-                width = width>maxSize ? width : Integer.MAX_VALUE;
-                for (int i=0,l=opt.getDescription().length(); i<l; ) {
-                    if (i>0) {
-                        for (int j=0; j<maxSize; j++)
+            if (opt.getDescription() != null) {
+                width = width > maxSize ? width : Integer.MAX_VALUE;
+                for (int i = 0, l = opt.getDescription().length(); i < l; ) {
+                    if (i > 0) {
+                        for (int j = 0; j < maxSize; j++)
                             ob.append(' ');
                     }
                     final int end = i + width - maxSize;
-                    ob.append( end < l ? opt.getDescription().substring(i, end) : opt.getDescription().substring(i));
+                    ob.append(end < l ? opt.getDescription().substring(i, end) : opt.getDescription().substring(i));
                     ob.append(CRLF);
                     i = end;
                 }
@@ -76,5 +76,4 @@ public class CLPrintUtils {
 
         out.append(buf);
     }
-
 }

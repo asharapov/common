@@ -18,9 +18,9 @@ public class WildcardMatcherTest {
         for (String[] test : tests) {
             final String pattern = test[0];
             final WildcardMatcher matcher = WildcardMatcher.makeMatcher(pattern, "*xxx*");
-            for (int i=1; i<test.length; i++) {
+            for (int i = 1; i < test.length; i++) {
                 final String text = test[i];
-                System.out.print(matcher+":    text:'"+text+"'   =   ");
+                System.out.print(matcher + ":    text:'" + text + "'   =   ");
                 System.out.println(matcher.match(text));
             }
             System.out.println();

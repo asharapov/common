@@ -35,7 +35,7 @@ public class TableProcessor {
         // Отрисовка строк с данными таблицы ...
         fill(out, '-', totalWidth);
         out.append(CRLF);
-        for (Iterator rows = ObjectUtil.makeIterator(data); rows.hasNext();) {
+        for (Iterator rows = ObjectUtil.makeIterator(data); rows.hasNext(); ) {
             final Object row = rows.next();
             out.append('|');
             for (int i = 0; i < widths.length; i++) {
@@ -69,7 +69,7 @@ public class TableProcessor {
         if (!requiresCalculations)
             return widths;
 
-        for (Iterator rows = ObjectUtil.makeIterator(data); rows.hasNext();) {
+        for (Iterator rows = ObjectUtil.makeIterator(data); rows.hasNext(); ) {
             final Object row = rows.next();
             for (int i = widths.length - 1; i >= 0; i--) {
                 final TableModel.Column col = columns.get(i);
@@ -129,5 +129,4 @@ public class TableProcessor {
             out.append(c);
         }
     }
-
 }

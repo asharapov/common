@@ -33,7 +33,7 @@ public class CLParser {
      */
     public CommandLine parse(final String[] args) throws CLParserException {
         final CommandLine cmd = new CommandLine(options);
-        for (ReadAheadIterator<String> it = new ObjectArrayIterator<String>(args); it.hasNext();) {
+        for (ReadAheadIterator<String> it = new ObjectArrayIterator<String>(args); it.hasNext(); ) {
             final String token = it.next();
 
             if (!token.startsWith("-") || "-".equals(token)) {
@@ -50,12 +50,12 @@ public class CLParser {
             if (token.startsWith("--")) {
                 // обрабатываем варианты --arg  или --arg=value
                 final int eqp = token.indexOf('=');
-                final Option opt = options.getOption( eqp>=0 ? token.substring(2,eqp) : token.substring(2) );
-                final String value = eqp>=0 ? token.substring(eqp+1) : null;
-                if (opt==null) {
+                final Option opt = options.getOption(eqp >= 0 ? token.substring(2, eqp) : token.substring(2));
+                final String value = eqp >= 0 ? token.substring(eqp + 1) : null;
+                if (opt == null) {
                     processUnknownToken(cmd, token, it);
                 } else
-                if (value!=null) {
+                if (value != null) {
                     cmd.setOptionValue(opt, value);
                 } else
                 if (opt.hasArgs()) {
@@ -110,7 +110,7 @@ public class CLParser {
         }
         final String nextToken = it.readAhead();
 
-        if (nextToken.startsWith("-") && nextToken.length()>1 ) {
+        if (nextToken.startsWith("-") && nextToken.length() > 1) {
             cmd.setOption(option);
         } else {
             cmd.setOptionValue(option, it.next());
@@ -127,5 +127,4 @@ public class CLParser {
             }
         }
     }
-
 }

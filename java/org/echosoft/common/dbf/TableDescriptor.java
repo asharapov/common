@@ -20,7 +20,7 @@ class TableDescriptor implements Serializable {
     private final LanguageDriver languageDriver;
 
     public TableDescriptor(final byte[] buf) {
-        if (buf==null || buf.length<32)
+        if (buf == null || buf.length < 32)
             throw new IllegalArgumentException("Invalid buffer size");
         this.version = buf[0];
         final Calendar cal = Calendar.getInstance();
@@ -69,6 +69,6 @@ class TableDescriptor implements Serializable {
 
     @Override
     public String toString() {
-        return "[DBF.Table{ver:"+version+", date:"+ StringUtil.formatDate(date)+", records:"+recordsCount+", headerSize:"+headerSize+", recordSize:"+recordSize+"}]";
+        return "[DBF.Table{ver:" + version + ", date:" + StringUtil.formatDate(date) + ", records:" + recordsCount + ", headerSize:" + headerSize + ", recordSize:" + recordSize + "}]";
     }
 }

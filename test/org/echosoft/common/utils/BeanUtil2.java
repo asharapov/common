@@ -18,6 +18,7 @@ import org.echosoft.common.types.TypeRegistry;
 
 /**
  * Используется для динамического доступа к свойствам объектов.
+ *
  * @author Anton Sharapov
  * @version 2.0
  */
@@ -30,11 +31,12 @@ public class BeanUtil2 {
      * <p>Возвращает значение свойства объекта.</p>
      * <p><strong>Важно: </strong> Если в процессе вычисления сложного выражения вида <code>a.b.c</code> значение подвыражения <code>a.b</code> получилось равным <code>null</code> то
      * данный метод вернет <code>null</code> а не поднимет исключение!</p>
+     *
      * @param bean объект относительно которого вычисляется выражение.
      * @param expr вычисляемое выражение.
      * @return Значение полученное в результате вычисления выражения.
-     * @throws IllegalAccessException  поднимается если вызывающий поток не имеет прав на обращение к вызываемому методу или полю класса.
-     * @throws InvocationTargetException  поднимается в случае если вызываемый метод возвращает исключительную ситуацию.
+     * @throws IllegalAccessException    поднимается если вызывающий поток не имеет прав на обращение к вызываемому методу или полю класса.
+     * @throws InvocationTargetException поднимается в случае если вызываемый метод возвращает исключительную ситуацию.
      */
     public static Object getProperty(final Object bean, final String expr) throws IllegalAccessException, InvocationTargetException {
         if (expr == null)
@@ -49,7 +51,7 @@ public class BeanUtil2 {
             final char c = expr.charAt(i);
             switch (c) {
                 case '.': {
-                    if (i>start) {
+                    if (i > start) {
                         final BeanMetadata meta = getMetadata(result.getClass());
                         result = meta.getValue(result, expr.substring(start, i));
                         if (result == null)
@@ -63,14 +65,14 @@ public class BeanUtil2 {
                     if (r < i)
                         throw new IllegalArgumentException("Missed ']' symbol: " + expr);
                     final String[] args = StringUtil.split(expr.substring(i + 1, r), ',');
-                    if (i>start) {
+                    if (i > start) {
                         final BeanMetadata meta = getMetadata(result.getClass());
                         result = meta.getValue(result, expr.substring(start, i));
                         if (result == null)
                             return null;
                     }
                     result = getIndexedProperty(result, args);
-                    if (result==null)
+                    if (result == null)
                         return null;
                     i = r;
                     start = i + 1;
@@ -102,23 +104,24 @@ public class BeanUtil2 {
      * Устанавливает новое значение свойства объекта. Допускается использование вложенных свойств.
      * <p><strong>Важно: </strong> Если в процессе установки значения для выражения вида <code>a.b.c</code> значение подвыражения <code>a</code> или <code>a.b</code> было вычислено как <code>null</code> то
      * данный метод поднимет исключение.</p>
+     *
      * @param bean  объект чье свойство подлежит изменению
      * @param expr  выражение, ссылающееся на свойство чье значение требуется изменить.
-     * @param value  новое значение свойства.
-     * @throws IllegalAccessException  поднимается если вызывающий поток не имеет прав на обращение к вызываемому методу или полю класса.
-     * @throws InvocationTargetException  поднимается в случае если вызываемый метод возвращает исключительную ситуацию.
-     * @throws NullPointerException если в процессе вычисления сложного выражения было получено <code>null</code>.
+     * @param value новое значение свойства.
+     * @throws IllegalAccessException    поднимается если вызывающий поток не имеет прав на обращение к вызываемому методу или полю класса.
+     * @throws InvocationTargetException поднимается в случае если вызываемый метод возвращает исключительную ситуацию.
+     * @throws NullPointerException      если в процессе вычисления сложного выражения было получено <code>null</code>.
      */
     public static void setProperty(final Object bean, final String expr, final Object value) throws IllegalAccessException, InvocationTargetException {
         int start = 0;
         Object scope = bean;
         final int length = expr.length();
-        final int lastPos = length-1;
+        final int lastPos = length - 1;
         for (int i = 0; i < length; i++) {
             final char c = expr.charAt(i);
             switch (c) {
                 case '.': {
-                    if (i>start) {
+                    if (i > start) {
                         final BeanMetadata meta = getMetadata(scope.getClass());
                         scope = meta.getValue(scope, expr.substring(start, i));
                     }
@@ -130,11 +133,11 @@ public class BeanUtil2 {
                     if (r < i)
                         throw new IllegalArgumentException("Missed ']' symbol: " + expr);
                     final String[] args = StringUtil.split(expr.substring(i + 1, r), ',');
-                    if (i>start) {
+                    if (i > start) {
                         final BeanMetadata meta = getMetadata(scope.getClass());
                         scope = meta.getValue(scope, expr.substring(start, i));
                     }
-                    if (r<lastPos) {
+                    if (r < lastPos) {
                         scope = getIndexedProperty(scope, args);
                     } else {
                         setIndexedProperty(scope, args, value);
@@ -149,7 +152,7 @@ public class BeanUtil2 {
                         throw new IllegalArgumentException("Missed ')' symbol: " + expr);
                     final String[] args = StringUtil.split(expr.substring(i + 1, r), ',');
                     final BeanMetadata meta = getMetadata(scope.getClass());
-                    if (r<lastPos) {
+                    if (r < lastPos) {
                         scope = meta.getValue(scope, expr.substring(start, i), args);
                     } else {
                         meta.setValue(scope, expr.substring(start, i), args, value);
@@ -202,17 +205,17 @@ public class BeanUtil2 {
                 result = Array.get(result, idx);
             } else
             if (result instanceof List) {
-                result = ((List)result).get(idx);
+                result = ((List) result).get(idx);
             } else
             if (result instanceof Iterable) {
-                final Iterator it = ((Iterable)result).iterator();
-                for (int j=idx; j>=0; j--) {
+                final Iterator it = ((Iterable) result).iterator();
+                for (int j = idx; j >= 0; j--) {
                     result = it.next();
                 }
             } else
             if (result instanceof Iterator) {
-                final Iterator it = (Iterator)result;
-                for (int j=idx; j>=0; j--) {
+                final Iterator it = (Iterator) result;
+                for (int j = idx; j >= 0; j--) {
                     result = it.next();
                 }
             }
@@ -221,8 +224,8 @@ public class BeanUtil2 {
     }
 
     private static void setIndexedProperty(Object bean, final String[] args, final Object value) {
-        final int lastPos = args.length-1;
-        if (lastPos>0) {
+        final int lastPos = args.length - 1;
+        if (lastPos > 0) {
             final String[] args2 = new String[lastPos];
             System.arraycopy(args, 0, args2, 0, lastPos);
             bean = getIndexedProperty(bean, args2);
@@ -233,7 +236,7 @@ public class BeanUtil2 {
             Array.set(bean, idx, value);
         } else
         if (bean instanceof List) {
-            ((List)bean).set(idx, value);
+            ((List) bean).set(idx, value);
         }
     }
 
@@ -263,7 +266,7 @@ public class BeanUtil2 {
                 if (!Modifier.isFinal(field.getModifiers()))
                     setters.put(field.getName(), accessor);
             }
-            final HashMap<String,ArrayList<Method>> overloadedGetters = new HashMap<String,ArrayList<Method>>();
+            final HashMap<String, ArrayList<Method>> overloadedGetters = new HashMap<String, ArrayList<Method>>();
             for (final Method method : cls.getMethods()) {
                 if (Modifier.isStatic(method.getModifiers()))
                     continue;
@@ -285,19 +288,19 @@ public class BeanUtil2 {
                             getters.put(name, getter);
                     } else {
                         ArrayList<Method> list = overloadedGetters.get(name);
-                        if (list==null) {
+                        if (list == null) {
                             list = new ArrayList<Method>();
                             overloadedGetters.put(name, list);
                         }
                         list.add(method);
                     }
                 } else
-                if (paramTypes.length==1 && name.startsWith("set",0)) {
+                if (paramTypes.length == 1 && name.startsWith("set", 0)) {
                     // init setters ...
                     setters.put(Introspector.decapitalize(name.substring(3)), new PropertySetter(method));
                 }
             }
-            for (Map.Entry<String,ArrayList<Method>> entry : overloadedGetters.entrySet()) {
+            for (Map.Entry<String, ArrayList<Method>> entry : overloadedGetters.entrySet()) {
                 final Method[] methods = entry.getValue().toArray(new Method[entry.getValue().size()]);
                 final OverloadedMethodsGetter getter = new OverloadedMethodsGetter(methods);
                 final String name = entry.getKey();
@@ -313,18 +316,18 @@ public class BeanUtil2 {
 
         public Object getValue(final Object bean, final String name) throws InvocationTargetException, IllegalAccessException {
             final Getter getter = getters.get(name);
-            if (getter!=null) {
+            if (getter != null) {
                 return getter.getValue(bean);
             } else
             if (inheritsMapInterface) {
-                return ((Map)bean).get(name);
+                return ((Map) bean).get(name);
             } else
                 throw new RuntimeException("Can't get '" + name + "' property for " + (bean != null ? bean.getClass().getName() : "null") + " bean.");
         }
 
         public Object getValue(final Object bean, final String name, final String[] args) throws InvocationTargetException, IllegalAccessException {
             final Getter getter = getters.get(name);
-            if (getter!=null) {
+            if (getter != null) {
                 return getter.getValue(bean, args);
             } else
                 throw new RuntimeException("Can't get '" + name + "' property for " + (bean != null ? bean.getClass().getName() : "null") + " bean.");
@@ -332,11 +335,11 @@ public class BeanUtil2 {
 
         public void setValue(final Object bean, final String name, final Object value) throws InvocationTargetException, IllegalAccessException {
             final Setter setter = setters.get(name);
-            if (setter!=null) {
+            if (setter != null) {
                 setter.setValue(bean, value);
             } else
             if (inheritsMapInterface) {
-                ((Map)bean).put(name, value);
+                ((Map) bean).put(name, value);
             } else
                 throw new RuntimeException("Can't set '" + name + "' property for " + (bean != null ? bean.getClass().getName() : "null") + " bean.");
         }
@@ -349,14 +352,16 @@ public class BeanUtil2 {
             throw new UnsupportedOperationException("Not supported");
         }
 
+        @Override
         public String toString() {
-            return "[BeanMetadata{"+clsName+"}]";
+            return "[BeanMetadata{" + clsName + "}]";
         }
     }
 
 
     private static interface Getter {
         public Object getValue(Object bean) throws IllegalAccessException, InvocationTargetException;
+
         public Object getValue(Object bean, final String[] args) throws IllegalAccessException, InvocationTargetException;
     }
 
@@ -364,26 +369,34 @@ public class BeanUtil2 {
         public void setValue(Object bean, Object value) throws IllegalAccessException, InvocationTargetException;
     }
 
+
     private static class FieldAccessor implements Getter, Setter {
         private final Field field;
+
         public FieldAccessor(final Field field) {
             this.field = field;
         }
+
+        @Override
         public Object getValue(final Object bean) throws IllegalAccessException {
             return field.get(bean);
         }
+
+        @Override
         public Object getValue(final Object bean, final String[] args) throws IllegalAccessException {
-            if (args.length==1) {
+            if (args.length == 1) {
                 final Object result = field.get(bean);
-                if (result==null) {
+                if (result == null) {
                     return null;
                 } else
                 if (result instanceof Map) {
-                    return ((Map)result).get(args[0]);
+                    return ((Map) result).get(args[0]);
                 }
             }
             throw new UnsupportedOperationException();
         }
+
+        @Override
         public void setValue(final Object bean, final Object value) throws IllegalAccessException {
             field.set(bean, value);
         }
@@ -391,20 +404,25 @@ public class BeanUtil2 {
 
     private static final class PropertyGetter implements Getter {
         private final Method method;
+
         public PropertyGetter(final Method method) {
             this.method = method;
         }
+
+        @Override
         public Object getValue(final Object bean) throws IllegalAccessException, InvocationTargetException {
             return method.invoke(bean);
         }
+
+        @Override
         public Object getValue(final Object bean, final String[] args) throws InvocationTargetException, IllegalAccessException {
-            if (args.length==1) {
+            if (args.length == 1) {
                 final Object result = method.invoke(bean);
-                if (result==null) {
+                if (result == null) {
                     return null;
                 } else
                 if (result instanceof Map) {
-                    return ((Map)result).get(args[0]);
+                    return ((Map) result).get(args[0]);
                 }
             }
             throw new UnsupportedOperationException();
@@ -413,9 +431,12 @@ public class BeanUtil2 {
 
     private static final class PropertySetter implements Setter {
         private final Method method;
+
         public PropertySetter(final Method method) {
             this.method = method;
         }
+
+        @Override
         public void setValue(final Object bean, final Object value) throws InvocationTargetException, IllegalAccessException {
             method.invoke(bean, value);
         }
@@ -428,14 +449,17 @@ public class BeanUtil2 {
         public OverloadedMethodsGetter(final Method[] methods) {
             this.methods = methods;
             this.paramTypes = new Class<?>[methods.length][];
-            for (int i=0; i<methods.length; i++) {
+            for (int i = 0; i < methods.length; i++) {
                 this.paramTypes[i] = methods[i].getParameterTypes();
             }
         }
 
+        @Override
         public Object getValue(final Object bean) throws InvocationTargetException, IllegalAccessException {
             throw new UnsupportedOperationException();
         }
+
+        @Override
         public Object getValue(final Object bean, final String[] args) throws InvocationTargetException, IllegalAccessException {
             for (int i = methods.length - 1; i >= 0; i--) {
                 final Class<?>[] types = paramTypes[i];
@@ -461,16 +485,18 @@ public class BeanUtil2 {
     private static final class OverloadedMethodsSetter implements Setter {
         private final Method[] methods;
         private final Class<?>[][] paramTypes;
+
         public OverloadedMethodsSetter(final Method[] methods) {
             this.methods = methods;
             this.paramTypes = new Class<?>[methods.length][];
-            for (int i=0; i<methods.length; i++) {
+            for (int i = 0; i < methods.length; i++) {
                 this.paramTypes[i] = methods[i].getParameterTypes();
             }
         }
 
+        @Override
         public void setValue(final Object bean, final Object value) throws InvocationTargetException, IllegalAccessException {
-            if (value==null) {
+            if (value == null) {
                 for (int i = methods.length - 1; i >= 0; i--) {
                     final Class<?>[] types = paramTypes[i];
                     if (types.length == 1 && !types[0].isPrimitive()) {
@@ -481,7 +507,7 @@ public class BeanUtil2 {
             } else {
                 for (int i = methods.length - 1; i >= 0; i--) {
                     final Class<?>[] types = paramTypes[i];
-                    if (types.length == 1 &&  types[0].equals(value.getClass())) {
+                    if (types.length == 1 && types[0].equals(value.getClass())) {
                         methods[i].invoke(bean, value);
                         return;
                     }

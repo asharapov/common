@@ -8,15 +8,15 @@ public class MissingArgumentException extends CLParserException {
     private final String option;
 
     public MissingArgumentException(final Option option) {
-        this(option.getFullName()!=null ? option.getFullName() : String.valueOf(option.getShortName()));
+        this(option.getFullName() != null ? option.getFullName() : String.valueOf(option.getShortName()));
     }
 
     public MissingArgumentException(final char option) {
-        this( String.valueOf(option) );
+        this(String.valueOf(option));
     }
 
     public MissingArgumentException(final String option) {
-        super("Missing mandatory argument for option: "+option);
+        super("Missing mandatory argument for option: " + option);
         this.option = option;
     }
 

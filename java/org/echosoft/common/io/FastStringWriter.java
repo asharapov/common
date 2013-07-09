@@ -8,6 +8,7 @@ import java.io.Writer;
  * который при необходимости расширяется до требуемых размеров.</p>
  * <p>Функционально данный класс аналогичен стандартному <code>java.io.StringWriter</code>. Основным отличием от последнего
  * является то что все методы данного класса не синхронизованы.
+ *
  * @author Anton Sharapov
  */
 public final class FastStringWriter extends Writer {
@@ -19,7 +20,7 @@ public final class FastStringWriter extends Writer {
      */
     private char value[];
 
-    /** 
+    /**
      * Реальное количество символов в буфере.
      */
     private int count;
@@ -34,7 +35,8 @@ public final class FastStringWriter extends Writer {
 
     /**
      * Создает новый поток с предустановленной емкостью внутреннего буфера.
-     * @param capacity   начальная емкость буфера.
+     *
+     * @param capacity начальная емкость буфера.
      */
     public FastStringWriter(final int capacity) {
         value = new char[capacity];
@@ -43,10 +45,11 @@ public final class FastStringWriter extends Writer {
     /**
      * Создает экземпляр потока символов и сразу помещает в него указанную строку.
      * По умолчанию емкость внутреннего буфера равна длине записываемой строки плюс {@link #INITIAL_CAPACITY} символов.
-     * @param text  строка для записи в поток, может быть <code>null</code>.
+     *
+     * @param text строка для записи в поток, может быть <code>null</code>.
      */
     public FastStringWriter(final String text) {
-        if (text==null) {
+        if (text == null) {
             value = new char[INITIAL_CAPACITY + 4];
             value[0] = 'n';
             value[1] = 'u';
@@ -62,7 +65,8 @@ public final class FastStringWriter extends Writer {
 
     /**
      * Записывает в поток указанную строку символов.
-     * @param text  строка для записи в поток, может быть <code>null</code>.
+     *
+     * @param text строка для записи в поток, может быть <code>null</code>.
      */
     @Override
     public void write(final String text) {
@@ -82,9 +86,10 @@ public final class FastStringWriter extends Writer {
 
     /**
      * Записывает в поток фрагмент указанной в аргументе строки символов.
-     * @param text  строка, чей фрагмент требуется записать в поток. Может быть <code>null</code>.
-     * @param offset  смещение, по которому доступен первый символ требуемого фрагмента.
-     * @param length  кол-во символов для записи в поток.
+     *
+     * @param text   строка, чей фрагмент требуется записать в поток. Может быть <code>null</code>.
+     * @param offset смещение, по которому доступен первый символ требуемого фрагмента.
+     * @param length кол-во символов для записи в поток.
      */
     @Override
     public void write(final String text, final int offset, final int length) {
@@ -103,7 +108,8 @@ public final class FastStringWriter extends Writer {
 
     /**
      * Записывает в поток массив символов.
-     * @param chars  массив символов для записи в поток, не может быть <code>null</code>.
+     *
+     * @param chars массив символов для записи в поток, не может быть <code>null</code>.
      */
     @Override
     public void write(final char chars[]) {
@@ -115,9 +121,10 @@ public final class FastStringWriter extends Writer {
 
     /**
      * Записывает в поток фрагмент указанного в аргументе массива символов.
+     *
      * @param chars  массив, чей фрагмент требуется записать в поток. Может быть <code>null</code>.
-     * @param offset  смещение, по которому доступен первый символ требуемого фрагмента.
-     * @param length  кол-во символов для записи в поток.
+     * @param offset смещение, по которому доступен первый символ требуемого фрагмента.
+     * @param length кол-во символов для записи в поток.
      */
     public void write(final char chars[], final int offset, final int length) {
         ensureCapacity(length);
@@ -127,17 +134,19 @@ public final class FastStringWriter extends Writer {
 
     /**
      * Записывает в поток отдельный символ.
-     * @param c  символ для записи в поток.
+     *
+     * @param c символ для записи в поток.
      */
     @Override
     public void write(final int c) {
         ensureCapacity(1);
-        value[count++] = (char)c;
+        value[count++] = (char) c;
     }
 
     /**
      * Записывает в поток отдельный символ.
-     * @param c  символ для записи в поток.
+     *
+     * @param c символ для записи в поток.
      */
     public void write(final char c) {
         ensureCapacity(1);
@@ -146,12 +155,13 @@ public final class FastStringWriter extends Writer {
 
     /**
      * Добавляет в поток указанную последовательность символов.
-     * @param cseq  описывает последовательность символов которую требуется добавить в выходной поток, может быть <code>null</code>.
-     * @return  ссылку на данный поток.
+     *
+     * @param cseq описывает последовательность символов которую требуется добавить в выходной поток, может быть <code>null</code>.
+     * @return ссылку на данный поток.
      */
     @Override
     public FastStringWriter append(final CharSequence cseq) {
-        if (cseq==null) {
+        if (cseq == null) {
             ensureCapacity(4);
             value[count++] = 'n';
             value[count++] = 'u';
@@ -168,14 +178,15 @@ public final class FastStringWriter extends Writer {
 
     /**
      * Добавляет в поток фрагмент указанной последовательности символов.
+     *
      * @param cseq  описывает последовательность символов чей фрагмент требуется добавить в выходной поток, может быть <code>null</code>.
      * @param start индекс первого символа фрагмента который требуется записать в поток.
-     * @param end индекс символа, следующего за последним символом требуемого фрагмента.
-     * @return  ссылку на данный поток.
+     * @param end   индекс символа, следующего за последним символом требуемого фрагмента.
+     * @return ссылку на данный поток.
      */
     @Override
     public FastStringWriter append(final CharSequence cseq, final int start, final int end) {
-        if (cseq==null) {
+        if (cseq == null) {
             ensureCapacity(4);
             value[count++] = 'n';
             value[count++] = 'u';
@@ -193,8 +204,9 @@ public final class FastStringWriter extends Writer {
 
     /**
      * Добавляет в поток отдельный символ.
-     * @param c  символ для записи в поток.
-     * @return  ссылку на данный поток.
+     *
+     * @param c символ для записи в поток.
+     * @return ссылку на данный поток.
      */
     @Override
     public FastStringWriter append(final char c) {
@@ -218,9 +230,9 @@ public final class FastStringWriter extends Writer {
     }
 
 
-
     /**
      * Переносит весь сохраненный в потоке контент в другой поток.
+     *
      * @param out выходной поток куда будет помещено все содержимое данного потока.
      * @throws IOException в случае проблем при помещении данных в выходной поток.
      */
@@ -230,6 +242,7 @@ public final class FastStringWriter extends Writer {
 
     /**
      * Переносит весь сохраненный в потоке контент в другой поток.
+     *
      * @param out выходной поток куда будет помещено все содержимое данного потока.
      */
     public void writeOut(final FastStringWriter out) {
@@ -238,7 +251,8 @@ public final class FastStringWriter extends Writer {
 
     /**
      * Возвращает количество символов, помещенных в данный поток.
-     * @return  количество символов в потоке на данный момент.
+     *
+     * @return количество символов в потоке на данный момент.
      */
     public int length() {
         return count;
@@ -246,9 +260,10 @@ public final class FastStringWriter extends Writer {
 
     /**
      * Копирует запрошенный фрагмент от всего содержимого потока в указанный массив символов.
-     * @param srcBegin  индекс первого символа для копирования.
-     * @param srcEnd индекс символа, следующего за последним копируемым символом.
-     * @param dst  целевой буфер.
+     *
+     * @param srcBegin индекс первого символа для копирования.
+     * @param srcEnd   индекс символа, следующего за последним копируемым символом.
+     * @param dst      целевой буфер.
      * @param dstBegin смещение по которому будет проводиться запись в целевой буфер.
      */
     public void getChars(final int srcBegin, final int srcEnd, final char dst[], final int dstBegin) {
@@ -257,7 +272,8 @@ public final class FastStringWriter extends Writer {
 
     /**
      * Возвращает все символы помещенные в данный поток в виде строки.
-     * @return  все символы помещенные в данный поток в виде строки. 
+     *
+     * @return все символы помещенные в данный поток в виде строки.
      */
     public String toString() {
         return new String(value, 0, count);
@@ -267,7 +283,8 @@ public final class FastStringWriter extends Writer {
     /**
      * Метод выполняет проверку что в буфере еще есть место для размещения дополнительных N байт, где N указывается в аргументе метода.
      * Если в буфере недостаточно свободного места то он расширяется на требуемую величину.
-     * @param delta  сколько байт еще требуется положить в буфер.
+     *
+     * @param delta сколько байт еще требуется положить в буфер.
      */
     private void ensureCapacity(final int delta) {
         final int required = count + delta;
@@ -284,5 +301,4 @@ public final class FastStringWriter extends Writer {
             value = buf;
         }
     }
-
 }

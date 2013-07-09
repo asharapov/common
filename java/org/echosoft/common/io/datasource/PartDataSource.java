@@ -27,19 +27,18 @@ public class PartDataSource implements DataSource {
                 final int delim = attr.indexOf('=');
                 if (delim < 0)
                     continue;
-                final String name = attr.substring(0,delim).trim();
+                final String name = attr.substring(0, delim).trim();
                 if (!"filename".equals(name))
                     continue;
-                file = attr.substring(delim+1).trim();
-                if (file.length() > 0 && file.charAt(0)=='\"')
+                file = attr.substring(delim + 1).trim();
+                if (file.length() > 0 && file.charAt(0) == '\"')
                     file = file.substring(1);
                 final int length = file.length();
-                if (length > 0 && file.charAt(length-1) == '\"')
+                if (length > 0 && file.charAt(length - 1) == '\"')
                     file = file.substring(0, length - 1);
             }
         }
         this.fileName = file;
-
     }
 
     @Override
@@ -65,5 +64,4 @@ public class PartDataSource implements DataSource {
     public long getSize() {
         return part.getSize();
     }
-
 }
