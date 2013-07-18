@@ -11,7 +11,7 @@ public interface DataProcessor<T> {
      * Вызывается перед началом обработки массива данных.
      * Является подходящим местом для инициализации всех требуемых обработчиком ресурсов.
      */
-    public void begin() throws Exception;
+    public void init() throws Exception;
 
     /**
      * Основной метод. Вызывается для каждой записи обрабатываемого массива данных.
@@ -24,5 +24,5 @@ public interface DataProcessor<T> {
      * Вызывается по завершении обработки последнего элемента массива данных.
      * Является подходящим местом для освобождения всех ресурсов затребованных обработчиком.
      */
-    public void complete() throws Exception;
+    public void close() throws Exception;
 }
