@@ -3,7 +3,7 @@ package org.echosoft.common.data;
 /**
  * @author Anton Sharapov
  */
-public interface DataIssuer<T> {
+public interface Issuer<T> {
 
     public boolean hasNext() throws Exception;
 

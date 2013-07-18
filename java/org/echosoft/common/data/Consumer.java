@@ -5,7 +5,7 @@ package org.echosoft.common.data;
  *
  * @author Anton Sharapov
  */
-public interface DataProcessor<T> {
+public interface Consumer<T> {
 
     /**
      * Вызывается перед началом обработки массива данных.
@@ -18,7 +18,7 @@ public interface DataProcessor<T> {
      *
      * @param record  текущая обрабатываемая запись.
      */
-    public void process(final T record) throws Exception;
+    public void consume(T record) throws Exception;
 
     /**
      * Вызывается по завершении обработки последнего элемента массива данных.

@@ -2,7 +2,7 @@ package org.echosoft.common.utils;
 
 import java.util.Iterator;
 
-import org.echosoft.common.data.DataIssuer;
+import org.echosoft.common.data.Issuer;
 import org.echosoft.common.types.Type;
 import org.echosoft.common.types.Types;
 
@@ -109,7 +109,7 @@ public class Any {
         return as(Types.LONG_ARRAY, str, defaultValue);
     }
 
-    public static <T> Iterator<T> asIterator(final DataIssuer<T> issuer) {
+    public static <T> Iterator<T> asIterator(final Issuer<T> issuer) {
         return new Iterator<T>() {
             @Override
             public boolean hasNext() {
