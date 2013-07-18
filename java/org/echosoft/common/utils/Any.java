@@ -109,7 +109,7 @@ public class Any {
         return as(Types.LONG_ARRAY, str, defaultValue);
     }
 
-    public <T> Iterator<T> asIterator(final DataIssuer<T> issuer) {
+    public static <T> Iterator<T> asIterator(final DataIssuer<T> issuer) {
         return new Iterator<T>() {
             @Override
             public boolean hasNext() {
