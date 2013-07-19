@@ -1,4 +1,4 @@
-package org.echosoft.common.model;
+package org.echosoft.common.data.misc;
 
 import java.io.IOException;
 import java.util.ArrayList;

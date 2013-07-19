@@ -19,7 +19,7 @@ public interface Reference<K extends Serializable, T extends Serializable> exten
     /**
      * Краткое описание данного бизнес-объекта (как правило - адаптированное для отображения сведений об объекте пользователю в UI).
      *
-     * @return краткое описание данного объекта.
+     * @return краткое текстовое описание данного объекта.
      */
-    public T getDescription();
+    public T getText();
 }

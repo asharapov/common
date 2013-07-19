@@ -1,4 +1,4 @@
-package org.echosoft.common.model;
+package org.echosoft.common.data;
 
 /**
  * Performs some predicate which returns true or false based on the input object.

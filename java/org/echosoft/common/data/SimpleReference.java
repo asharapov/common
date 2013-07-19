@@ -30,7 +30,7 @@ public class SimpleReference implements Reference<Long, String>, Cloneable {
     }
 
     @Override
-    public String getDescription() {
+    public String getText() {
         return title;
     }
 

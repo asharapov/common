@@ -4,8 +4,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 
-import org.echosoft.common.model.Predicate;
-import org.echosoft.common.model.Predicates;
+import org.echosoft.common.data.Predicate;
+import org.echosoft.common.data.Predicates;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;

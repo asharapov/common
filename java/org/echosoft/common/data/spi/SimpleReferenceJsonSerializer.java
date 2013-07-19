@@ -22,7 +22,7 @@ public class SimpleReferenceJsonSerializer implements JsonSerializer<Reference<N
         out.write("{id:");
         out.write(src.getId().toString());
         out.write(",desc:");
-        JsonUtil.encodeString(src.getDescription(), out);
+        JsonUtil.encodeString(src.getText(), out);
         out.write('}');
     }
 }

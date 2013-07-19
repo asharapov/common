@@ -7,7 +7,7 @@ import java.io.StringWriter;
 import java.util.HashMap;
 
 import org.echosoft.common.json.beans.Data;
-import org.echosoft.common.model.TreeNode;
+import org.echosoft.common.data.misc.TreeNode;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;

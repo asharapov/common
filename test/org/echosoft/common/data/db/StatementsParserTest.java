@@ -1,8 +1,7 @@
-package org.echosoft.common.data.sql;
+package org.echosoft.common.data.db;
 
 import java.io.StringReader;
 
-import org.echosoft.common.data.sql.StatementsParser;
 import org.junit.Test;
 
 /**

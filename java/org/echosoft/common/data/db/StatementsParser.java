@@ -1,4 +1,4 @@
-package org.echosoft.common.data.sql;
+package org.echosoft.common.data.db;
 
 import java.io.IOException;
 import java.io.Reader;
@@ -228,7 +228,7 @@ public class StatementsParser implements Iterator<String> {
      * Осуществляем буферизированное чтение символов из потока.
      *
      * @return Очередной прочитанный символ или <code>(char)0</code> при достижении конца входного потока.
-     * @throws java.io.IOException в случае каких-либо ошибок при чтении данных из потока.
+     * @throws IOException в случае каких-либо ошибок при чтении данных из потока.
      */
     private char readChar() throws IOException {
         if (pos >= length) {

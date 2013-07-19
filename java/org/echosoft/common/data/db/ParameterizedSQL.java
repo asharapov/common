@@ -1,4 +1,4 @@
-package org.echosoft.common.data.sql;
+package org.echosoft.common.data.db;
 
 import java.io.Serializable;
 import java.sql.PreparedStatement;

@@ -49,12 +49,12 @@ public class ReferenceTest {
                         return id;
                     }
                     @Override
-                    public String getDescription() {
+                    public String getText() {
                         return name;
                     }
                     @Override
                     public String toString() {
-                        return "[SimpleEntity.Reference{id:" + getId() + ", desc:" + getDescription() + "}]";
+                        return "[SimpleEntity.Reference{id:" + getId() + ", desc:" + getText() + "}]";
                     }
                 };
             }

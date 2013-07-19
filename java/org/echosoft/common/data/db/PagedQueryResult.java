@@ -1,4 +1,4 @@
-package org.echosoft.common.data;
+package org.echosoft.common.data.db;
 
 import java.util.List;
 

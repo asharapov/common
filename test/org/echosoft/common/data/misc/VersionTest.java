@@ -1,4 +1,4 @@
-package org.echosoft.common.model;
+package org.echosoft.common.data.misc;
 
 import java.io.StringWriter;
 import java.text.ParseException;
@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
+import org.echosoft.common.data.misc.Version;
 import org.echosoft.common.json.CompactJsonWriter;
 import org.echosoft.common.json.JsonContext;
 import org.echosoft.common.json.JsonWriter;
@@ -13,7 +14,7 @@ import org.junit.Assert;
 import org.junit.Test;
 
 /**
- * Contains junit test cases for {@link Version} class.
+ * Contains junit test cases for {@link org.echosoft.common.data.misc.Version} class.
  *
  * @author Anton Sharapov
  */

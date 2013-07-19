@@ -3,7 +3,7 @@ package org.echosoft.common.collections;
 import java.util.Enumeration;
 import java.util.NoSuchElementException;
 
-import org.echosoft.common.model.Predicate;
+import org.echosoft.common.data.Predicate;
 
 
 /** 

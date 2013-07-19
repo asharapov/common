@@ -1,10 +1,10 @@
-package org.echosoft.common.model;
+package org.echosoft.common.data.misc;
 
 import java.io.Serializable;
 import java.text.ParseException;
 
 import org.echosoft.common.json.annotate.JsonUseSeriazer;
-import org.echosoft.common.model.spi.VersionJsonSerializer;
+import org.echosoft.common.data.misc.spi.VersionJsonSerializer;
 
 /**
  * Описывает версию чего бы то ни было.

@@ -1,6 +1,5 @@
-package org.echosoft.common.data.sql;
+package org.echosoft.common.data.db;
 
-import org.echosoft.common.data.sql.ParameterizedSQL;
 import org.junit.Assert;
 import org.junit.Test;
 

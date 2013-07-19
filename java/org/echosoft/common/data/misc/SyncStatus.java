@@ -1,4 +1,4 @@
-package org.echosoft.common.model;
+package org.echosoft.common.data.misc;
 
 /**
  * Can be used to persistence control for any managed entities.
