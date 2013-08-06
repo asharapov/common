@@ -20,9 +20,9 @@ import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 import java.util.zip.InflaterInputStream;
 
-import org.echosoft.common.collections.ArrayIterator;
-import org.echosoft.common.collections.EnumerationIterator;
-import org.echosoft.common.collections.ObjectArrayIterator;
+import org.echosoft.common.collections.iterators.ArrayIterator;
+import org.echosoft.common.collections.iterators.EnumerationIterator;
+import org.echosoft.common.collections.iterators.ObjectArrayIterator;
 
 /**
  * Содержит часто используемые методы для работы с объектами произвольных классов.

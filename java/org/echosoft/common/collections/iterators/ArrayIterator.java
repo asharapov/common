@@ -1,4 +1,4 @@
-package org.echosoft.common.collections;
+package org.echosoft.common.collections.iterators;
 
 import java.lang.reflect.Array;
 import java.util.NoSuchElementException;

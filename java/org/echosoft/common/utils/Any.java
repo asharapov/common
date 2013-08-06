@@ -2,7 +2,7 @@ package org.echosoft.common.utils;
 
 import java.util.Iterator;
 
-import org.echosoft.common.data.Issuer;
+import org.echosoft.common.collections.issuers.Issuer;
 import org.echosoft.common.types.Type;
 import org.echosoft.common.types.Types;
 

@@ -4,10 +4,10 @@ import java.io.IOException;
 import java.io.Writer;
 import java.lang.reflect.InvocationTargetException;
 
+import org.echosoft.common.data.misc.Version;
 import org.echosoft.common.json.JsonSerializer;
 import org.echosoft.common.json.JsonUtil;
 import org.echosoft.common.json.JsonWriter;
-import org.echosoft.common.data.misc.Version;
 
 /**
  * Сериализует в JSON формат экземпляры класса {@link Version}.

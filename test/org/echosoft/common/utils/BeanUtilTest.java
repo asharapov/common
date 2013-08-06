@@ -8,7 +8,6 @@ import java.util.Map;
 
 import org.junit.BeforeClass;
 import org.junit.Test;
-
 import static org.echosoft.common.utils.BeanUtil.getProperty;
 import static org.echosoft.common.utils.BeanUtil.setProperty;
 import static org.junit.Assert.assertArrayEquals;

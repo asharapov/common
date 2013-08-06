@@ -1,4 +1,4 @@
-package org.echosoft.common.data;
+package org.echosoft.common.collections;
 
 /**
  * Содержит ряд общеупотребительных предикатов.

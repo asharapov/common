@@ -1,9 +1,9 @@
-package org.echosoft.common.data;
+package org.echosoft.common.collections.issuers;
 
 import java.util.NoSuchElementException;
 
 /**
- * Простая реализация интерфейса {@link ReadAheadIssuer}.<br/>
+ * Простая реализация интерфейса {@link ReadAheadIssuer}, адаптирующая уже существующие объекты типа {@link Issuer}.
  *
  * @author Anton Sharapov
  */

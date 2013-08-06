@@ -1,7 +1,7 @@
 package org.echosoft.common.cli.parser;
 
-import org.echosoft.common.collections.ObjectArrayIterator;
-import org.echosoft.common.collections.ReadAheadIterator;
+import org.echosoft.common.collections.iterators.ObjectArrayIterator;
+import org.echosoft.common.collections.iterators.ReadAheadIterator;
 
 /**
  * Отвечает за разбор аргументов командной строки.

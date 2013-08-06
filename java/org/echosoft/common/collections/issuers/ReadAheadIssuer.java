@@ -1,4 +1,4 @@
-package org.echosoft.common.data;
+package org.echosoft.common.collections.issuers;
 
 /**
  * Добавляет к итератору возможность упреждающего чтения следующего элемента без изменения текущего состояния объекта.

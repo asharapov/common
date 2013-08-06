@@ -1,13 +1,13 @@
 package org.echosoft.common.io.xml;
 
-import org.echosoft.common.collections.ObjectArrayIterator;
-import org.echosoft.common.utils.StringUtil;
-
-import javax.xml.namespace.QName;
 import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
+import javax.xml.namespace.QName;
+
+import org.echosoft.common.collections.iterators.ObjectArrayIterator;
+import org.echosoft.common.utils.StringUtil;
 
 /**
  * Определяет местоложение определенного тега в документе XML.

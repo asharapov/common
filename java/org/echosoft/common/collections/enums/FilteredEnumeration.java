@@ -1,19 +1,20 @@
-package org.echosoft.common.collections;
+package org.echosoft.common.collections.enums;
 
-import java.util.Iterator;
+import java.util.Enumeration;
 import java.util.NoSuchElementException;
 
-import org.echosoft.common.data.Predicate;
+import org.echosoft.common.collections.Predicate;
+import org.echosoft.common.collections.Predicates;
 
 
-/**
+/** 
  * Итератор - прокси выполняющий фильтрацию содержимого исходного итератора.
  *
  * @author Anton Sharapov
  */
-public class FilterIterator<T> implements ReadAheadIterator<T> {
+public class FilteredEnumeration<T> implements Enumeration<T> {
 
-    private final Iterator<T> iter;
+    private final Enumeration<T> iter;
     private final Predicate<T> predicate;
     private boolean nextCalculated;
     private boolean hasNext;
@@ -23,31 +24,20 @@ public class FilterIterator<T> implements ReadAheadIterator<T> {
      * @param iter      исходный итератор из которого надо отбирать только те элементы что соответствуют задаваемому предикату.
      * @param predicate предикат для отбора элементов из исходного итератора.
      */
-    public FilterIterator(final Iterator<T> iter, final Predicate<T> predicate) {
+    public FilteredEnumeration(final Enumeration<T> iter, final Predicate<T> predicate) {
         this.iter = iter;
-        this.predicate = predicate;
+        this.predicate = predicate != null ? predicate : Predicates.<T>all();
         this.nextCalculated = false;
     }
 
-
-    /**
-     * Возвращает <code>true</code> если в исходном итераторе содержится как минимум один элемент
-     * удовлетворяющий заданному предикату.
-     *
-     * @return true если итератор содержит как миниму один элемент удовлетворяющий заданному предикату.
-     */
-    public boolean hasNext() {
+    @Override
+    public boolean hasMoreElements() {
         ensureNextCalculated();
         return hasNext;
     }
 
-    /**
-     * Возвращает очередной элемент итератора соответствующий предикату.
-     *
-     * @return очередной элемент итератора.
-     * @throws NoSuchElementException в случае исчерпания элементов в исходном итераторе.
-     */
-    public T next() {
+    @Override
+    public T nextElement() {
         ensureNextCalculated();
         if (!hasNext)
             throw new NoSuchElementException();
@@ -57,16 +47,6 @@ public class FilterIterator<T> implements ReadAheadIterator<T> {
         return result;
     }
 
-    /**
-     * Всегда поднимает исключение {@link UnsupportedOperationException}.
-     */
-    @Override
-    public void remove() {
-        throw new UnsupportedOperationException();
-    }
-
-
-    @Override
     public T readAhead() {
         ensureNextCalculated();
         if (!hasNext)
@@ -77,8 +57,8 @@ public class FilterIterator<T> implements ReadAheadIterator<T> {
     protected void ensureNextCalculated() {
         if (!nextCalculated) {
             nextCalculated = true;
-            while (iter.hasNext()) {
-                final T object = iter.next();
+            while (iter.hasMoreElements()) {
+                final T object = iter.nextElement();
                 if (predicate.accept(object)) {
                     next = object;
                     hasNext = true;

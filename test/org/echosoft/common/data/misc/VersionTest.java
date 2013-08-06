@@ -6,7 +6,6 @@ import java.util.Map;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
-import org.echosoft.common.data.misc.Version;
 import org.echosoft.common.json.CompactJsonWriter;
 import org.echosoft.common.json.JsonContext;
 import org.echosoft.common.json.JsonWriter;

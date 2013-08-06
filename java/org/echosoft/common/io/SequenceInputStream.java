@@ -1,4 +1,4 @@
-package org.echosoft.common.collections;
+package org.echosoft.common.io;
 
 import java.io.IOException;
 import java.io.InputStream;

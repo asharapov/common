@@ -1,4 +1,4 @@
-package org.echosoft.common.collections;
+package org.echosoft.common.collections.enums;
 
 import java.util.Enumeration;
 import java.util.Iterator;

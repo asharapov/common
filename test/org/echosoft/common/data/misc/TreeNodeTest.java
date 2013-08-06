@@ -2,8 +2,7 @@ package org.echosoft.common.data.misc;
 
 import java.util.Comparator;
 
-import org.echosoft.common.data.Predicate;
-import org.echosoft.common.data.misc.TreeNode;
+import org.echosoft.common.collections.Predicate;
 import org.echosoft.common.utils.StringUtil;
 import org.junit.Test;
 

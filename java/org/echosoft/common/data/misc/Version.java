@@ -3,8 +3,8 @@ package org.echosoft.common.data.misc;
 import java.io.Serializable;
 import java.text.ParseException;
 
-import org.echosoft.common.json.annotate.JsonUseSeriazer;
 import org.echosoft.common.data.misc.spi.VersionJsonSerializer;
+import org.echosoft.common.json.annotate.JsonUseSeriazer;
 
 /**
  * Описывает версию чего бы то ни было.

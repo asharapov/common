@@ -2,13 +2,17 @@ package org.echosoft.common.json;
 
 import java.io.StringWriter;
 import java.math.BigDecimal;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 
+import org.echosoft.common.data.misc.TreeNode;
 import org.echosoft.common.json.beans.Component;
 import org.echosoft.common.json.beans.Data;
 import org.echosoft.common.json.beans.Item;
 import org.echosoft.common.json.introspect.BeanSerializer;
-import org.echosoft.common.data.misc.TreeNode;
 import org.echosoft.common.utils.StringUtil;
 import org.junit.Assert;
 import org.junit.Before;
