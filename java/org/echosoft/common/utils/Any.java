@@ -1,8 +1,5 @@
 package org.echosoft.common.utils;
 
-import java.util.Iterator;
-
-import org.echosoft.common.collections.issuers.Issuer;
 import org.echosoft.common.types.Type;
 import org.echosoft.common.types.Types;
 
@@ -107,30 +104,5 @@ public class Any {
     }
     public static Long[] asLongArray(final String str, final Long[] defaultValue) {
         return as(Types.LONG_ARRAY, str, defaultValue);
-    }
-
-    public static <T> Iterator<T> asIterator(final Issuer<T> issuer) {
-        return new Iterator<T>() {
-            @Override
-            public boolean hasNext() {
-                try {
-                    return issuer.hasNext();
-                } catch (Exception e) {
-                    throw new RuntimeException(e.getMessage(), e);
-                }
-            }
-            @Override
-            public T next() {
-                try {
-                    return issuer.next();
-                } catch (Exception e) {
-                    throw new RuntimeException(e.getMessage(), e);
-                }
-            }
-            @Override
-            public void remove() {
-                throw new UnsupportedOperationException();
-            }
-        };
     }
 }
