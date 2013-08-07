@@ -246,6 +246,19 @@ public class Element implements Serializable, Cloneable {
         return result;
     }
 
+    @Override
+    public Element clone() throws CloneNotSupportedException {
+        final Element result = (Element)super.clone();
+        if (this.namespaces != null) {
+            result.namespaces = new ArrayList<NameSpace>(this.namespaces);
+        }
+        if (this.attributes != null) {
+            result.attributes = new ArrayList<Attribute>(this.attributes);
+        }
+        return result;
+    }
+
+
     public static class NameSpace implements Serializable, Cloneable {
         private final String prefix;
         private final String nsURI;
@@ -261,6 +274,11 @@ public class Element implements Serializable, Cloneable {
 
         public String getURI() {
             return nsURI;
+        }
+
+        @Override
+        public NameSpace clone() throws CloneNotSupportedException {
+            return (NameSpace)super.clone();
         }
     }
 
@@ -280,6 +298,11 @@ public class Element implements Serializable, Cloneable {
 
         public String getValue() {
             return value;
+        }
+
+        @Override
+        public Attribute clone() throws CloneNotSupportedException {
+            return (Attribute)super.clone();
         }
     }
 }

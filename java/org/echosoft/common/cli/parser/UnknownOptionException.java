@@ -8,15 +8,15 @@ public class UnknownOptionException extends CLParserException {
     private final String option;
 
     public UnknownOptionException(final Option option) {
-        this( option.getFullName()!=null ? option.getFullName() : String.valueOf(option.getShortName()) );
+        this(option.getFullName() != null ? option.getFullName() : String.valueOf(option.getShortName()));
     }
 
     public UnknownOptionException(final char option) {
-        this( String.valueOf(option) );
+        this(String.valueOf(option));
     }
 
     public UnknownOptionException(final String option) {
-        super("Unknown option: "+option);
+        super("Unknown option: " + option);
         this.option = option;
     }
 

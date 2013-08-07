@@ -15,7 +15,14 @@ import java.util.*;
  */
 public class CommandLine implements Serializable {
 
-    protected static final String[] DEFAULT_DATE_PATTERNS = {"dd.MM.yyyy'T'HH:mm", "dd.MM.yyyy HH:mm", "dd.MM.yyyy", "yyyy-MM-dd'T'HH:mm", "yyyy-MM-dd HH:mm", "yyyy-MM-dd"};
+    /**
+     * @return Список поддерживаемых форматов даты и времени.
+     */
+    public static List<String> getSupportedDatePatterns() {
+        return Collections.unmodifiableList(Arrays.asList(DEFAULT_DATE_PATTERNS));
+    }
+
+    private static final String[] DEFAULT_DATE_PATTERNS = {"dd.MM.yyyy'T'HH:mm", "dd.MM.yyyy HH:mm", "dd.MM.yyyy", "yyyy-MM-dd'T'HH:mm", "yyyy-MM-dd HH:mm", "yyyy-MM-dd"};
 
     private final Options options;
     private final List<String> unresolvedArgs;
@@ -276,5 +283,4 @@ public class CommandLine implements Serializable {
     void setOption(final Option option) throws CLParserException {
         setOptionValue(option, null);
     }
-
 }

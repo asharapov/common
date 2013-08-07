@@ -1,5 +1,15 @@
 package org.echosoft.common.utils;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.StringReader;
+import java.net.URL;
+import java.util.Iterator;
+import java.util.NoSuchElementException;
+import java.util.Properties;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -15,16 +25,6 @@ import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.StringReader;
-import java.net.URL;
-import java.util.Iterator;
-import java.util.NoSuchElementException;
-import java.util.Properties;
 
 import org.echosoft.common.io.FastStringWriter;
 import org.w3c.dom.Document;
@@ -38,8 +38,8 @@ import org.xml.sax.SAXException;
 /**
  * Содержит методы, часто используемые при работе с DOM моделью документов XML.
  *
- * @author  Andrey Ochirov
- * @author  Anton Sharapov
+ * @author Andrey Ochirov
+ * @author Anton Sharapov
  */
 public class XMLUtil {
 
@@ -56,16 +56,18 @@ public class XMLUtil {
      * Constructor of <code>XMLUtil</code> declared as private
      * to prevent its direct instantiation.
      */
-    private XMLUtil() {}
+    private XMLUtil() {
+    }
 
 
     /**
      * Loads document from file, that name specified as parameter to this method.
-     * @param file  the file name, that contains XML document.
-     * @return  the <code>Document</code> interface instance that represents the entire XML document.
-     * @throws IOException  in case of any io errors.
-     * @throws ParserConfigurationException  in case of any parsing errors.
-     * @throws SAXException  in case of any xml parsing errors.
+     *
+     * @param file the file name, that contains XML document.
+     * @return the <code>Document</code> interface instance that represents the entire XML document.
+     * @throws IOException                  in case of any io errors.
+     * @throws ParserConfigurationException in case of any parsing errors.
+     * @throws SAXException                 in case of any xml parsing errors.
      */
     public static Document loadDocument(final File file) throws IOException, ParserConfigurationException, SAXException {
         final DocumentBuilder builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
@@ -79,11 +81,12 @@ public class XMLUtil {
 
     /**
      * Loads document from the URL, that specified as parameter to this method. Also, the URL can referencing to the file.
-     * @param   url the URL to the XML source.
-     * @return  the <code>Document</code> interface instance that represents the entire XML document.
-     * @throws IOException  in case of any io errors.
-     * @throws ParserConfigurationException  in case of any parsing errors.
-     * @throws SAXException  in case of any xml parsing errors.
+     *
+     * @param url the URL to the XML source.
+     * @return the <code>Document</code> interface instance that represents the entire XML document.
+     * @throws IOException                  in case of any io errors.
+     * @throws ParserConfigurationException in case of any parsing errors.
+     * @throws SAXException                 in case of any xml parsing errors.
      */
     public static Document loadDocument(final URL url) throws IOException, ParserConfigurationException, SAXException {
         if (url.getProtocol().equalsIgnoreCase("file")) {
@@ -101,11 +104,12 @@ public class XMLUtil {
 
     /**
      * Loads document from the input stream, that specified as parameter to this method.
-     * @param   in the input stream of XML document.
-     * @return  the <code>Document</code> interface instance that represents the entire XML document.
-     * @throws IOException  in case of any io errors.
-     * @throws ParserConfigurationException  in case of any parsing errors.
-     * @throws SAXException  in case of any xml parsing errors.
+     *
+     * @param in the input stream of XML document.
+     * @return the <code>Document</code> interface instance that represents the entire XML document.
+     * @throws IOException                  in case of any io errors.
+     * @throws ParserConfigurationException in case of any parsing errors.
+     * @throws SAXException                 in case of any xml parsing errors.
      */
     public static Document loadDocument(final InputStream in) throws IOException, ParserConfigurationException, SAXException {
         final DocumentBuilder builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
@@ -113,37 +117,36 @@ public class XMLUtil {
     }
 
 
-
     /**
      * Gets <code>TEXT</code> element for node.
-     * @param   node node with text.
-     * @return  text, that contains the specified node.
+     *
+     * @param node node with text.
+     * @return text, that contains the specified node.
      */
     public static String getNodeText(final Node node) {
 //        node.normalize();
         StringBuilder buf = null;
         final NodeList list = node.getChildNodes();
-        for (int i = 0, len=list.getLength(); i < len; i++) {
+        for (int i = 0, len = list.getLength(); i < len; i++) {
             final Node n = list.item(i);
-            switch (n.getNodeType()) {
-                case Node.TEXT_NODE:
-                case Node.CDATA_SECTION_NODE: {
-                    final String value = n.getNodeValue();
-                    if (value!=null && value.length()>0) {
-                        if (buf==null)
-                            buf = new StringBuilder(value.length());
-                        buf.append(value);
-                    }
+            final int type = n.getNodeType();
+            if (type == Node.TEXT_NODE || type == Node.CDATA_SECTION_NODE) {
+                final String value = n.getNodeValue();
+                if (value != null && value.length() > 0) {
+                    if (buf == null)
+                        buf = new StringBuilder(value.length());
+                    buf.append(value);
                 }
             }
         }
-        return buf!=null ? StringUtil.trim(buf.toString()) : null;
+        return buf != null ? StringUtil.trim(buf.toString()) : null;
     }
 
 
     /**
      * Extracts child elements from node whith type <code>ELEMENT_NODE</code>.
-     * @param node   root node of XML document for search.
+     *
+     * @param node root node of XML document for search.
      * @return iterator with proper node childs.
      */
     public static Iterator<Element> getChildElements(final Node node) {
@@ -154,10 +157,10 @@ public class XMLUtil {
             private Element nextElement = seekNext();
 
             public boolean hasNext() {
-                return nextElement!=null;
+                return nextElement != null;
             }
             public Element next() {
-                if (nextElement==null)
+                if (nextElement == null)
                     throw new NoSuchElementException();
                 final Element result = nextElement;
                 nextElement = seekNext();
@@ -167,11 +170,11 @@ public class XMLUtil {
                 throw new UnsupportedOperationException("operation not supported");
             }
             private Element seekNext() {
-                for (int i=nextPos, len=nodes.getLength(); i<len; i++) {
+                for (int i = nextPos, len = nodes.getLength(); i < len; i++) {
                     final Node childNode = nodes.item(i);
                     if (childNode.getNodeType() == Node.ELEMENT_NODE) {
-                        nextPos = i+1;
-                        return (Element)childNode;
+                        nextPos = i + 1;
+                        return (Element) childNode;
                     }
                 }
                 return null;
@@ -182,8 +185,9 @@ public class XMLUtil {
 
     /**
      * Extracts child elements with given name from node whith type <code>ELEMENT_NODE</code>.
-     * @param node   root node of XML document for search.
-     * @param elementName  name of elements that should be returned.
+     *
+     * @param node        root node of XML document for search.
+     * @param elementName name of elements that should be returned.
      * @return iterator with proper node childs.
      */
     public static Iterator<Element> getChildElements(final Node node, final String elementName) {
@@ -194,10 +198,10 @@ public class XMLUtil {
             private Element nextElement = seekNext();
 
             public boolean hasNext() {
-                return nextElement!=null;
+                return nextElement != null;
             }
             public Element next() {
-                if (nextElement==null)
+                if (nextElement == null)
                     throw new NoSuchElementException();
                 final Element result = nextElement;
                 nextElement = seekNext();
@@ -207,11 +211,11 @@ public class XMLUtil {
                 throw new UnsupportedOperationException("operation not supported");
             }
             private Element seekNext() {
-                for (int i=nextPos, len=nodes.getLength(); i<len; i++) {
+                for (int i = nextPos, len = nodes.getLength(); i < len; i++) {
                     final Node childNode = nodes.item(i);
-                    if (childNode.getNodeType()==Node.ELEMENT_NODE && childNode.getNodeName().equals(elementName)) {
-                        nextPos = i+1;
-                        return (Element)childNode;
+                    if (childNode.getNodeType() == Node.ELEMENT_NODE && childNode.getNodeName().equals(elementName)) {
+                        nextPos = i + 1;
+                        return (Element) childNode;
                     }
                 }
                 return null;
@@ -221,9 +225,10 @@ public class XMLUtil {
 
     /**
      * Gets first child element with specified name.
-     * @param   parentNode parent node.
-     * @param   childName child name.
-     * @return  first childr element with specified name.
+     *
+     * @param parentNode parent node.
+     * @param childName  child name.
+     * @return first childr element with specified name.
      */
     public static Element getChildElement(final Node parentNode, final String childName) {
 //        parentNode.normalize();
@@ -231,7 +236,7 @@ public class XMLUtil {
         for (int i = 0; i < nodeList.getLength(); i++) {
             final Node node = nodeList.item(i);
             if (node.getNodeType() == Node.ELEMENT_NODE && node.getNodeName().equals(childName))
-                return (Element)node;
+                return (Element) node;
         }
         return null;
     }
@@ -240,18 +245,19 @@ public class XMLUtil {
     public static Element getNextSiblingElement(Node node, final String siblingName) {
         do {
             node = node.getNextSibling();
-            if (node==null)
+            if (node == null)
                 return null;
-        } while (node.getNodeType()!=Node.ELEMENT_NODE || !node.getNodeName().equals(siblingName));
-        return (Element)node;
+        } while (node.getNodeType() != Node.ELEMENT_NODE || !node.getNodeName().equals(siblingName));
+        return (Element) node;
     }
 
 
     /**
      * Gets <code>TEXT</code> parentElement for child parentElement
-     * @param   parentElement parent parentElement.
-     * @param   childName child parentElement name.
-     * @return  text, that contains the specified child parentElement.
+     *
+     * @param parentElement parent parentElement.
+     * @param childName     child parentElement name.
+     * @return text, that contains the specified child parentElement.
      */
     public static String getChildNodeText(final Element parentElement, final String childName) {
         final Element childElement = getChildElement(parentElement, childName);
@@ -261,13 +267,14 @@ public class XMLUtil {
 
     /**
      * Gets <code>CDATASection</code> element for node.
-     * @param   node node with text.
-     * @return  text, that contains the specified node.
+     *
+     * @param node node with text.
+     * @return text, that contains the specified node.
      */
     public static String getNodeCDATASection(final Node node) {
 //        node.normalize();
         final NodeList list = node.getChildNodes();
-        for (int i = 0, len=list.getLength(); i < len; i++) {
+        for (int i = 0, len = list.getLength(); i < len; i++) {
             final Node child = list.item(i);
             if (child.getNodeType() == Node.CDATA_SECTION_NODE)
                 return child.getNodeValue();
@@ -278,61 +285,66 @@ public class XMLUtil {
 
     /**
      * Select node list what matches given xpath query
-     * @param doc  xml document
-     * @param expression  xpath query
-     * @return  nodes which confirms given xpath query.
-     * @throws XPathExpressionException  in case of any errors.
+     *
+     * @param doc        xml document
+     * @param expression xpath query
+     * @return nodes which confirms given xpath query.
+     * @throws XPathExpressionException in case of any errors.
      */
     public static NodeList query(final Document doc, final String expression) throws XPathExpressionException {
         final XPath xpath = XPathFactory.newInstance().newXPath();
-        return (NodeList)xpath.evaluate(expression, doc.getDocumentElement(), XPathConstants.NODESET);
+        return (NodeList) xpath.evaluate(expression, doc.getDocumentElement(), XPathConstants.NODESET);
     }
 
     /**
      * Select node list what matches given xpath query
-     * @param node  xml node
-     * @param expression  xpath query
-     * @return  nodes which confirms given xpath query.
-     * @throws XPathExpressionException  in case of any errors.
+     *
+     * @param node       xml node
+     * @param expression xpath query
+     * @return nodes which confirms given xpath query.
+     * @throws XPathExpressionException in case of any errors.
      */
     public static NodeList query(final Node node, final String expression) throws XPathExpressionException {
         final XPath xpath = XPathFactory.newInstance().newXPath();
-        return (NodeList)xpath.evaluate(expression, node, XPathConstants.NODESET);
+        return (NodeList) xpath.evaluate(expression, node, XPathConstants.NODESET);
     }
 
 
     /**
      * Select only one node what matches given xpath query
-     * @param doc  xml document
-     * @param expression  xpath query
-     * @return  first element which confirms given xpath query.
-     * @throws XPathExpressionException  in case of any errors.
+     *
+     * @param doc        xml document
+     * @param expression xpath query
+     * @return first element which confirms given xpath query.
+     * @throws XPathExpressionException in case of any errors.
      */
     public static Element queryElement(final Document doc, final String expression) throws XPathExpressionException {
         final XPath xpath = XPathFactory.newInstance().newXPath();
-        return (Element)xpath.evaluate(expression, doc, XPathConstants.NODE);
+        return (Element) xpath.evaluate(expression, doc, XPathConstants.NODE);
     }
 
 
     /**
      * Select only one node what matches given xpath query
-     * @param node  xml node
-     * @param expression  xpath query
-     * @return  first element which confirms given xpath query.
-     * @throws XPathExpressionException  in case of any errors.
+     *
+     * @param node       xml node
+     * @param expression xpath query
+     * @return first element which confirms given xpath query.
+     * @throws XPathExpressionException in case of any errors.
      */
     public static Element queryElement(final Node node, final String expression) throws XPathExpressionException {
         final XPath xpath = XPathFactory.newInstance().newXPath();
-        return (Element)xpath.evaluate(expression, node, XPathConstants.NODE);
+        return (Element) xpath.evaluate(expression, node, XPathConstants.NODE);
     }
 
 
     /**
      * Select only one node what matches given xpath query
-     * @param doc  xml document
-     * @param xpath  xpath query
-     * @return  text under element which confirms given xpath query
-     * @throws XPathExpressionException  in case of any errors.
+     *
+     * @param doc   xml document
+     * @param xpath xpath query
+     * @return text under element which confirms given xpath query
+     * @throws XPathExpressionException in case of any errors.
      */
     public static String queryText(final Document doc, final String xpath) throws XPathExpressionException {
         return queryText(doc.getDocumentElement(), xpath);
@@ -341,24 +353,26 @@ public class XMLUtil {
 
     /**
      * Select only one node what matches given xpath query
-     * @param node  xml node
-     * @param expression  xpath query
-     * @return  text under element which confirms given xpath query
-     * @throws XPathExpressionException  in case of any errors.
+     *
+     * @param node       xml node
+     * @param expression xpath query
+     * @return text under element which confirms given xpath query
+     * @throws XPathExpressionException in case of any errors.
      */
     public static String queryText(final Node node, final String expression) throws XPathExpressionException {
         final XPath xpath = XPathFactory.newInstance().newXPath();
-        final Node n = (Node)xpath.evaluate(expression, node, XPathConstants.NODE);
-        if (n==null)
+        final Node n = (Node) xpath.evaluate(expression, node, XPathConstants.NODE);
+        if (n == null)
             return null;
-        return (n.getNodeType()==Node.TEXT_NODE) ? n.getNodeValue() : getNodeText(n);
+        return (n.getNodeType() == Node.TEXT_NODE) ? n.getNodeValue() : getNodeText(n);
     }
 
 
     /**
      * Create new DOM document.
+     *
      * @return new xml DOM document.
-     * @throws ParserConfigurationException  in case of any errors.
+     * @throws ParserConfigurationException in case of any errors.
      */
     public static Document createDocument() throws ParserConfigurationException {
         final DocumentBuilderFactory dFactory = DocumentBuilderFactory.newInstance();
@@ -370,11 +384,12 @@ public class XMLUtil {
 
     /**
      * Create new DOM document from XMl string.
-     * @param xml  text of the serialized XML document.
-     * @return  new XML DOC document.
-     * @throws ParserConfigurationException  in case of parsing errors.
-     * @throws IOException  in case of io errors.
-     * @throws SAXException  in case errors.
+     *
+     * @param xml text of the serialized XML document.
+     * @return new XML DOC document.
+     * @throws ParserConfigurationException in case of parsing errors.
+     * @throws IOException                  in case of io errors.
+     * @throws SAXException                 in case errors.
      */
     public static Document createDocument(final String xml) throws ParserConfigurationException, IOException, SAXException {
         final DocumentBuilderFactory dFactory = DocumentBuilderFactory.newInstance();
@@ -387,9 +402,10 @@ public class XMLUtil {
 
     /**
      * Serialize document to string.
-     * @param node  node which must be serialized.
+     *
+     * @param node node which must be serialized.
      * @return serialized form of the node.
-     * @throws TransformerException  in case of any errors.
+     * @throws TransformerException in case of any errors.
      */
     public static String serialize(final Node node) throws TransformerException {
         final Transformer serializer = TransformerFactory.newInstance().newTransformer();
@@ -402,10 +418,11 @@ public class XMLUtil {
 
     /**
      * Serialize document to the output file.
-     * @param node  node which must be serialized.
-     * @param outputFile  output file.
-     * @throws TransformerException  in case of any errors.
-     * @throws IOException  in case any io errors.
+     *
+     * @param node       node which must be serialized.
+     * @param outputFile output file.
+     * @throws TransformerException in case of any errors.
+     * @throws IOException          in case any io errors.
      */
     public static void serialize(final Node node, final File outputFile) throws TransformerException, IOException {
         final Transformer serializer = TransformerFactory.newInstance().newTransformer();
@@ -421,30 +438,31 @@ public class XMLUtil {
 
     /**
      * Process the source DOM tree to the output DOM tree
-     * @param xmlDoc  model DOM tree
-     * @param xslDoc  template DOM tree
+     *
+     * @param xmlDoc model DOM tree
+     * @param xslDoc template DOM tree
      * @return produced DOM tree.
-     * @throws TransformerException  in case of any errors due documents transformation
-     * @throws ParserConfigurationException  in case of any errors due documents parsing
+     * @throws TransformerException         in case of any errors due documents transformation
+     * @throws ParserConfigurationException in case of any errors due documents parsing
      */
     public static Document apply(final Document xmlDoc, final Document xslDoc) throws TransformerException, ParserConfigurationException {
-        final Transformer transformer = TransformerFactory.newInstance().newTransformer( new DOMSource(xslDoc) );
+        final Transformer transformer = TransformerFactory.newInstance().newTransformer(new DOMSource(xslDoc));
         final Document targetDoc = XMLUtil.createDocument();
-        transformer.transform( new DOMSource(xmlDoc), new DOMResult(targetDoc) );
+        transformer.transform(new DOMSource(xmlDoc), new DOMResult(targetDoc));
         return targetDoc;
     }
 
 
     /**
      * Process the source document to the output document
+     *
      * @param xmlFile  file with model DOM tree
      * @param xslFile  file with template DOM tree
      * @param htmlFile file with produced DOM tree.
-     * @throws TransformerException  in case of any errors due documents transformation
+     * @throws TransformerException in case of any errors due documents transformation
      */
     public static void apply(final File xmlFile, final File xslFile, final File htmlFile) throws TransformerException {
-        final Transformer transformer = TransformerFactory.newInstance().newTransformer( new StreamSource(xslFile) );
-        transformer.transform( new StreamSource(xmlFile), new StreamResult(htmlFile) );
+        final Transformer transformer = TransformerFactory.newInstance().newTransformer(new StreamSource(xslFile));
+        transformer.transform(new StreamSource(xmlFile), new StreamResult(htmlFile));
     }
-
 }

@@ -50,6 +50,6 @@ public abstract class Field implements Serializable {
     protected abstract Date getAsDate(final byte[] recordBuf) throws DBFException;
 
     public String toString() {
-        return "[DBF.Field{name:" + descriptor.getName() + ", type:" + descriptor.getType() + ", size:" + descriptor.getSize() + ", precision:" + descriptor.getPrecision() + ", offset:" + descriptor.getFieldOffset()+"}]";
+        return "[DBF.Field{name:" + descriptor.getName() + ", type:" + descriptor.getType() + ", size:" + descriptor.getSize() + ", precision:" + descriptor.getPrecision() + ", offset:" + descriptor.getFieldOffset() + "}]";
     }
 }

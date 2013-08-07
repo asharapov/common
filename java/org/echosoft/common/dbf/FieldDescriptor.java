@@ -14,15 +14,16 @@ class FieldDescriptor implements Serializable {
     private final int precision;
     private final boolean indexed;
     private final int fieldOffset;
-    private final Charset charset;
+    private final String charsetName;
+    private transient Charset charset;
 
     public FieldDescriptor(final byte[] buf, final int offset, final Charset charset, final int fieldOffset) throws DBFException {
         if (buf.length - offset < 32)
             throw new IllegalArgumentException("Invalid buffer size");
         this.name = Util.readZeroBasedString(buf, offset, 11, charset);
         this.type = FieldType.findByCode((char) buf[offset + 11]);
-        if (type==null)
-            throw new DBFException("Unknown DBF field type: '" + (char)buf[offset + 11]);
+        if (type == null)
+            throw new DBFException("Unknown DBF field type: '" + (char) buf[offset + 11]);
         switch (type) {
             case LOGICAL: {
                 size = 1;
@@ -58,6 +59,7 @@ class FieldDescriptor implements Serializable {
         }
         this.indexed = buf[offset + 31] == 1;
         this.fieldOffset = fieldOffset;
+        this.charsetName = charset.name();
         this.charset = charset;
     }
 
@@ -86,6 +88,8 @@ class FieldDescriptor implements Serializable {
     }
 
     public Charset getCharset() {
+        if (charset == null)
+            charset = Charset.forName(charsetName);
         return charset;
     }
 

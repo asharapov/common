@@ -91,8 +91,8 @@ public final class BeanSerializer implements JsonSerializer {
     @Override
     public void serialize(final Object src, final JsonWriter jw) throws IOException, InvocationTargetException, IllegalAccessException {
         jw.beginObject();
-        for (MemberAccessor member : accessors) {
-            member.serialize(src, jw);
+        for (int i = 0; i < accessors.length; i++) {
+            accessors[i].serialize(src, jw);
         }
         jw.endObject();
     }

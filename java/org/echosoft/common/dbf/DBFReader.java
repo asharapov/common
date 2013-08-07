@@ -291,5 +291,4 @@ public class DBFReader {
         final Field field = fields[fieldNum];
         return field.getAsDate(recordBuf);
     }
-
 }

@@ -9,7 +9,7 @@ class Util {
 
     public static String readZeroBasedString(final byte[] buf, final int offset, final int maxSize, final Charset charset) {
         int size = 0;
-        for (int i=offset; size<=maxSize && buf[i] != 0x0 ; i++) size++;
+        for (int i = offset; size <= maxSize && buf[i] != 0x0; i++) size++;
         return new String(buf, offset, size, charset);
     }
 
@@ -23,5 +23,4 @@ class Util {
     public static int readUnsignedShort(final byte[] buf, final int offset) {
         return ((buf[offset + 1] & 0xFF) << 8) | (buf[offset] & 0xFF);
     }
-
 }

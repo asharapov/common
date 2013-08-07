@@ -4,8 +4,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 
-import org.echosoft.common.model.Predicate;
-import org.echosoft.common.model.Predicates;
+import org.echosoft.common.collections.iterators.FilteredIterator;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -25,7 +24,7 @@ public class FilterIteratorTest {
     @Test
     public void testFilterAll() {
         final ArrayList<String> result = new ArrayList<String>();
-        final Iterator<String> it = new FilterIterator<String>(list.iterator(), Predicates.<String>all());
+        final Iterator<String> it = new FilteredIterator<String>(list.iterator(), Predicates.<String>all());
         while ( it.hasNext() ) {
             result.add( it.next() );
         }
@@ -35,7 +34,7 @@ public class FilterIteratorTest {
     @Test
     public void testFilterNothing() {
         final ArrayList<String> result = new ArrayList<String>();
-        final Iterator<String> it = new FilterIterator<String>(list.iterator(), Predicates.<String>nothing());
+        final Iterator<String> it = new FilteredIterator<String>(list.iterator(), Predicates.<String>nothing());
         while ( it.hasNext() ) {
             result.add( it.next() );
         }
@@ -50,7 +49,7 @@ public class FilterIteratorTest {
                 return value!=null && value.length()==2;
             }
         };
-        final Iterator<String> it = new FilterIterator<String>(list.iterator(), filter);
+        final Iterator<String> it = new FilteredIterator<String>(list.iterator(), filter);
         while ( it.hasNext() ) {
             result.add( it.next() );
         }

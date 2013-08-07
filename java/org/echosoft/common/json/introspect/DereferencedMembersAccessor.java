@@ -31,9 +31,6 @@ public final class DereferencedMembersAccessor implements MemberAccessor {
         field.setAccessible(true);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void serialize(final Object src, final JsonWriter jw) throws IOException, InvocationTargetException, IllegalAccessException {
         final Object bean = method != null ? method.invoke(src) : field.get(src);
@@ -45,8 +42,8 @@ public final class DereferencedMembersAccessor implements MemberAccessor {
             members = BeanSerializer.getMembers(cl);
             cache.put(cl, members);
         }
-        for (final MemberAccessor member : members) {
-            member.serialize(bean, jw);
+        for (int i = 0; i < members.length; i++) {
+            members[i].serialize(bean, jw);
         }
     }
 

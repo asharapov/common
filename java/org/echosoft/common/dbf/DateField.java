@@ -48,7 +48,7 @@ class DateField extends Field {
     @Override
     protected Long getAsLong(final byte[] recordBuf) throws DBFException {
         final Date value = (Date) getAsObject(recordBuf);
-        return value!=null ? value.getTime() : null;
+        return value != null ? value.getTime() : null;
     }
 
     @Override
@@ -58,6 +58,6 @@ class DateField extends Field {
 
     @Override
     protected Date getAsDate(final byte[] recordBuf) throws DBFException {
-        return (Date)getAsObject(recordBuf);
+        return (Date) getAsObject(recordBuf);
     }
 }

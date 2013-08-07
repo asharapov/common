@@ -46,15 +46,14 @@ public class TypeRegistry {
     @SuppressWarnings("unchecked")
     public <T> Type<T> findType(final Class<T> cl) {
         Type<?> type = types.get(cl);
-        if (type==null) {
-            for (Map.Entry<Class<?>,Type<?>> entry : types.entrySet()) {
+        if (type == null) {
+            for (Map.Entry<Class<?>, Type<?>> entry : types.entrySet()) {
                 if (cl.isAssignableFrom(entry.getKey())) {
                     type = entry.getValue();
                     break;
                 }
             }
         }
-        return (Type<T>)type;
+        return (Type<T>) type;
     }
-
 }

@@ -6,6 +6,7 @@ import org.echosoft.common.utils.StringUtil;
 
 /**
  * Содержит описание одной опции в командной строки.
+ *
  * @author Anton Sharapov
  */
 public class Option implements Serializable, Cloneable {
@@ -25,7 +26,7 @@ public class Option implements Serializable, Cloneable {
     }
 
     public Option(final Character shortName, final String fullName, final boolean required, final String argName, final String description) {
-        this(shortName, fullName, required, argName!=null && !argName.trim().isEmpty(), true, argName, description);
+        this(shortName, fullName, required, argName != null && !argName.trim().isEmpty(), true, argName, description);
     }
 
     public Option(final Character shortName, final String fullName, final boolean required, final boolean hasArgs, final boolean argsRequired, final String argName, final String description) {
@@ -34,15 +35,16 @@ public class Option implements Serializable, Cloneable {
         this.required = required;
         this.hasArgs = hasArgs;
         this.argsRequired = argsRequired;
-        this.argName = argName!=null && !argName.trim().isEmpty() ? argName.trim() : DEFAULT_ARG_NAME;
+        this.argName = argName != null && !argName.trim().isEmpty() ? argName.trim() : DEFAULT_ARG_NAME;
         this.description = StringUtil.trim(description);
-        if (this.shortName==null && this.fullName==null)
+        if (this.shortName == null && this.fullName == null)
             throw new IllegalArgumentException("Option names not specified");
     }
 
     /**
      * Возвращает краткое (однобуквенное) название опции или <code>null</code>.
-     * @return  краткое название опции или <code>null</code>.
+     *
+     * @return краткое название опции или <code>null</code>.
      */
     public Character getShortName() {
         return shortName;
@@ -50,6 +52,7 @@ public class Option implements Serializable, Cloneable {
 
     /**
      * Возвращает полное название опции или <code>null</code>.
+     *
      * @return Возвращает полное название опции или <code>null</code>.
      */
     public String getFullName() {
@@ -58,6 +61,7 @@ public class Option implements Serializable, Cloneable {
 
     /**
      * Возвращает <code>true</code> если опция должна быть обязательно указана в командной строке.
+     *
      * @return <code>true</code> если опция должна быть обязательно указана в командной строке.
      */
     public boolean isRequired() {
@@ -72,7 +76,8 @@ public class Option implements Serializable, Cloneable {
      * Возвращает <code>true</code> если опция <u>может</u> иметь параметр.<br/>
      * Определение того является ли данный параметр обязательным следует из свойства {@link #isArgsRequired()}.<br/>
      * Установка данного свойства в <code>false</code> автоматически влечет за собой и установку свойства {@link #isArgsRequired()} в <code>false</code>.
-     * @return  <code>true</code> если опция <u>может</u> иметь параметр.
+     *
+     * @return <code>true</code> если опция <u>может</u> иметь параметр.
      */
     public boolean hasArgs() {
         return hasArgs;
@@ -87,6 +92,7 @@ public class Option implements Serializable, Cloneable {
     /**
      * Возвращает <code>true</code> если данная опция <u>требует</u> наличия дополнительного параметра.<br/>
      * Установка данного свойства в <code>true</code> автоматически влечет за собой и установку свойства {@link #hasArgs()}.
+     *
      * @return <code>true</code> если данная опция <u>требует</u> наличия дополнительного параметра.
      */
     public boolean isArgsRequired() {
@@ -102,19 +108,21 @@ public class Option implements Serializable, Cloneable {
     /**
      * Возвращает название аргумента опции. Используется только при печати строки с подсказкой по опциям допустимым в разбираемой командной строке.
      * По умолчанию возвращает {@link #DEFAULT_ARG_NAME}.
+     *
      * @return название аргумента опции используемое при печати подсказки по опциям командной строки
      */
     public String getArgName() {
         return argName;
     }
     public Option setArgName(final String argName) {
-        this.argName = argName!=null && !argName.trim().isEmpty() ? argName.trim() : DEFAULT_ARG_NAME;
+        this.argName = argName != null && !argName.trim().isEmpty() ? argName.trim() : DEFAULT_ARG_NAME;
         return this;
     }
 
     /**
      * Возвращает описание опции. Используеся при печати подсказки по опциям допустимым в разбираемой командной строке.
-     * @return  описание опции.
+     *
+     * @return описание опции.
      */
     public String getDescription() {
         return description;
@@ -126,19 +134,24 @@ public class Option implements Serializable, Cloneable {
 
     @Override
     public int hashCode() {
-        return fullName!=null ? fullName.hashCode() : shortName.hashCode();
+        return fullName != null ? fullName.hashCode() : shortName.hashCode();
     }
 
     @Override
     public boolean equals(final Object obj) {
-        if (obj==null || !getClass().equals(obj.getClass()))
+        if (obj == null || !getClass().equals(obj.getClass()))
             return false;
-        final Option other = (Option)obj;
-        return (shortName!=null ? shortName.equals(other.shortName) : other.shortName==null) &&
-               (fullName!=null ? fullName.equals(other.fullName) : other.fullName==null);
+        final Option other = (Option) obj;
+        return (shortName != null ? shortName.equals(other.shortName) : other.shortName == null) &&
+                (fullName != null ? fullName.equals(other.fullName) : other.fullName == null);
 //               required==other.required && hasArgs==other.hasArgs && argsRequired==other.argsRequired &&
 //               (argName!=null ? argName.equals(other.argName) : other.argName==null) &&
 //               (description!=null ? description.equals(other.description) : other.description==null);
+    }
+
+    @Override
+    public Option clone() throws CloneNotSupportedException {
+        return (Option) super.clone();
     }
 
     @Override

@@ -17,8 +17,8 @@ class NumericField extends Field {
         final String value = read(recordBuf);
         if (value.isEmpty())
             return null;
-        if (getPrecision()==0) {
-            return descriptor.getSize()>8
+        if (getPrecision() == 0) {
+            return descriptor.getSize() > 8
                     ? new Long(value)
                     : new Integer(value);
         } else {
@@ -74,7 +74,7 @@ class NumericField extends Field {
         final String value = read(recordBuf);
         if (value.isEmpty())
             return null;
-        try{
+        try {
             return new BigDecimal(value);
         } catch (NumberFormatException e) {
             throw new DBFException("Can't convert type to bigdecimal", e);
@@ -93,5 +93,4 @@ class NumericField extends Field {
             throw new DBFException("Can't convert type to date", e);
         }
     }
-
 }

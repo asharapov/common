@@ -19,10 +19,11 @@ public class Any {
             throw ee;
         }
     }
+
     public static <T> T as(final Type<T> type, final String str, final T defaultValue) {
         try {
             final T result = type.decode(str);
-            return result!=null ? result : defaultValue;
+            return result != null ? result : defaultValue;
         } catch (Exception e) {
             return defaultValue;
         }

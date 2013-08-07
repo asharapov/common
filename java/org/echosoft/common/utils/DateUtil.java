@@ -121,6 +121,8 @@ public class DateUtil {
                         cal.set(Calendar.MILLISECOND, 0);
                         break;
                     }
+                    case NEUTRAL:
+                        break;
                     case HIGH: {
                         cal.set(Calendar.MONTH, Calendar.DECEMBER);
                         cal.set(Calendar.DAY_OF_MONTH, 31);
@@ -147,6 +149,8 @@ public class DateUtil {
                         cal.set(Calendar.MILLISECOND, 0);
                         break;
                     }
+                    case NEUTRAL:
+                        break;
                     case HIGH: {
                         final int month = cal.get(Calendar.MONTH);
                         cal.set(Calendar.MONTH, month + 2 - month % 3);
@@ -171,6 +175,8 @@ public class DateUtil {
                         cal.set(Calendar.MILLISECOND, 0);
                         break;
                     }
+                    case NEUTRAL:
+                        break;
                     case HIGH: {
                         cal.set(Calendar.DAY_OF_MONTH, cal.getActualMaximum(Calendar.DAY_OF_MONTH));
                         cal.set(Calendar.HOUR_OF_DAY, 23);
@@ -194,6 +200,8 @@ public class DateUtil {
                         cal.set(Calendar.MILLISECOND, 0);
                         break;
                     }
+                    case NEUTRAL:
+                        break;
                     case HIGH: {
                         int lastDay = cal.getFirstDayOfWeek() + 6;
                         if (lastDay > 7)
@@ -218,6 +226,8 @@ public class DateUtil {
                         cal.set(Calendar.MILLISECOND, 0);
                         break;
                     }
+                    case NEUTRAL:
+                        break;
                     case HIGH: {
                         cal.set(Calendar.HOUR_OF_DAY, 23);
                         cal.set(Calendar.MINUTE, 59);
@@ -237,6 +247,8 @@ public class DateUtil {
                         cal.set(Calendar.MILLISECOND, 0);
                         break;
                     }
+                    case NEUTRAL:
+                        break;
                     case HIGH: {
                         cal.set(Calendar.MINUTE, 59);
                         cal.set(Calendar.SECOND, 59);
@@ -254,6 +266,8 @@ public class DateUtil {
                         cal.set(Calendar.MILLISECOND, 0);
                         break;
                     }
+                    case NEUTRAL:
+                        break;
                     case HIGH: {
                         cal.set(Calendar.SECOND, 59);
                         cal.set(Calendar.MILLISECOND, 999);
@@ -267,9 +281,13 @@ public class DateUtil {
                 switch (bound) {
                     case LOW: {
                         cal.set(Calendar.MILLISECOND, 0);
+                        break;
                     }
+                    case NEUTRAL:
+                        break;
                     case HIGH: {
                         cal.set(Calendar.MILLISECOND, 999);
+                        break;
                     }
                 }
                 break;

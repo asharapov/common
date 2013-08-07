@@ -1,8 +1,8 @@
 package org.echosoft.common.utils;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.io.Writer;
 import java.text.ParseException;
 import java.util.ArrayList;
@@ -319,7 +319,8 @@ public class StringUtil {
                 final char c = part.charAt(i);
                 if (c == mask) {
                     buf.append(mask).append(mask);
-                } else if (c == separator) {
+                } else
+                if (c == separator) {
                     buf.append(mask).append(separator);
                 } else {
                     buf.append(c);
@@ -355,7 +356,8 @@ public class StringUtil {
                 } else {
                     masked = true;
                 }
-            } else if (c == separator) {
+            } else
+            if (c == separator) {
                 if (masked) {
                     buf.append(separator);
                     masked = false;
@@ -613,7 +615,7 @@ public class StringUtil {
      * Конвертирует недопустимые в атрибутах тегов HTML символы в соответствующие кодовые обозначения принятые в HTML.<br/>
      * Заменяет символы '&', ' " ', ' ' ' на соответствующие обозначения принятые в HTML: "&amp;amp;", "&amp;quot;", "&amp;#39;".
      *
-     * @param out   выходной поток куда будет помещена отконвертированная версия входной строки.
+     * @param out  выходной поток куда будет помещена отконвертированная версия входной строки.
      * @param text оригинальный текст значения атрибута HTML.
      * @throws IOException в случае каких-либо проблем вывода данных в поток.
      */
@@ -641,7 +643,7 @@ public class StringUtil {
      * Конвертирует недопустимые в атрибутах тегов HTML символы в соответствующие кодовые обозначения принятые в HTML.<br/>
      * Заменяет символы '&', ' " ', ' ' ' на соответствующие обозначения принятые в HTML: "&amp;amp;", "&amp;quot;", "&amp;#39;".
      *
-     * @param out   выходной поток куда будет помещена отконвертированная версия входной строки.
+     * @param out  выходной поток куда будет помещена отконвертированная версия входной строки.
      * @param text оригинальный текст значения атрибута HTML.
      */
     public static void encodeXMLAttribute(final StringBuilder out, final String text) {
@@ -694,13 +696,15 @@ public class StringUtil {
             return context;
         final ArrayList<String> tokens = new ArrayList<String>(10);
         boolean first = true, addContext = true;
-        for (Iterator<String> it = new FastStringTokenizer(path.trim(), '/', (char) 0); it.hasNext(); ) {
+        for (Iterator<String> it = new FastStringTokenizer(path.trim(), '/'); it.hasNext(); ) {
             final String token = it.next();
             if (token.length() == 0) {
                 if (first)
                     addContext = false;
-            } else if (".".equals(token)) {
-            } else if ("..".equals(token)) {
+            } else
+            if (".".equals(token)) {
+            } else
+            if ("..".equals(token)) {
                 tokens.remove(tokens.size() - 1);
             } else {
                 tokens.add(token);
@@ -1450,8 +1454,8 @@ public class StringUtil {
      */
     public static String stackTrace(final Throwable th) {
         try {
-            final ByteArrayOutputStream buf = new ByteArrayOutputStream(128);
-            th.printStackTrace(new PrintWriter(buf, true));
+            final StringWriter buf = new StringWriter(128);
+            th.printStackTrace(new PrintWriter(buf, false));
             return buf.toString();
         } catch (Exception e) {
             return "Runtime error: " + e.getMessage();
@@ -1502,9 +1506,13 @@ public class StringUtil {
     }
 
     public static Set<String> asUnmodifiableSet(final Collection<String> items1, final String... items2) {
-        final int length = items1 != null ? items1.size() + items2.length : items2.length;
-        final Set<String> set = new HashSet<String>(length);
-        set.addAll(items1);
+        final Set<String> set;
+        if (items1 != null) {
+            set = new HashSet<String>(items1.size() + items2.length);
+            set.addAll(items1);
+        } else {
+            set = new HashSet<String>(items2.length);
+        }
         set.addAll(Arrays.asList(items2));
         return Collections.unmodifiableSet(set);
     }

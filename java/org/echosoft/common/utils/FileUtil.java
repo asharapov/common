@@ -8,6 +8,7 @@ import java.nio.channels.FileChannel;
 
 /**
  * Набор утилитарных методов для работы с файловой подсистемой.
+ *
  * @author Anton Sharapov
  */
 public class FileUtil {
@@ -16,8 +17,9 @@ public class FileUtil {
 
     /**
      * Копирует файл в указанное место файловой системы.
+     *
      * @param srcFile файл который должен быть скопирован.
-     * @param dst определяет куда будет скопирован файл. Задается либо полный путь к файлу либо просто каталог куда должен быть скопирован файл.
+     * @param dst     определяет куда будет скопирован файл. Задается либо полный путь к файлу либо просто каталог куда должен быть скопирован файл.
      * @throws IOException в случае каких-либо проблем при копировании.
      */
     public static void copy(final File srcFile, final File dst) throws IOException {
@@ -36,7 +38,9 @@ public class FileUtil {
                 if (destFile.length() != size) {
                     throw new IOException("Failed to copy full contents from '" + srcFile + "' to '" + destFile + "'.");
                 }
-                destFile.setLastModified(srcFile.lastModified());
+                if (!destFile.setLastModified(srcFile.lastModified())) {
+                    throw new IOException("Can't set last modification time for target path");
+                }
             } finally {
                 out.close();
             }
@@ -44,5 +48,4 @@ public class FileUtil {
             in.close();
         }
     }
-
 }

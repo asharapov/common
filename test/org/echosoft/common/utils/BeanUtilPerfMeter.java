@@ -80,27 +80,27 @@ public class BeanUtilPerfMeter {
     private static long test2(final int counter) throws Exception {
         final long started = System.currentTimeMillis();
         for (int i = counter; i >= 0; i--) {
-            BeanUtil2.getProperty(company, "cid");
-            BeanUtil2.getProperty(company, "name");
-            BeanUtil2.getProperty(company, "director");
-            BeanUtil2.getProperty(company, "director.name");
-            BeanUtil2.getProperty(company, "director.address.country");
-            BeanUtil2.getProperty(company, "director.topRated");
-            BeanUtil2.getProperty(company, "director.awards[2]");
-            BeanUtil2.getProperty(company, "director.awards[1].bytes");
-            BeanUtil2.getProperty(company, "director.skills[0]");
-            BeanUtil2.getProperty(company, "director.env.k1");
-            BeanUtil2.getProperty(company, "director.getEnv.k2");
-            BeanUtil2.getProperty(company, "hasChildren");
-            BeanUtil2.getProperty(company, "director.address.hashCode");
-            BeanUtil2.getProperty(company, "director.getSomeone(keystr)");
-            BeanUtil2.getProperty(company, "director.someone(keystr)");
-            BeanUtil2.getProperty(company, "director.getMethod1(1)");
-            BeanUtil2.getProperty(company, "director.method1(2)");
-            BeanUtil2.getProperty(company, "director.getMethod2(1)");
-            BeanUtil2.getProperty(company, "director.method2(2)");
-            BeanUtil2.getProperty(company, "top(-1)");
-            BeanUtil2.getProperty(company, "bottom(-2)");
+            BeanUtil.getProperty(company, "cid");
+            BeanUtil.getProperty(company, "name");
+            BeanUtil.getProperty(company, "director");
+            BeanUtil.getProperty(company, "director.name");
+            BeanUtil.getProperty(company, "director.address.country");
+            BeanUtil.getProperty(company, "director.topRated");
+            BeanUtil.getProperty(company, "director.awards[2]");
+            BeanUtil.getProperty(company, "director.awards[1].bytes");
+            BeanUtil.getProperty(company, "director.skills[0]");
+            BeanUtil.getProperty(company, "director.env.k1");
+            BeanUtil.getProperty(company, "director.getEnv.k2");
+            BeanUtil.getProperty(company, "hasChildren");
+            BeanUtil.getProperty(company, "director.address.hashCode");
+            BeanUtil.getProperty(company, "director.getSomeone(keystr)");
+            BeanUtil.getProperty(company, "director.someone(keystr)");
+            BeanUtil.getProperty(company, "director.getMethod1(1)");
+            BeanUtil.getProperty(company, "director.method1(2)");
+            BeanUtil.getProperty(company, "director.getMethod2(1)");
+            BeanUtil.getProperty(company, "director.method2(2)");
+            BeanUtil.getProperty(company, "top(-1)");
+            BeanUtil.getProperty(company, "bottom(-2)");
         }
         return System.currentTimeMillis() - started;
     }

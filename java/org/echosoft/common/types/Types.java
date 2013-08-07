@@ -11,11 +11,13 @@ import org.echosoft.common.utils.StringUtil;
 
 /**
  * Содержит ссылки на объекты, реализации интерфейса {@link Type} для базового набора классов.
+ *
  * @author Anton Sharapov
  */
 public class Types {
 
-    private Types() {}
+    private Types() {
+    }
 
     public static final Type<String> STRING =
             new Type<String>() {
@@ -31,7 +33,9 @@ public class Types {
                 public String decode(final String str) {
                     return str;
                 }
-                public String toString() { return "[Type<String>]"; }
+                public String toString() {
+                    return "[Type<String>]";
+                }
             };
 
     public static final Type<Character> CHARACTER =
@@ -43,18 +47,23 @@ public class Types {
                     return Character.class.isInstance(obj);
                 }
                 public String encode(final Character value) {
-                    return value!=null ? value.toString() : null;
+                    return value != null ? value.toString() : null;
                 }
                 public Character decode(final String str) throws ClassCastException {
-                    if (str==null)
+                    if (str == null)
                         return null;
                     switch (str.length()) {
-                        case 0 : return null;
-                        case 1 : return str.charAt(0);
-                        default: throw new ClassCastException("Unable to cast \""+str+"\" to Character");
+                        case 0:
+                            return null;
+                        case 1:
+                            return str.charAt(0);
+                        default:
+                            throw new ClassCastException("Unable to cast \"" + str + "\" to Character");
                     }
                 }
-                public String toString() { return "[Type<Character>]"; }
+                public String toString() {
+                    return "[Type<Character>]";
+                }
             };
 
     public static final Type<Boolean> BOOLEAN =
@@ -66,14 +75,16 @@ public class Types {
                     return Boolean.class.isInstance(obj);
                 }
                 public String encode(final Boolean value) {
-                    return value!=null ? value.toString() : null;
+                    return value != null ? value.toString() : null;
                 }
                 public Boolean decode(final String str) {
-                    if (str==null || str.isEmpty())
+                    if (str == null || str.isEmpty())
                         return null;
                     return "true".equals(str.toLowerCase());
                 }
-                public String toString() { return "[Type<Boolean>]"; }
+                public String toString() {
+                    return "[Type<Boolean>]";
+                }
             };
 
     public static final Type<Byte> BYTE =
@@ -85,14 +96,16 @@ public class Types {
                     return Integer.class.isInstance(obj);
                 }
                 public String encode(final Byte value) {
-                    return value!=null ? Integer.toString(value,10) : null;
+                    return value != null ? Integer.toString(value, 10) : null;
                 }
                 public Byte decode(final String str) throws NumberFormatException {
-                    if (str==null || str.isEmpty())
+                    if (str == null || str.isEmpty())
                         return null;
-                    return Byte.parseByte(str,10);
+                    return Byte.parseByte(str, 10);
                 }
-                public String toString() { return "[Type<Byte>]"; }
+                public String toString() {
+                    return "[Type<Byte>]";
+                }
             };
 
     public static final Type<Short> SHORT =
@@ -104,14 +117,16 @@ public class Types {
                     return Short.class.isInstance(obj);
                 }
                 public String encode(final Short value) {
-                    return value!=null ? Integer.toString(value,10) : null;
+                    return value != null ? Integer.toString(value, 10) : null;
                 }
                 public Short decode(final String str) throws NumberFormatException {
-                    if (str==null || str.isEmpty())
+                    if (str == null || str.isEmpty())
                         return null;
-                    return Short.parseShort(str,10);
+                    return Short.parseShort(str, 10);
                 }
-                public String toString() { return "[Type<Short>]"; }
+                public String toString() {
+                    return "[Type<Short>]";
+                }
             };
 
     public static final Type<Integer> INTEGER =
@@ -123,14 +138,16 @@ public class Types {
                     return Integer.class.isInstance(obj);
                 }
                 public String encode(final Integer value) {
-                    return value!=null ? Integer.toString(value,10) : null;
+                    return value != null ? Integer.toString(value, 10) : null;
                 }
                 public Integer decode(final String str) throws NumberFormatException {
-                    if (str==null || str.isEmpty())
+                    if (str == null || str.isEmpty())
                         return null;
-                    return Integer.parseInt(str,10);
+                    return Integer.parseInt(str, 10);
                 }
-                public String toString() { return "[Type<Integer>]"; }
+                public String toString() {
+                    return "[Type<Integer>]";
+                }
             };
 
     public static final Type<Long> LONG =
@@ -142,14 +159,16 @@ public class Types {
                     return Long.class.isInstance(obj);
                 }
                 public String encode(final Long value) {
-                    return value!=null ? Long.toString(value,10) : null;
+                    return value != null ? Long.toString(value, 10) : null;
                 }
                 public Long decode(final String str) throws NumberFormatException {
-                    if (str==null || str.isEmpty())
+                    if (str == null || str.isEmpty())
                         return null;
-                    return Long.parseLong(str,10);
+                    return Long.parseLong(str, 10);
                 }
-                public String toString() { return "[Type<Long>]"; }
+                public String toString() {
+                    return "[Type<Long>]";
+                }
             };
 
     public static final Type<Float> FLOAT =
@@ -161,14 +180,16 @@ public class Types {
                     return Float.class.isInstance(obj);
                 }
                 public String encode(final Float value) {
-                    return value!=null ? Float.toString(value) : null;
+                    return value != null ? Float.toString(value) : null;
                 }
                 public Float decode(final String str) throws NumberFormatException {
-                    if (str==null || str.isEmpty())
+                    if (str == null || str.isEmpty())
                         return null;
                     return Float.parseFloat(str);
                 }
-                public String toString() { return "[Type<Float>]"; }
+                public String toString() {
+                    return "[Type<Float>]";
+                }
             };
 
     public static final Type<Double> DOUBLE =
@@ -180,14 +201,16 @@ public class Types {
                     return Double.class.isInstance(obj);
                 }
                 public String encode(final Double value) {
-                    return value!=null ? Double.toString(value) : null;
+                    return value != null ? Double.toString(value) : null;
                 }
                 public Double decode(final String str) throws NumberFormatException {
-                    if (str==null || str.isEmpty())
+                    if (str == null || str.isEmpty())
                         return null;
                     return Double.parseDouble(str);
                 }
-                public String toString() { return "[Type<Double>]"; }
+                public String toString() {
+                    return "[Type<Double>]";
+                }
             };
 
     public static final Type<BigInteger> BIGINTEGER =
@@ -199,14 +222,16 @@ public class Types {
                     return BigInteger.class.isInstance(obj);
                 }
                 public String encode(final BigInteger value) {
-                    return value!=null ? value.toString(10) : null;
+                    return value != null ? value.toString(10) : null;
                 }
                 public BigInteger decode(final String str) throws NumberFormatException {
-                    if (str==null || str.isEmpty())
+                    if (str == null || str.isEmpty())
                         return null;
-                    return new BigInteger(str,10);
+                    return new BigInteger(str, 10);
                 }
-                public String toString() { return "[Type<BigInteger>]"; }
+                public String toString() {
+                    return "[Type<BigInteger>]";
+                }
             };
 
     public static final Type<BigDecimal> BIGDECIMAL =
@@ -218,14 +243,16 @@ public class Types {
                     return BigDecimal.class.isInstance(obj);
                 }
                 public String encode(final BigDecimal value) {
-                    return value!=null ? value.toPlainString() : null;
+                    return value != null ? value.toPlainString() : null;
                 }
                 public BigDecimal decode(final String str) throws NumberFormatException {
-                    if (str==null || str.isEmpty())
+                    if (str == null || str.isEmpty())
                         return null;
                     return new BigDecimal(str);
                 }
-                public String toString() { return "[Type<BigDecimal>]"; }
+                public String toString() {
+                    return "[Type<BigDecimal>]";
+                }
             };
 
     public static final Type<Date> DATE =
@@ -237,12 +264,14 @@ public class Types {
                     return Date.class.isInstance(obj);
                 }
                 public String encode(final Date value) {
-                    return value!=null ? StringUtil.formatDate(value) : null;
+                    return value != null ? StringUtil.formatDate(value) : null;
                 }
                 public Date decode(final String str) throws ParseException {
                     return StringUtil.parseDate(str);
                 }
-                public String toString() { return "[Type<Date>]"; }
+                public String toString() {
+                    return "[Type<Date>]";
+                }
             };
 
     public static final Type<Date> DATETIME =
@@ -254,12 +283,14 @@ public class Types {
                     return Date.class.isInstance(obj);
                 }
                 public String encode(final Date value) {
-                    return value!=null ? StringUtil.formatDateTime(value) : null;
+                    return value != null ? StringUtil.formatDateTime(value) : null;
                 }
                 public Date decode(final String str) throws ParseException {
                     return StringUtil.parseDateTime(str);
                 }
-                public String toString() { return "[Type<DateTime>]"; }
+                public String toString() {
+                    return "[Type<DateTime>]";
+                }
             };
 
     public static final Type<Date> DATETIME2 =
@@ -271,12 +302,14 @@ public class Types {
                     return Date.class.isInstance(obj);
                 }
                 public String encode(final Date value) {
-                    return value!=null ? StringUtil.formatDateTime2(value) : null;
+                    return value != null ? StringUtil.formatDateTime2(value) : null;
                 }
                 public Date decode(final String str) throws ParseException {
                     return StringUtil.parseDateTime2(str);
                 }
-                public String toString() { return "[Type<DateTime2>]"; }
+                public String toString() {
+                    return "[Type<DateTime2>]";
+                }
             };
 
     public static final Type<String[]> STRING_ARRAY =
@@ -288,12 +321,14 @@ public class Types {
                     return String[].class.isInstance(obj);
                 }
                 public String encode(final String[] value) {
-                    return StringUtil.join('$',',',value);
+                    return StringUtil.join('$', ',', value);
                 }
                 public String[] decode(final String str) {
-                    return StringUtil.split('$',',',str);
+                    return StringUtil.split('$', ',', str);
                 }
-                public String toString() { return "[Type<String...>]"; }
+                public String toString() {
+                    return "[Type<String...>]";
+                }
             };
 
     public static final Type<Integer[]> INTEGER_ARRAY =
@@ -306,31 +341,33 @@ public class Types {
                     return Integer[].class.isInstance(obj);
                 }
                 public String encode(final Integer[] value) {
-                    if (value==null)
+                    if (value == null)
                         return null;
                     final StringBuilder buf = new StringBuilder(32);
-                    for (int i=0,len=value.length; i<len; i++) {
-                        if (i>0)
+                    for (int i = 0, len = value.length; i < len; i++) {
+                        if (i > 0)
                             buf.append(',');
                         final Integer item = value[i];
-                        if (item!=null)
-                            buf.append(Integer.toString(item,10));
+                        if (item != null)
+                            buf.append(Integer.toString(item, 10));
                     }
                     return buf.toString();
                 }
                 public Integer[] decode(final String str) throws NumberFormatException {
-                    if (str==null)
+                    if (str == null)
                         return null;
                     if (str.isEmpty())
                         return EMPTY_ARRAY;
                     final ArrayList<Integer> result = new ArrayList<Integer>();
-                    for (FastStringTokenizer it = new FastStringTokenizer(str,',',(char)0); it.hasNext(); ) {
+                    for (FastStringTokenizer it = new FastStringTokenizer(str, ','); it.hasNext(); ) {
                         final String token = it.nextToken();
-                        result.add( token!=null ? Integer.parseInt(token,10) : null);
+                        result.add(token != null ? Integer.parseInt(token, 10) : null);
                     }
                     return result.toArray(new Integer[result.size()]);
                 }
-                public String toString() { return "[Type<Integer...>]"; }
+                public String toString() {
+                    return "[Type<Integer...>]";
+                }
             };
 
     public static final Type<Long[]> LONG_ARRAY =
@@ -343,31 +380,32 @@ public class Types {
                     return Long[].class.isInstance(obj);
                 }
                 public String encode(final Long[] value) {
-                    if (value==null)
+                    if (value == null)
                         return null;
                     final StringBuilder buf = new StringBuilder(32);
-                    for (int i=0,len=value.length; i<len; i++) {
-                        if (i>0)
+                    for (int i = 0, len = value.length; i < len; i++) {
+                        if (i > 0)
                             buf.append(',');
                         final Long item = value[i];
-                        if (item!=null)
-                            buf.append(Long.toString(item,10));
+                        if (item != null)
+                            buf.append(Long.toString(item, 10));
                     }
                     return buf.toString();
                 }
                 public Long[] decode(final String str) throws NumberFormatException {
-                    if (str==null)
+                    if (str == null)
                         return null;
                     if (str.isEmpty())
                         return EMPTY_ARRAY;
                     final ArrayList<Long> result = new ArrayList<Long>();
-                    for (FastStringTokenizer it = new FastStringTokenizer(str,',',(char)0); it.hasNext(); ) {
+                    for (FastStringTokenizer it = new FastStringTokenizer(str, ','); it.hasNext(); ) {
                         final String token = it.nextToken();
-                        result.add( token!=null ? Long.parseLong(token,10) : null);
+                        result.add(token != null ? Long.parseLong(token, 10) : null);
                     }
                     return result.toArray(new Long[result.size()]);
                 }
-                public String toString() { return "[Type<Long...>]"; }
+                public String toString() {
+                    return "[Type<Long...>]";
+                }
             };
-
 }

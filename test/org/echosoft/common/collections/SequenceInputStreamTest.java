@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.TreeMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import org.echosoft.common.io.SequenceInputStream;
 import org.echosoft.common.utils.StreamUtil;
 import org.junit.Assert;
 import org.junit.Before;

@@ -2,6 +2,7 @@ package org.echosoft.common.dbf;
 
 /**
  * Поднимается в случае каких-либо проблем в структуре DBF файла.
+ *
  * @author Anton Sharapov
  */
 public class DBFException extends Exception {
@@ -32,7 +33,8 @@ public class DBFException extends Exception {
 
     /**
      * В тех случаях где это возможно возвращает позицию в файле где была обнаружена ошибка.
-     * @return  позиция в файле где была обнаружена ошибка или <code>0</code>.
+     *
+     * @return позиция в файле где была обнаружена ошибка или <code>0</code>.
      */
     public int getPosition() {
         return position;

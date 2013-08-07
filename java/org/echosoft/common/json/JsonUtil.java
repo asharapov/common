@@ -4,6 +4,7 @@ import java.beans.Introspector;
 import java.io.IOException;
 import java.io.Writer;
 import java.lang.annotation.Annotation;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
@@ -14,11 +15,14 @@ import java.util.Collection;
  */
 public final class JsonUtil {
 
-    public static final String[] JS_KEYWORDS = {
+    static final String[] JS_KEYWORDS = {
             "break", "case", "catch", "class", "comment", "const", "continue", "debugger", "default", "delete", "do",
             "else", "enum", "export", "extends", "finally", "for", "function", "if", "import", "in", "label", "new",
             "return", "super", "switch", "this", "throw", "try", "typeof", "var", "void", "while", "with"
     };
+    static final char[] NULL = {'n', 'u', 'l', 'l'};
+    static final char[] TRUE = {'t', 'r', 'u', 'e'};
+    static final char[] FALSE = {'f', 'a', 'l', 's', 'e'};
 
     private static final char[][] REPLACEMENT_CHARS;
     static {
@@ -35,9 +39,6 @@ public final class JsonUtil {
         REPLACEMENT_CHARS['\f'] = "\\f".toCharArray();
     }
 
-    public static final char[] NULL = {'n', 'u', 'l', 'l'};
-    public static final char[] TRUE = {'t', 'r', 'u', 'e'};
-    public static final char[] FALSE = {'f', 'a', 'l', 's', 'e'};
 
     public static void encodeChar(final char c, final Writer out) throws IOException {
         out.write('"');
@@ -106,7 +107,13 @@ public final class JsonUtil {
                 if (result == null)
                     throw new NullPointerException();
                 return result;
-            } catch (Exception ee) {
+            } catch (NoSuchMethodException ee) {
+                // Это какой-то неправильный синглтон. Мерзко ругаемся чтоб программисты быстрее это зафиксили...
+                throw new RuntimeException("Unable to obtain valid json serializer from class: " + scls);
+            } catch (IllegalAccessException ee){
+                // Это какой-то неправильный синглтон. Мерзко ругаемся чтоб программисты быстрее это зафиксили...
+                throw new RuntimeException("Unable to obtain valid json serializer from class: " + scls);
+            } catch (InvocationTargetException ee) {
                 // Это какой-то неправильный синглтон. Мерзко ругаемся чтоб программисты быстрее это зафиксили...
                 throw new RuntimeException("Unable to obtain valid json serializer from class: " + scls);
             }

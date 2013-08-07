@@ -8,11 +8,11 @@ public class MissingOptionException extends CLParserException {
     private final String option;
 
     public MissingOptionException(final Option option) {
-        this(option.getFullName()!=null ? option.getFullName() : String.valueOf(option.getShortName()));
+        this(option.getFullName() != null ? option.getFullName() : String.valueOf(option.getShortName()));
     }
 
     public MissingOptionException(final String option) {
-        super("Missing mandatory option: "+option);
+        super("Missing mandatory option: " + option);
         this.option = option;
     }
 

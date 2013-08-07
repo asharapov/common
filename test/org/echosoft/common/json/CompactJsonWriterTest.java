@@ -2,13 +2,17 @@ package org.echosoft.common.json;
 
 import java.io.StringWriter;
 import java.math.BigDecimal;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 
+import org.echosoft.common.data.misc.TreeNode;
 import org.echosoft.common.json.beans.Component;
 import org.echosoft.common.json.beans.Data;
 import org.echosoft.common.json.beans.Item;
 import org.echosoft.common.json.introspect.BeanSerializer;
-import org.echosoft.common.model.TreeNode;
 import org.echosoft.common.utils.StringUtil;
 import org.junit.Assert;
 import org.junit.Before;
@@ -241,10 +245,10 @@ public class CompactJsonWriterTest {
 
     @Test
     public void testTree() throws Exception {
-        final TreeNode<String> root = new TreeNode<String>("", null);
+        final TreeNode<String, String> root = new TreeNode<String, String>("", null);
         root.addChildNode("n1", "node1");
         root.addChildNode("n2", "node2");
-        root.findNode("n1").addChildNode("n11", "node1.1");
+        root.findNodeById("n1", true).addChildNode("n11", "node1.1");
         System.out.println(root.debugInfo());
         jw.writeObject(root);
         System.out.println(sw.getBuffer().toString());
