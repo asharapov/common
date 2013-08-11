@@ -27,6 +27,16 @@ public class Predicates {
                 }
             };
 
+    /**
+     * Предикат, возвращающиц <code>true</code> для всех объектов не равных <code>null</code>.
+     */
+    public static final Predicate NOT_NULL =
+            new Predicate() {
+                @Override
+                public boolean accept(final Object input) {
+                    return input != null;
+                }
+            };
 
     /**
      * Метод возвращает параметризированный предикат, возвращающий <code>true</code> для абсолютно всех входных данных.
@@ -47,4 +57,15 @@ public class Predicates {
     public static <T> Predicate<T> nothing() {
         return (Predicate<T>) NOTHING;
     }
+
+    /**
+     * Метод возвращает параметризированный предикат, возвращающий <code>true</code> для абсолютно всех непустых данных.
+     *
+     * @return параметризированный предикат, возвращающий <code>false</code> для всех непустых данных.
+     */
+    @SuppressWarnings("unchecked")
+    public static <T> Predicate<T> notNull() {
+        return (Predicate<T>) NOT_NULL;
+    }
+
 }

@@ -2,6 +2,7 @@ package org.echosoft.common.data;
 
 /**
  * Один из способов поточной обработки данных, когда обработчик передается в виде callback поставщику данных.
+ * TODO: при миграции библиотеки на Java 7 данный интерфейс должен быть расширен от java.lang.AutoCloseable
  *
  * @author Anton Sharapov
  */

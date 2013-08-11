@@ -1,4 +1,4 @@
-package org.echosoft.common.data;
+package org.echosoft.common.collections;
 
 /**
  * Преобразовывает объекты исходного класса в объекты целевого класса.

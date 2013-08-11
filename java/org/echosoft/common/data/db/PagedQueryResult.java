@@ -52,4 +52,8 @@ public class PagedQueryResult<T> {
         return rangeSize > 0 && totalSize > 0 ? (totalSize - 1) / rangeSize + 1 : 0;
     }
 
+    @Override
+    public String toString() {
+        return "[PagedQueryResult{total:" + totalSize + ", start:" + rangeStart + ", size:" + rangeSize + ", beans cnt:" + beans.size() + "}]";
+    }
 }
