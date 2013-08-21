@@ -4,11 +4,10 @@ package org.echosoft.common.data;
  * <p>Один из способов поточной обработки данных, когда обработчик передается в виде callback поставщику данных.</p>
  * <p>По сравнению с {@link Consumer} данный интерфейс дает предоставляет обработчику оценить возможность
  * выполнения требуемой работы и, при необходимости, отказаться от нее (см. метод {@link #init(D)}).</p>
- * TODO: при миграции библиотеки на Java 7 данный интерфейс должен быть расширен от java.lang.AutoCloseable
  *
  * @author Anton Sharapov
  */
-public interface ConditionalConsumer<D, T> {
+public interface ConditionalConsumer<D, T> extends AutoCloseable {
 
     /**
      * Вызывается перед началом обработки массива данных.
@@ -32,5 +31,6 @@ public interface ConditionalConsumer<D, T> {
      * Вызывается по завершении обработки последнего элемента массива данных.
      * Является подходящим местом для освобождения всех ресурсов затребованных обработчиком.
      */
+    @Override
     public void close() throws Exception;
 }

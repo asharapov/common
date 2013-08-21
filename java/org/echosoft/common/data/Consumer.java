@@ -2,11 +2,10 @@ package org.echosoft.common.data;
 
 /**
  * Один из способов поточной обработки данных, когда обработчик передается в виде callback поставщику данных.
- * TODO: при миграции библиотеки на Java 7 данный интерфейс должен быть расширен от java.lang.AutoCloseable
  *
  * @author Anton Sharapov
  */
-public interface Consumer<T> {
+public interface Consumer<T> extends AutoCloseable {
 
     /**
      * Вызывается перед началом обработки массива данных.
@@ -25,5 +24,6 @@ public interface Consumer<T> {
      * Вызывается по завершении обработки последнего элемента массива данных.
      * Является подходящим местом для освобождения всех ресурсов затребованных обработчиком.
      */
+    @Override
     public void close() throws Exception;
 }

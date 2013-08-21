@@ -10,7 +10,7 @@ import java.util.NoSuchElementException;
  *
  * @author Anton Sharapov
  */
-public class CSVParser implements Closeable {
+public class CSVParser implements Closeable, AutoCloseable {
 
     public static final char TOKENS_DELIMITER = ',';
     public static final char TOKENS_ESCAPE_CHAR = '"';

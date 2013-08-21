@@ -7,11 +7,10 @@ package org.echosoft.common.collections.issuers;
  * <li>Все методы интерфейса могут поднимать любые исключительные ситуации</li>
  * <li>Отсутствует метод <code>remove</code></li>
  * </ul>
- * TODO: при миграции библиотеки на Java 7 данный интерфейс должен быть расширен от java.lang.AutoCloseable
  *
  * @author Anton Sharapov
  */
-public interface Issuer<T> {
+public interface Issuer<T> extends AutoCloseable {
 
     /**
      * Выполняет проверку наличия следующего элемента в коллекции.
@@ -37,5 +36,6 @@ public interface Issuer<T> {
      *
      * @throws Exception в случае любых ошибок.
      */
+    @Override
     public void close() throws Exception;
 }
