@@ -21,7 +21,7 @@ import org.echosoft.common.utils.StringUtil;
  *
  * @author Anton Sharapov
  */
-public class BufferedDataSource implements DataSource {
+public class BufferedDataSource implements DataSource, AutoCloseable {
 
     private final int initBufferSize;
     private final int limitBufferSize;
@@ -36,14 +36,18 @@ public class BufferedDataSource implements DataSource {
     private int openOutputStreams;
 
     public BufferedDataSource(final File file) {
+        this.file = file;
+        this.name = file.getName();
         this.initBufferSize = 0;
         this.limitBufferSize = 0;
         this.tmpDir = null;
-        this.name = file.getName();
         this.buf = null;
-        this.file = file;
         this.count = 0;
         this.modCount = 0;
+    }
+
+    public BufferedDataSource(final int initBufferSize, final int limitBufferSize) {
+        this(initBufferSize, limitBufferSize, null);
     }
 
     public BufferedDataSource(final int initBufferSize, final int limitBufferSize, final File tmpDir) {
@@ -94,11 +98,8 @@ public class BufferedDataSource implements DataSource {
     }
 
     public void readFrom(final InputStream in) throws IOException {
-        final OutputStream out = getOutputStream();
-        try {
+        try (OutputStream out = getOutputStream()) {
             StreamUtil.pipeData(in, out);
-        } finally {
-            out.close();
         }
     }
 
@@ -107,30 +108,12 @@ public class BufferedDataSource implements DataSource {
             out.write(buf, 0, count);
         } else
         if (file != null) {
-            final InputStream in = new FileBufferInputStream();
-            try {
+            try (InputStream in = new FileBufferInputStream()) {
                 StreamUtil.pipeData(in, out);
-            } finally {
-                in.close();
             }
         }
     }
 
-    /**
-     * Сбрасывает всю информацию, записанную в данный буфер.
-     *
-     * @return true в случае успешной очистки всех занятых ресурсов.
-     */
-    public boolean close() throws IOException {
-        count = 0;
-        buf = null;
-        boolean result = true;
-        if (file != null) {
-            result = file.delete();
-            file = null;
-        }
-        return result && openedInputStreams == 0 && openOutputStreams == 0;
-    }
 
     @Override
     public InputStream getInputStream() throws IOException {
@@ -146,6 +129,25 @@ public class BufferedDataSource implements DataSource {
     @Override
     public OutputStream getOutputStream() throws IOException {
         return new BufferedOutputStream();
+    }
+
+    /**
+     * Сбрасывает всю информацию, записанную в данный буфер.
+     *
+     * @throws ConcurrentModificationException eсли на момент выполнения данного методы были не закрытые потоки на чтение или запись в буфер
+     */
+    @Override
+    public void close() throws Exception {
+        if (openOutputStreams > 0)
+            throw new ConcurrentModificationException("Has opened output streams");
+        if (openedInputStreams > 0)
+            throw new ConcurrentModificationException("Has opened input streams");
+        count = 0;
+        buf = null;
+        if (file != null) {
+            file.delete();
+            file = null;
+        }
     }
 
 
