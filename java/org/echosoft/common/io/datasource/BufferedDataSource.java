@@ -134,14 +134,13 @@ public class BufferedDataSource implements DataSource, AutoCloseable {
     /**
      * Сбрасывает всю информацию, записанную в данный буфер.
      *
-     * @throws ConcurrentModificationException eсли на момент выполнения данного методы были не закрытые потоки на чтение или запись в буфер
+     * @throws ConcurrentModificationException eсли на момент выполнения данного методы были не закрытые потоки на запись в буфер
      */
     @Override
     public void close() throws Exception {
         if (openOutputStreams > 0)
             throw new ConcurrentModificationException("Has opened output streams");
-        if (openedInputStreams > 0)
-            throw new ConcurrentModificationException("Has opened input streams");
+        modCount++;
         count = 0;
         buf = null;
         if (file != null) {
