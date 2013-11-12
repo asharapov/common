@@ -33,7 +33,7 @@ public class CLParser {
      */
     public CommandLine parse(final String[] args) throws CLParserException {
         final CommandLine cmd = new CommandLine(options);
-        for (ReadAheadIterator<String> it = new ObjectArrayIterator<String>(args); it.hasNext(); ) {
+        for (ReadAheadIterator<String> it = new ObjectArrayIterator<>(args); it.hasNext(); ) {
             final String token = it.next();
 
             if (!token.startsWith("-") || "-".equals(token)) {

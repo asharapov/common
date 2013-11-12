@@ -32,9 +32,9 @@ public class CommandLine implements Serializable {
 
     CommandLine(final Options options) {
         this.options = options;
-        this.unresolvedArgs = new ArrayList<String>();
-        this.values = new HashMap<Option, String>();
-        this.datePatterns = new ArrayList<String>(Arrays.asList(DEFAULT_DATE_PATTERNS));
+        this.unresolvedArgs = new ArrayList<>();
+        this.values = new HashMap<>();
+        this.datePatterns = new ArrayList<>(Arrays.asList(DEFAULT_DATE_PATTERNS));
         this.extendedDateFormatAllowed = false;
     }
 
@@ -195,6 +195,64 @@ public class CommandLine implements Serializable {
         if (result != null) {
             try {
                 return Double.parseDouble(result);
+            } catch (NumberFormatException e) {
+                throw new CLParserException(e.getMessage(), e);
+            }
+        } else
+            return defaultValue;
+    }
+
+    /**
+     * Возвращает значение опции в виде массива целых чисел которые были введены пользователем с использованием запятой в качестве разделителя.
+     *
+     * @param optionName   краткое либо полное название опции чье значение в командной строке требуется возвратить.
+     * @param defaultValue значение по умолчанию, возвращается данным методом если указанная опция отсутствовала в разобранной командной строке.
+     * @return значение указанной опции в командной строке либо значение по умолчанию если указанная опция в командной строке не присутствовала.
+     * @throws UnknownOptionException поднимается в случае когда указанная в аргументе опция не была предварительно задекларирована в списке допустимых,
+     *                                т.е. данная опция отсутствовала в списке опций, переданных парсеру командной строки.
+     * @throws CLParserException      поднимается в случае ошибок конвертации строки со значением опции в массив чисел.
+     */
+    public int[] getOptionIntArrayValue(final String optionName, final int[] defaultValue) throws CLParserException {
+        final Option opt = options.getOption(optionName);
+        if (opt == null)
+            throw new UnknownOptionException(optionName);
+        final String[] tokens = StringUtil.splitIgnoringEmpty(values.get(opt), ',');
+        if (tokens != null && tokens.length > 0) {
+            try {
+                final int[] result = new int[tokens.length];
+                for (int i = 0; i < tokens.length; i++) {
+                    result[i] = Integer.parseInt(tokens[i]);
+                }
+                return result;
+            } catch (NumberFormatException e) {
+                throw new CLParserException(e.getMessage(), e);
+            }
+        } else
+            return defaultValue;
+    }
+
+    /**
+     * Возвращает значение опции в виде массива длинных целых чисел которые были введены пользователем с использованием запятой в качестве разделителя.
+     *
+     * @param optionName   краткое либо полное название опции чье значение в командной строке требуется возвратить.
+     * @param defaultValue значение по умолчанию, возвращается данным методом если указанная опция отсутствовала в разобранной командной строке.
+     * @return значение указанной опции в командной строке либо значение по умолчанию если указанная опция в командной строке не присутствовала.
+     * @throws UnknownOptionException поднимается в случае когда указанная в аргументе опция не была предварительно задекларирована в списке допустимых,
+     *                                т.е. данная опция отсутствовала в списке опций, переданных парсеру командной строки.
+     * @throws CLParserException      поднимается в случае ошибок конвертации строки со значением опции в массив чисел.
+     */
+    public long[] getOptionLongArrayValue(final String optionName, final long[] defaultValue) throws CLParserException {
+        final Option opt = options.getOption(optionName);
+        if (opt == null)
+            throw new UnknownOptionException(optionName);
+        final String[] tokens = StringUtil.splitIgnoringEmpty(values.get(opt), ',');
+        if (tokens != null && tokens.length > 0) {
+            try {
+                final long[] result = new long[tokens.length];
+                for (int i = 0; i < tokens.length; i++) {
+                    result[i] = Long.parseLong(tokens[i]);
+                }
+                return result;
             } catch (NumberFormatException e) {
                 throw new CLParserException(e.getMessage(), e);
             }
