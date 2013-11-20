@@ -24,7 +24,7 @@ import org.echosoft.common.types.TypeRegistry;
  */
 public class BeanUtil {
 
-    private static final ConcurrentHashMap<Class<?>, BeanMetadata> cache = new ConcurrentHashMap<Class<?>, BeanMetadata>();
+    private static final ConcurrentHashMap<Class<?>, BeanMetadata> cache = new ConcurrentHashMap<>();
     private static final TypeRegistry registry = new TypeRegistry();
 
     /**
@@ -248,8 +248,8 @@ public class BeanUtil {
         private final boolean inheritsMapInterface;
 
         private BeanMetadata(final Class<?> cls) {
-            this.getters = new HashMap<String, Getter>();
-            this.setters = new HashMap<String, Setter>();
+            this.getters = new HashMap<>();
+            this.setters = new HashMap<>();
             this.clsName = cls.getName();
             this.inheritsMapInterface = Map.class.isAssignableFrom(cls);
             init(cls);
@@ -289,7 +289,7 @@ public class BeanUtil {
                     } else {
                         ArrayList<Method> list = overloadedGetters.get(name);
                         if (list == null) {
-                            list = new ArrayList<Method>();
+                            list = new ArrayList<>();
                             overloadedGetters.put(name, list);
                         }
                         list.add(method);

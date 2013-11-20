@@ -69,9 +69,7 @@ public class ObjectUtil {
             final ByteArrayInputStream bis = new ByteArrayInputStream(bytes);
             final ObjectInputStream ois = new ObjectInputStream(bis);
             return ois.readObject();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        } catch (ClassNotFoundException e) {
+        } catch (IOException | ClassNotFoundException e) {
             throw new RuntimeException(e);
         }
     }
@@ -99,11 +97,8 @@ public class ObjectUtil {
      */
     public static byte[] zipBytes(final byte[] data) throws IOException {
         final ByteArrayOutputStream bos = new ByteArrayOutputStream(128);
-        final DeflaterOutputStream zos = new GZIPOutputStream(bos);
-        try {
+        try (DeflaterOutputStream zos = new GZIPOutputStream(bos)) {
             zos.write(data);
-        } finally {
-            zos.close();
         }
         return bos.toByteArray();
     }
@@ -116,16 +111,13 @@ public class ObjectUtil {
      * @throws IOException в случае возникновения каких-либо ошибок ввода-вывода.
      */
     public static byte[] unzipBytes(final byte[] data) throws IOException {
-        final InflaterInputStream in = new GZIPInputStream(new ByteArrayInputStream(data));
-        try {
+        try (InflaterInputStream in = new GZIPInputStream(new ByteArrayInputStream(data))) {
             final ByteArrayOutputStream out = new ByteArrayOutputStream(READ_STREAM_BUFFER_SIZE);
             final byte[] buf = new byte[READ_STREAM_BUFFER_SIZE];
             for (int size = in.read(buf); size > 0; size = in.read(buf)) {
                 out.write(buf, 0, size);
             }
             return out.toByteArray();
-        } finally {
-            in.close();
         }
     }
 
@@ -238,10 +230,10 @@ public class ObjectUtil {
             return ((Map) obj).entrySet().iterator();
         } else
         if (obj instanceof Enumeration) {
-            return new EnumerationIterator<Object>((Enumeration<Object>) obj);
+            return new EnumerationIterator<>((Enumeration<Object>) obj);
         } else
         if (obj instanceof Object[]) {
-            return new ObjectArrayIterator<Object>((Object[]) obj);
+            return new ObjectArrayIterator<>((Object[]) obj);
         } else
         if ((obj instanceof boolean[]) || (obj instanceof byte[]) ||
                 (obj instanceof char[]) || (obj instanceof short[]) ||
@@ -250,14 +242,14 @@ public class ObjectUtil {
             return new ArrayIterator(obj);
         } else
         if (obj instanceof String) {
-            return new EnumerationIterator<Object>(new StringTokenizer((String) obj, ","));
+            return new EnumerationIterator<>(new StringTokenizer((String) obj, ","));
         } else
             return Collections.singleton(obj).iterator();
     }
 
 
     @SuppressWarnings("unchecked")
-    public static <T, E extends T> E makeInstance(Class<E> clazz, Class<T> ancestorClass) throws ClassNotFoundException, InstantiationException, NoSuchMethodException, InvocationTargetException, IllegalAccessException {
+    public static <T, E extends T> E makeInstance(final Class<E> clazz, final Class<T> ancestorClass) throws ClassNotFoundException, InstantiationException, NoSuchMethodException, InvocationTargetException, IllegalAccessException {
         if (ancestorClass != null) {
             if (!ancestorClass.isAssignableFrom(clazz))
                 throw new IllegalArgumentException(ancestorClass.getName() + " is not assignable from " + clazz.getName());

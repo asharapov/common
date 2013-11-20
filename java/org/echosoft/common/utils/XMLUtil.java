@@ -71,11 +71,8 @@ public class XMLUtil {
      */
     public static Document loadDocument(final File file) throws IOException, ParserConfigurationException, SAXException {
         final DocumentBuilder builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
-        final FileInputStream in = new FileInputStream(file);
-        try {
+        try (FileInputStream in = new FileInputStream(file)) {
             return builder.parse(new InputSource(in));
-        } finally {
-            in.close();
         }
     }
 
@@ -93,11 +90,8 @@ public class XMLUtil {
             final String fileName = StringUtil.trim(url.getHost()) != null ? StringUtil.trim(url.getHost()) : url.getFile();
             return loadDocument(new File(fileName));
         } else {
-            final InputStream in = url.openStream();
-            try {
+            try (InputStream in = url.openStream()) {
                 return loadDocument(in);
-            } finally {
-                in.close();
             }
         }
     }
@@ -427,11 +421,8 @@ public class XMLUtil {
     public static void serialize(final Node node, final File outputFile) throws TransformerException, IOException {
         final Transformer serializer = TransformerFactory.newInstance().newTransformer();
         serializer.setOutputProperties(SER_PROPS);
-        final FileOutputStream out = new FileOutputStream(outputFile);
-        try {
+        try (FileOutputStream out = new FileOutputStream(outputFile)) {
             serializer.transform(new DOMSource(node), new StreamResult(out));
-        } finally {
-            out.close();
         }
     }
 
