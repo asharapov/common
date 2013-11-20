@@ -1268,6 +1268,129 @@ public class StringUtil {
         buf.append(Integer.toString(p));
     }
 
+    /**
+     * Преобразует переданную в аргументе дату в строку формата <code>yyyy-MM-dd HH:mm:ss</code>.
+     * Если исходная дата равна <code>null</code> то метод возвращает пустую строку.
+     *
+     * @param date дата которую требуется преобразовать в строку.
+     * @return результат форматирования даты или пустая строка если исходная дата равна <code>null</code>.
+     */
+    public static String formatISODateTime2(final Date date) {
+        if (date == null)
+            return "";
+        final Calendar cal = getCalendarInstanceForThread();
+        cal.setTime(date);
+        final StringBuilder buf = new StringBuilder(19);
+        buf.append(Integer.toString(cal.get(Calendar.YEAR)));
+        buf.append('-');
+        int p = cal.get(Calendar.MONTH) + 1;
+        if (p < 10)
+            buf.append('0');
+        buf.append(Integer.toString(p));
+        buf.append('-');
+        p = cal.get(Calendar.DAY_OF_MONTH);
+        if (p < 10)
+            buf.append('0');
+        buf.append(Integer.toString(p));
+        buf.append(' ');
+        p = cal.get(Calendar.HOUR_OF_DAY);
+        if (p < 10)
+            buf.append('0');
+        buf.append(Integer.toString(p));
+        buf.append(':');
+        p = cal.get(Calendar.MINUTE);
+        if (p < 10)
+            buf.append('0');
+        buf.append(Integer.toString(p));
+        buf.append(':');
+        p = cal.get(Calendar.SECOND);
+        if (p < 10)
+            buf.append('0');
+        buf.append(Integer.toString(p));
+        return buf.toString();
+    }
+
+    /**
+     * Преобразует переданную в аргументе дату в строку формата <code>yyyy-MM-dd HH:mm:ss</code>.
+     * Если исходная дата равна <code>null</code> то метод не делает ничего.
+     *
+     * @param buf  буффер, реализующий интерфейс {@link Appendable} в котором будет аккумулироваться результат.
+     * @param date дата которую требуется преобразовать в строку.
+     * @throws IOException в случае каких-либо проблем с сохранением данных в буфере.
+     */
+    public static void formatISODateTime2(final Appendable buf, final Date date) throws IOException {
+        if (date == null)
+            return;
+        final Calendar cal = getCalendarInstanceForThread();
+        cal.setTime(date);
+        buf.append(Integer.toString(cal.get(Calendar.YEAR)));
+        buf.append('-');
+        int p = cal.get(Calendar.MONTH) + 1;
+        if (p < 10)
+            buf.append('0');
+        buf.append(Integer.toString(p));
+        buf.append('-');
+        p = cal.get(Calendar.DAY_OF_MONTH);
+        if (p < 10)
+            buf.append('0');
+        buf.append(Integer.toString(p));
+        buf.append(' ');
+        p = cal.get(Calendar.HOUR_OF_DAY);
+        if (p < 10)
+            buf.append('0');
+        buf.append(Integer.toString(p));
+        buf.append(':');
+        p = cal.get(Calendar.MINUTE);
+        if (p < 10)
+            buf.append('0');
+        buf.append(Integer.toString(p));
+        buf.append(':');
+        p = cal.get(Calendar.SECOND);
+        if (p < 10)
+            buf.append('0');
+        buf.append(Integer.toString(p));
+    }
+
+    /**
+     * Преобразует переданную в аргументе дату в строку формата <code>yyyy-MM-dd HH:mm:ss</code>.
+     * Если исходная дата равна <code>null</code> то метод не делает ничего.
+     *
+     * @param buf  буффер, реализующий интерфейс {@link Appendable} в котором будет аккумулироваться результат.
+     * @param date дата которую требуется преобразовать в строку.
+     */
+    public static void formatISODateTime2(final StringBuilder buf, final Date date) {
+        if (date == null)
+            return;
+        final Calendar cal = getCalendarInstanceForThread();
+        cal.setTime(date);
+        buf.append(Integer.toString(cal.get(Calendar.YEAR)));
+        buf.append('-');
+        int p = cal.get(Calendar.MONTH) + 1;
+        if (p < 10)
+            buf.append('0');
+        buf.append(Integer.toString(p));
+        buf.append('-');
+        p = cal.get(Calendar.DAY_OF_MONTH);
+        if (p < 10)
+            buf.append('0');
+        buf.append(Integer.toString(p));
+        buf.append(' ');
+        p = cal.get(Calendar.HOUR_OF_DAY);
+        if (p < 10)
+            buf.append('0');
+        buf.append(Integer.toString(p));
+        buf.append(':');
+        p = cal.get(Calendar.MINUTE);
+        if (p < 10)
+            buf.append('0');
+        buf.append(Integer.toString(p));
+        buf.append(':');
+        p = cal.get(Calendar.SECOND);
+        if (p < 10)
+            buf.append('0');
+        buf.append(Integer.toString(p));
+    }
+
 
     /**
      * Осуществляет разбор даты из строки даты в формате <code>dd.MM.yyyy</code>. Если исходная строка равна null или имеет нулевую длину то метод вернет <code>null</code>.
