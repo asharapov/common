@@ -20,12 +20,13 @@ public class VersionJsonSerializer implements JsonSerializer<Version> {
         final Writer out = jw.getOutputWriter();
         out.write("{major:");
         out.write( Integer.toString(src.getMajor(),10) );
-        if (src.getMinor()>0 || src.getRevision()>0) {
+        if (src.getMinor()>0 || src.getRevision() != null) {
             out.write(",minor:");
             out.write( Integer.toString(src.getMinor(),10) );
-            if (src.getRevision()>0) {
-                out.write(",rev:");
-                out.write( Integer.toString(src.getRevision(),10) );
+            if (src.getRevision() != null) {
+                out.write(",revision:\"");
+                out.write( src.getRevision() );
+                out.write("\"");
             }
         }
         if (src.getExtraVersion()!=null) {

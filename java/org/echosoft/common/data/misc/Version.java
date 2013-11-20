@@ -1,97 +1,92 @@
 package org.echosoft.common.data.misc;
 
 import java.io.Serializable;
-import java.text.ParseException;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.echosoft.common.data.misc.spi.VersionJsonSerializer;
 import org.echosoft.common.json.annotate.JsonUseSeriazer;
+import org.echosoft.common.utils.Any;
+import org.echosoft.common.utils.StringUtil;
 
 /**
- * Описывает версию чего бы то ни было.
+ * Версия программных компонентов.
  *
  * @author Anton Sharapov
  */
 @JsonUseSeriazer(value = VersionJsonSerializer.class, recursive = true)
 public class Version implements Serializable, Comparable<Version> {
 
+    private static final Pattern pattern1 = Pattern.compile("^(\\d+?)(?:\\.(\\d+)*)?(?:\\.([0-9A-Fa-f]*))?(?:[\\.-](.*))?$");
+    private static final Pattern pattern2 = Pattern.compile("^([0-9A-Fa-f]+)?(?:[\\.-](.*))?$");
+    private static final Pattern pattern3 = Pattern.compile("^([0-9A-Fa-f]*)$");
+
     /**
      * Выполняет разбор номера версии из строки.
      *
      * @param version строка с номером версии.
      * @return разобранный экземпляр {@link Version} или <code>null</code> если переданная в аргументе строка была пустой
-     * @throws ParseException в случае некорректной строки переданной в аргументе.
      */
-    public static Version parseVersion(String version) throws ParseException {
+    public static Version parseVersion(String version) {
+        version = StringUtil.trim(version);
         if (version == null)
             return null;
-        version = version.trim();
-        final int length = version.length();
-        if (length == 0)
-            return null;
 
-        final int parts[] = {0, 0, 0};
-        String extra;
-        int p = 0, s = 0, e = 0;
-        while (p < parts.length) {
-            char c = 0;
-            while (e < length && Character.isDigit(c = version.charAt(e))) e++;
-            if (e > s) {
-                parts[p++] = Integer.parseInt(version.substring(s, e));
-                s = e;
-                if (c == '.' && p < parts.length && s + 1 < length && Character.isDigit(version.charAt(s + 1))) {
-                    s = ++e;
-                } else {
-                    break;
-                }
-            } else {
-                break;
-            }
+        Matcher m = pattern1.matcher(version);
+        if (m.find()) {
+            final String maj = m.group(1);
+            final String min = m.group(2);
+            final String rev = m.group(3);
+            final String ext = m.group(4);
+            return new Version(Any.asInt(maj,0), Any.asInt(min,0), rev, ext);
         }
-        if (p > 0) {
-            extra = version.substring(s, length).trim();
-        } else
-            throw new ParseException("Invalid version " + version, s);
-        return new Version(parts[0], parts[1], parts[2], extra);
+        m = pattern2.matcher(version);
+        if (m.find()) {
+            final String rev = m.group(1);
+            final String ext = m.group(2);
+            return new Version(0, 0, rev, ext);
+        }
+        return null;
     }
 
     private final int major;
     private final int minor;
-    private final int revision;
+    private final String revision;
     private final String extraVersion;
 
     public Version(final int major) {
-        this(major, 0, 0, null);
-    }
-
-    public Version(final int major, final String extraVersion) {
-        this(major, 0, 0, extraVersion);
+        this(major, 0, null, null);
     }
 
     public Version(final int major, final int minor) {
-        this(major, minor, 0, null);
-    }
-
-    public Version(final int major, final int minor, final String extraVersion) {
-        this(major, minor, 0, extraVersion);
+        this(major, minor, null, null);
     }
 
     public Version(final int major, final int minor, final int revision) {
+        this(major, minor, Integer.toString(revision), null);
+    }
+
+    public Version(final int major, final int minor, final String revision) {
         this(major, minor, revision, null);
     }
 
-    public Version(final int major, final int minor, final int revision, final String extraVersion) {
-        if (major < 0 || minor < 0 || revision < 0)
+    public Version(final int major, final int minor, String revision, String extraVersion) {
+        if (major < 0 || minor < 0)
             throw new IllegalArgumentException("Negative arguments not allowed");
+        if (revision != null) {
+            revision = revision.trim();
+            if (!pattern3.matcher(revision).find())
+                throw new IllegalArgumentException("Illegal revision: " + revision);
+        }
+        if (extraVersion != null) {
+            extraVersion = extraVersion.trim();
+            if (extraVersion.length() > 0 && (extraVersion.charAt(0) == '-' || extraVersion.charAt(0) == '.'))
+                extraVersion = extraVersion.substring(1).trim();
+        }
         this.major = major;
         this.minor = minor;
-        this.revision = revision;
-
-        if (extraVersion != null) {
-            final String ev = extraVersion.trim();
-            this.extraVersion = ev.length() > 0 ? ev : null;
-        } else {
-            this.extraVersion = null;
-        }
+        this.revision = revision != null && revision.length() > 0 && !"0".equals(revision) ? revision : null;
+        this.extraVersion = extraVersion != null && extraVersion.length() > 0 ? extraVersion : null;
     }
 
 
@@ -103,7 +98,7 @@ public class Version implements Serializable, Comparable<Version> {
         return minor;
     }
 
-    public int getRevision() {
+    public String getRevision() {
         return revision;
     }
 
@@ -119,14 +114,11 @@ public class Version implements Serializable, Comparable<Version> {
             return major > other.major ? 1 : -1;
         if (minor != other.minor)
             return minor > other.minor ? 1 : -1;
-        if (revision != other.revision)
-            return revision > other.revision ? 1 : -1;
 
-        if (extraVersion != null) {
-            return other.extraVersion != null ? extraVersion.compareTo(other.extraVersion) : -1;
-        } else {
-            return other.extraVersion != null ? -1 : 0;
-        }
+        int r = StringUtil.compareNullableStrings(revision, other.revision);
+        if (r != 0)
+            return r;
+        return StringUtil.compareNullableStrings(extraVersion, other.extraVersion);
     }
 
     @Override
@@ -139,20 +131,23 @@ public class Version implements Serializable, Comparable<Version> {
         if (obj == null || !getClass().equals(obj.getClass()))
             return false;
         final Version other = (Version) obj;
-        return major == other.major && minor == other.minor && revision == other.revision &&
+        return major == other.major && minor == other.minor &&
+                (revision != null ? revision.equals(other.revision) : other.revision == null) &&
                 (extraVersion != null ? extraVersion.equals(other.extraVersion) : other.extraVersion == null);
     }
 
     @Override
     public String toString() {
         final StringBuilder buf = new StringBuilder(16);
-        buf.append(major);
-        buf.append('.');
-        buf.append(minor);
-        buf.append('.');
-        buf.append(revision);
-        if (extraVersion != null)
+        buf.append(major).append('.').append(minor);
+        if (revision != null) {
+            buf.append('.').append(revision);
+        }
+        if (extraVersion != null) {
+            if (extraVersion.charAt(0) != '-')
+                buf.append('-');
             buf.append(extraVersion);
+        }
         return buf.toString();
     }
 }
