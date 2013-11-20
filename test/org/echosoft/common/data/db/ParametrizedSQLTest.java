@@ -2,7 +2,9 @@ package org.echosoft.common.data.db;
 
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -30,12 +32,16 @@ public class ParametrizedSQLTest {
                         "SELECT 2 & 3 as x, 1:2 as y, 't &p1 ' y, \"&p2\" x&p 3&p (&) +&",
                         "SELECT 2 & 3 as x, 1:2 as y, 't &p1 ' y, \"&p2\" x&p 3&p (&) +&"),
                 new TestCase(
-                        "SELECT /* &param */ FROM dual -- WHERE f1>&p\nAND f2<&p2",
+                        "SELECT /* &param */ FROM dual -- WHERE f1>&p\nAND f2<&param2",
                         "SELECT /* &param */ FROM dual -- WHERE f1>&p\nAND f2<?",
                         "p2"),
         };
+        final Map<String,Object> p = new HashMap<>();
+        p.put("param1", 1);
+        p.put("param2", "P2");
         for (TestCase test : tests) {
             final ParameterizedSQL psql = new ParameterizedSQL(test.namedSQL);
+            String s = psql.compileNonParameterizedQuery(p);
             Assert.assertEquals(test.namedSQL + "  ", test.unnamedSQL, psql.getQuery());
             Assert.assertEquals(test.namedSQL + "  ", test.params, psql.getParamNames());
         }

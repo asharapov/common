@@ -4,8 +4,11 @@ import java.io.Serializable;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
+
+import org.echosoft.common.utils.StringUtil;
 
 /**
  * Преобразует SQL выражения вида
@@ -30,7 +33,7 @@ public class ParameterizedSQL implements Serializable {
      * @param namedSql текст SQL запроса в котором возможно есть именованные параметры. Параметр не может быть <code>null</code>.
      */
     public ParameterizedSQL(final String namedSql) {
-        this.paramNames = new ArrayList<String>();
+        this.paramNames = new ArrayList<>();
         this.sql = transform(namedSql, paramNames);
     }
 
@@ -64,6 +67,40 @@ public class ParameterizedSQL implements Serializable {
                 throw new SQLException("Parameter '" + paramName + "' not specified in the arguments");
             pstmt.setObject(num++, value);
         }
+    }
+
+    /**
+     * Формирует текст запрос с включенными в него значениями параметров.
+     * Используется исключительно в целях отладки.
+     *
+     * @param params значения параметров запроса.
+     * @return текст запроса с параметрами подставленными в нужных местах.
+     */
+    public String compileNonParameterizedQuery(final Map<String, Object> params) throws SQLException {
+        final StringBuilder buf = new StringBuilder(sql.length() + 64);
+        buf.append('\n');
+        int idx = 0, lastPos = -1;
+        int pos;
+        while ((pos = sql.indexOf('?', lastPos + 1)) >= 0) {
+            buf.append(sql.substring(lastPos + 1, pos));
+            if (idx < paramNames.size()) {
+                final String paramName = paramNames.get(idx++);
+                Object param = params.get(paramName);
+                if (param instanceof CharSequence) {
+                    buf.append('\'').append(param).append('\'');
+                } else if (param instanceof Date) {
+                    buf.append("TO_DATE('");
+                    StringUtil.formatISODateTime2(buf, (Date) param);
+                    buf.append("', 'YYYY-MM-DD HH24:MI:SS')");
+                } else
+                    buf.append(param);
+            } else {
+                buf.append('?');
+            }
+            lastPos = pos;
+        }
+        buf.append(sql.substring(lastPos + 1));
+        return buf.toString();
     }
 
 
