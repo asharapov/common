@@ -10,7 +10,7 @@ import java.util.NoSuchElementException;
  *
  * @author Anton Sharapov
  */
-public class ArrayIterator implements ReadAheadIterator {
+public class ArrayIterator<T> implements ReadAheadIterator<T> {
 
     private final Object array;
     private final int length;
@@ -30,16 +30,64 @@ public class ArrayIterator implements ReadAheadIterator {
         this.index = 0;
     }
 
+    public ArrayIterator(final T[] array) {
+        this.array = array;
+        this.length = array.length;
+        this.index = 0;
+    }
+
+    public ArrayIterator(final char[] array) {
+        this.array = array;
+        this.length = array.length;
+        this.index = 0;
+    }
+
+    public ArrayIterator(final byte[] array) {
+        this.array = array;
+        this.length = array.length;
+        this.index = 0;
+    }
+
+    public ArrayIterator(final short[] array) {
+        this.array = array;
+        this.length = array.length;
+        this.index = 0;
+    }
+
+    public ArrayIterator(final int[] array) {
+        this.array = array;
+        this.length = array.length;
+        this.index = 0;
+    }
+
+    public ArrayIterator(final long[] array) {
+        this.array = array;
+        this.length = array.length;
+        this.index = 0;
+    }
+
+    public ArrayIterator(final float[] array) {
+        this.array = array;
+        this.length = array.length;
+        this.index = 0;
+    }
+
+    public ArrayIterator(final double[] array) {
+        this.array = array;
+        this.length = array.length;
+        this.index = 0;
+    }
+
     @Override
     public boolean hasNext() {
         return index < length;
     }
 
     @Override
-    public Object next() {
+    public T next() {
         if (index >= length)
             throw new NoSuchElementException();
-        return Array.get(array, index++);
+        return (T)Array.get(array, index++);
     }
 
     /**
@@ -53,9 +101,9 @@ public class ArrayIterator implements ReadAheadIterator {
     }
 
     @Override
-    public Object readAhead() {
+    public T readAhead() {
         if (index >= length)
             throw new NoSuchElementException();
-        return Array.get(array, index);
+        return (T)Array.get(array, index);
     }
 }
