@@ -12,11 +12,11 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
-import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.Set;
-
-import org.echosoft.common.io.FastStringTokenizer;
+import java.util.StringTokenizer;
 
 /**
  * Содержит часто используемые методы для работы со строками.
@@ -27,6 +27,9 @@ import org.echosoft.common.io.FastStringTokenizer;
 public class StringUtil {
 
     public static final String EMPTY_STRING_ARRAY[] = new String[0];
+    private static final char[] HEXDIGITS = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F'};
+    private static final char[] GEN_PWD_CHARS1 = {'a', 'e', 'i', 'o', 'u', 'y'};
+    private static final char[] GEN_PWD_CHARS2 = {'b', 'c', 'd', 'f', 'g', 'h', 'j', 'k', 'l', 'm', 'n', 'p', 'q', 'r', 's', 't', 'x', 'z', '1', '2', '3', '4', '5', '6', '7', '8', '9'};
     private static final char[][] REPLACEMENT_XML_TEXTS;
     private static final char[][] REPLACEMENT_XML_ATTRS;
     static {
@@ -215,22 +218,31 @@ public class StringUtil {
     }
 
     /**
-     * Вырезает из строки все управляющие символы с ASCII кодами в диапазоне 0..31 включительно.
+     * Удаляет избыточные повторяющиеся пробелы в тексте а также заменяет все символы с кодом меньшим 0x20 на символ 0x20 (пробел).
      *
-     * @param text строка из которой должны быть вырезаны управляющие символы.
-     * @return полученная в результате строка.
+     * @param text исходный текст
+     * @return текст без лишних пробелов и прочих спец. символов.
      */
-    public static String skipControlChars(final CharSequence text) {
-        if (text == null)
+    public static String skipRedundantSpaces(final String text) {
+        final int len0;
+        if (text == null || (len0 = text.length()) == 0)
             return null;
-        final int len = text.length();
-        final StringBuilder buf = new StringBuilder(len);
-        for (int i = 0; i < len; i++) {
-            final char c = text.charAt(i);
-            if (c >= 32)
-                buf.append(c);
+        final StringBuilder buf = new StringBuilder(len0);
+        char cc = ' ';
+        for (int i = 0; i < len0; i++) {
+            char c = text.charAt(i);
+            if (c <= ' ') {
+                if (cc == ' ')
+                    continue;
+                c = ' ';
+            }
+            buf.append(c);
+            cc = c;
         }
-        return buf.toString();
+        final int len1 = buf.length();
+        if (len1 == 0)
+            return null;
+        return cc != ' ' ? buf.toString() : buf.substring(0, len1 - 1);
     }
 
     /**
@@ -344,7 +356,7 @@ public class StringUtil {
             return null;
         if (text.length() == 0)
             return EMPTY_STRING_ARRAY;
-        final ArrayList<String> parts = new ArrayList<String>(5);
+        final ArrayList<String> parts = new ArrayList<>(5);
         final StringBuilder buf = new StringBuilder(32);
         boolean masked = false;
         for (int i = 0, len = text.length(); i < len; i++) {
@@ -392,7 +404,7 @@ public class StringUtil {
     public static String[] split(final String text, final char separator) {
         if (text == null)
             return null;
-        final ArrayList<String> buf = new ArrayList<String>();
+        final ArrayList<String> buf = new ArrayList<>();
         final int length = text.length();
         int pos = 0;
         for (int i = 0; i < length; i++) {
@@ -407,7 +419,51 @@ public class StringUtil {
     }
 
     /**
-     * Разбивает исходную строку на несколько подстрок трактуя указанный символ как разделитель.
+     * Разбивает исходную строку на несколько непустых подстрок допуская в качестве разделителей:
+     * <ul>
+     *   <li>любые символы с ascii кодом меньшим или равным 0x20 (включая пробелы, табуляции и переводы строк)</li>
+     *   <li>запятые (<code>,</code>)</li>
+     *   <li>точки с запятой (<code>;</code>)</li>
+     * </ul>
+     * Примеры
+     * <ol>
+     * <li> исходная строка <code>a b c</code> будет разбита на три подстроки: {"a", "b", "c"}.
+     * <li> исходная строка <code>a b ;; c,d</code> будет разбита на четыре подстроки: {"a", "b", "c", "d"}.
+     * <li> исходная строка <code>a_b_</code> будет разбита на две подстроки: {"a", "b"}.
+     * <li> исходная строка <code>a</code> будет оставлена как есть: {"a"}.
+     * <li> если исходная строка равна пустой строке или состоит только из символов-разделителей метод вернет пустой список.
+     * <li> если исходная строка равна <code>null</code> - метод вернет <code>null</code>
+     * </ol>
+     *
+     * @param text      исходная строка.
+     * @return массив строк полученных в результате разделения исходной строки на подстроки используя указанный символ-разделитель.
+     *         Метод возвращает <code>null</code> если исходная строка равна <code>null</code>.
+     */
+    public static List<String> splitIgnoringEmpty(final String text) {
+        if (text == null)
+            return null;
+        final int len0 = text.length();
+        final ArrayList<String> result = new ArrayList<>();
+        int start = -1;
+        for (int i = 0; i < len0; i++) {
+            char c = text.charAt(i);
+            if (c <= ' ' || c == ',' || c == ';') {
+                if (start >= 0) {
+                    result.add(text.substring(start, i));
+                    start = -1;
+                }
+            } else {
+                if (start < 0)
+                    start = i;
+            }
+        }
+        if (start >= 0)
+            result.add(text.substring(start));
+        return result;
+    }
+
+    /**
+     * Разбивает исходную строку на несколько непустых подстрок трактуя указанный символ как разделитель.
      * В полученных после разбиения подстроках удаляются концевые пробелы и если полученная подстрока будет не пустой то она будет включена в результат данной функции.
      * Примеры использования метода когда в качестве подстроки используется символ '_' :
      * <ol>
@@ -428,23 +484,23 @@ public class StringUtil {
     public static String[] splitIgnoringEmpty(final String text, final char separator) {
         if (text == null)
             return null;
-        final ArrayList<String> buf = new ArrayList<String>();
+        final ArrayList<String> result = new ArrayList<>();
         final int length = text.length();
         int pos = 0;
         for (int i = 0; i < length; i++) {
             if (text.charAt(i) == separator) {
                 final String token = text.substring(pos, i).trim();
                 if (!token.isEmpty())
-                    buf.add(token);
+                    result.add(token);
                 pos = i + 1;
             }
         }
         if (pos < length) {
             final String token = text.substring(pos, length).trim();
             if (!token.isEmpty())
-                buf.add(token);
+                result.add(token);
         }
-        return buf.toArray(new String[buf.size()]);
+        return result.toArray(new String[result.size()]);
     }
 
     /**
@@ -694,22 +750,18 @@ public class StringUtil {
     public static String normalizePath(final String context, final String path) {
         if (path == null)
             return context;
-        final ArrayList<String> tokens = new ArrayList<String>(10);
-        boolean first = true, addContext = true;
-        for (Iterator<String> it = new FastStringTokenizer(path.trim(), '/'); it.hasNext(); ) {
-            final String token = it.next();
-            if (token.length() == 0) {
-                if (first)
-                    addContext = false;
-            } else
+        final ArrayList<String> tokens = new ArrayList<>(10);
+        final boolean addContext = !path.startsWith("/");
+        for (StringTokenizer tokenizer = new StringTokenizer(path.trim(), "/", false); tokenizer.hasMoreTokens(); ) {
+            final String token = tokenizer.nextToken();
             if (".".equals(token)) {
+                // skip token ...
             } else
             if ("..".equals(token)) {
                 tokens.remove(tokens.size() - 1);
             } else {
                 tokens.add(token);
             }
-            first = false;
         }
         final StringBuilder buf = new StringBuilder(32);
         if (addContext) {
@@ -1622,8 +1674,43 @@ public class StringUtil {
         return true;
     }
 
+    /**
+     * Форматирует указанный в аргументе массив байт в виде строки с 16-ричным представлением содержимого этого массива байт.
+     *
+     * @param data массив байт.
+     * @return строка с шестнадцатиричным представлением содержимого исходного массива.
+     */
+    public static String formatBytes(final byte[] data) {
+        if (data == null || data.length == 0)
+            return null;
+        final char[] chars = new char[data.length * 2];
+        for (int i = 0, p = 0; i < data.length; i++) {
+            final byte b = data[i];
+            chars[p++] = HEXDIGITS[(0xF0 & b) >>> 4];
+            chars[p++] = HEXDIGITS[0x0F & b];
+        }
+        return new String(chars);
+    }
+
+    /**
+     * Простейший генериратор паролей состоящих из цифр и прописных латинских букв.
+     *
+     * @param length требуемая длина пароля.
+     * @return новый пароль.
+     */
+    public static String generatePassword(final int length) {
+        final Random r = new Random();
+        final char[] result = new char[length];
+        for (int i = 0; i < length; i++) {
+            final char[] chars = r.nextInt(3) == 0 ? GEN_PWD_CHARS1 : GEN_PWD_CHARS2;
+            final int p = r.nextInt(chars.length);
+            result[i] = chars[p];
+        }
+        return new String(result);
+    }
+
     public static Set<String> asUnmodifiableSet(final String... items) {
-        final Set<String> set = new HashSet<String>(items.length);
+        final Set<String> set = new HashSet<>(items.length);
         set.addAll(Arrays.asList(items));
         return Collections.unmodifiableSet(set);
     }
@@ -1631,10 +1718,10 @@ public class StringUtil {
     public static Set<String> asUnmodifiableSet(final Collection<String> items1, final String... items2) {
         final Set<String> set;
         if (items1 != null) {
-            set = new HashSet<String>(items1.size() + items2.length);
+            set = new HashSet<>(items1.size() + items2.length);
             set.addAll(items1);
         } else {
-            set = new HashSet<String>(items2.length);
+            set = new HashSet<>(items2.length);
         }
         set.addAll(Arrays.asList(items2));
         return Collections.unmodifiableSet(set);
@@ -1669,5 +1756,5 @@ public class StringUtil {
         }
         return result;
     }
-    private static final ThreadLocal<Calendar> _ctl = new ThreadLocal<Calendar>();
+    private static final ThreadLocal<Calendar> _ctl = new ThreadLocal<>();
 }

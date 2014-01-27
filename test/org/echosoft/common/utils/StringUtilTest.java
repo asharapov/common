@@ -1,10 +1,13 @@
 package org.echosoft.common.utils;
 
 import java.io.StringWriter;
+import java.nio.charset.Charset;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.echosoft.common.io.FastStringWriter;
@@ -51,6 +54,57 @@ public class StringUtilTest {
         Assert.assertEquals(3, StringUtil.indexOf(text, 0, 'd', 'h'));
         Assert.assertEquals(-1, StringUtil.indexOf(text, 0));
         Assert.assertEquals(-1, StringUtil.indexOf(text, 0));
+    }
+
+    @Test
+    public void testSkipRedundantSpaces() throws Exception {
+        final String[][] tests = {
+                {null, null},
+                {"", null},
+                {" ", null},
+                {"  ", null},
+                {"   ", null},
+                {"a", "a"},
+                {"asd", "asd"},
+                {" asd", "asd"},
+                {"  asd", "asd"},
+                {" asd ", "asd"},
+                {"  asd  ", "asd"},
+                {" asd  ", "asd"},
+                {" asd  fgh", "asd fgh"},
+                {" asd \t fgh", "asd fgh"}
+        };
+        for (String[] test : tests) {
+            Assert.assertEquals(test[1], StringUtil.skipRedundantSpaces(test[0]));
+        }
+    }
+
+    @Test
+    public void testSplitIgnoringEmpty1() throws Exception {
+        final Object[][] tests = {
+                {null, null},
+                {"", StringUtil.EMPTY_STRING_ARRAY},
+                {" ", StringUtil.EMPTY_STRING_ARRAY},
+                {"  ", StringUtil.EMPTY_STRING_ARRAY},
+                {"   ", StringUtil.EMPTY_STRING_ARRAY},
+                {"a", new String[]{"a"}},
+                {"asd", new String[]{"asd"}},
+                {" asd", new String[]{"asd"}},
+                {"  asd", new String[]{"asd"}},
+                {"  asd ", new String[]{"asd"}},
+                {"  asd  ", new String[]{"asd"}},
+                {"  asd  ,;", new String[]{"asd"}},
+                {"  asd  ,:", new String[]{"asd", ":"}},
+                {",,asd  ,:", new String[]{"asd",":"}},
+                {"\t,", StringUtil.EMPTY_STRING_ARRAY},
+        };
+        for (Object[] test : tests) {
+            final String text = (String)test[0];
+            final String[] expected = (String[])test[1];
+            final List<String> expectedList = expected != null ? Arrays.asList(expected) : null;
+            final List<String> resultList = StringUtil.splitIgnoringEmpty(text);
+            Assert.assertEquals(text, expectedList, resultList);
+        }
     }
 
     @Test
@@ -242,6 +296,8 @@ public class StringUtilTest {
     @Test
     public void testNormalizePath() throws Exception {
         final String ctx = "/ctx";
+        final String path = StringUtil.normalizePath(ctx, "/");
+        System.out.println(path);
         final String[][] testcases = new String[][]{
                 {null,            ctx},
                 {"",              ctx},
@@ -254,10 +310,16 @@ public class StringUtilTest {
                 {"aa/bb/../cc",   ctx+"/"+"aa/cc"},
                 {"./aa/bb/../cc", ctx+"/"+"aa/cc"}
         };
+        int p = 0;
         for (String[] testcase : testcases) {
             final String result = StringUtil.normalizePath(ctx, testcase[0]);
             System.out.println(testcase[0]+"  -->  "+result);
+            try {
             Assert.assertEquals("failed testcase '"+testcase[0]+"': ", testcase[1], result);
+            } catch (Throwable e) {
+                throw e;
+            }
+            p++;
         }
     }
 
@@ -418,6 +480,31 @@ public class StringUtilTest {
         } catch (Exception e) {
             final String text = StringUtil.stackTrace(e);
             System.out.println(text);
+        }
+    }
+
+    @Test
+    public void testFormatBytes() throws Exception {
+        final Charset charset = Charset.forName("UTF-8");
+        final String[][] testcases = {
+                {null, null},
+                {"", null},
+                {"abc", "616263"},
+                {"abc abc", "61626320616263"},
+                {"abc def", "61626320646566"}
+        };
+        for (String[] testcase : testcases) {
+            final byte[] data = testcase[0] != null ? testcase[0].getBytes(charset) : null;
+            final String result = StringUtil.formatBytes(data);
+            Assert.assertEquals(testcase[0], testcase[1], result);
+        }
+    }
+
+    @Test
+    public void testGeneratePassword() throws Exception {
+        final int pwdlen = 8;
+        for (int i = 0; i < 10; i++) {
+            System.out.println(StringUtil.generatePassword(pwdlen));
         }
     }
 }
