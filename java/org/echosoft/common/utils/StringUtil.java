@@ -1321,7 +1321,7 @@ public class StringUtil {
     }
 
     /**
-     * Преобразует переданную в аргументе дату в строку формата <code>yyyy-MM-dd HH:mm:ss</code>.
+     * Преобразует переданную в аргументе дату в строку формата <code>yyyy-MM-dd HH:mm</code>.
      * Если исходная дата равна <code>null</code> то метод возвращает пустую строку.
      *
      * @param date дата которую требуется преобразовать в строку.
@@ -1332,7 +1332,7 @@ public class StringUtil {
             return "";
         final Calendar cal = getCalendarInstanceForThread();
         cal.setTime(date);
-        final StringBuilder buf = new StringBuilder(19);
+        final StringBuilder buf = new StringBuilder(16);
         buf.append(Integer.toString(cal.get(Calendar.YEAR)));
         buf.append('-');
         int p = cal.get(Calendar.MONTH) + 1;
@@ -1354,16 +1354,11 @@ public class StringUtil {
         if (p < 10)
             buf.append('0');
         buf.append(Integer.toString(p));
-        buf.append(':');
-        p = cal.get(Calendar.SECOND);
-        if (p < 10)
-            buf.append('0');
-        buf.append(Integer.toString(p));
         return buf.toString();
     }
 
     /**
-     * Преобразует переданную в аргументе дату в строку формата <code>yyyy-MM-dd HH:mm:ss</code>.
+     * Преобразует переданную в аргументе дату в строку формата <code>yyyy-MM-dd HH:mm</code>.
      * Если исходная дата равна <code>null</code> то метод не делает ничего.
      *
      * @param buf  буффер, реализующий интерфейс {@link Appendable} в котором будет аккумулироваться результат.
@@ -1396,15 +1391,10 @@ public class StringUtil {
         if (p < 10)
             buf.append('0');
         buf.append(Integer.toString(p));
-        buf.append(':');
-        p = cal.get(Calendar.SECOND);
-        if (p < 10)
-            buf.append('0');
-        buf.append(Integer.toString(p));
     }
 
     /**
-     * Преобразует переданную в аргументе дату в строку формата <code>yyyy-MM-dd HH:mm:ss</code>.
+     * Преобразует переданную в аргументе дату в строку формата <code>yyyy-MM-dd HH:mm</code>.
      * Если исходная дата равна <code>null</code> то метод не делает ничего.
      *
      * @param buf  буффер, реализующий интерфейс {@link Appendable} в котором будет аккумулироваться результат.
@@ -1433,11 +1423,6 @@ public class StringUtil {
         buf.append(Integer.toString(p));
         buf.append(':');
         p = cal.get(Calendar.MINUTE);
-        if (p < 10)
-            buf.append('0');
-        buf.append(Integer.toString(p));
-        buf.append(':');
-        p = cal.get(Calendar.SECOND);
         if (p < 10)
             buf.append('0');
         buf.append(Integer.toString(p));
