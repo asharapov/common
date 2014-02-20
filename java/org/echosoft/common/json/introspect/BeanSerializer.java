@@ -27,8 +27,8 @@ public final class BeanSerializer implements JsonSerializer {
         String name;
         boolean writeNulls;
         boolean dereference;
-        final ArrayList<MemberAccessor> list = new ArrayList<MemberAccessor>();
-        final HashSet<String> properties = new HashSet<String>();
+        final ArrayList<MemberAccessor> list = new ArrayList<>();
+        final HashSet<String> properties = new HashSet<>();
         for (final JsonUtil.NamedMethod entry : JsonUtil.findGetters(cl)) {
             final Method method = entry.method;
             final JsonField jfa = method.getAnnotation(JsonField.class);

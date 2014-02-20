@@ -35,7 +35,7 @@ public class XMLStreamReaderExt implements XMLStreamReader {
 
     public XMLStreamReaderExt(final XMLStreamReader xmlr) {
         this.xmlr = xmlr;
-        this.stack = new ArrayDeque<TagInfo>(32);
+        this.stack = new ArrayDeque<>(32);
     }
 
     /**
@@ -600,7 +600,7 @@ public class XMLStreamReaderExt implements XMLStreamReader {
 
         private TagInfo(final QName qName) {
             this.qName = qName;
-            this.children = new HashMap<QName, Integer>();
+            this.children = new HashMap<>();
         }
 
         private void addChild(final QName cn) {

@@ -2,8 +2,6 @@ package org.echosoft.common.cli.parser;
 
 import java.io.PrintStream;
 
-import org.echosoft.common.utils.StringUtil;
-
 /**
  * @author Anton Sharapov
  */

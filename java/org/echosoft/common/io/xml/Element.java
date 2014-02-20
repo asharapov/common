@@ -34,7 +34,7 @@ public class Element implements Serializable, Cloneable {
         this.name = xmlr.getName();
         int cnt = xmlr.getNamespaceCount();
         if (cnt > 0) {
-            namespaces = new ArrayList<NameSpace>(cnt);
+            namespaces = new ArrayList<>(cnt);
             for (int i = 0; i < cnt; i++)
                 namespaces.add(new NameSpace(xmlr.getNamespacePrefix(i), xmlr.getNamespaceURI(i)));
         } else {
@@ -42,7 +42,7 @@ public class Element implements Serializable, Cloneable {
         }
         cnt = xmlr.getAttributeCount();
         if (cnt > 0) {
-            attributes = new ArrayList<Attribute>(cnt);
+            attributes = new ArrayList<>(cnt);
             for (int i = 0; i < cnt; i++) {
                 attributes.add(new Attribute(xmlr.getAttributeName(i), xmlr.getAttributeValue(i)));
             }
@@ -81,7 +81,7 @@ public class Element implements Serializable, Cloneable {
     public void setAttribute(final QName qName, final String value) {
         if (attributes == null) {
             if (value != null) {
-                attributes = new ArrayList<Attribute>(2);
+                attributes = new ArrayList<>(2);
                 attributes.add(new Attribute(qName, value));
             }
         } else {
@@ -111,7 +111,7 @@ public class Element implements Serializable, Cloneable {
     public void setAttribute(final String localName, final String value) {
         if (attributes == null) {
             if (value != null) {
-                attributes = new ArrayList<Attribute>(2);
+                attributes = new ArrayList<>(2);
                 attributes.add(new Attribute(new QName(localName), value));
             }
         } else {
@@ -238,10 +238,10 @@ public class Element implements Serializable, Cloneable {
     public Element cloneElement() {
         final Element result = new Element(name);
         if (this.namespaces != null) {
-            result.namespaces = new ArrayList<NameSpace>(this.namespaces);
+            result.namespaces = new ArrayList<>(this.namespaces);
         }
         if (this.attributes != null) {
-            result.attributes = new ArrayList<Attribute>(this.attributes);
+            result.attributes = new ArrayList<>(this.attributes);
         }
         return result;
     }
@@ -250,10 +250,10 @@ public class Element implements Serializable, Cloneable {
     public Element clone() throws CloneNotSupportedException {
         final Element result = (Element)super.clone();
         if (this.namespaces != null) {
-            result.namespaces = new ArrayList<NameSpace>(this.namespaces);
+            result.namespaces = new ArrayList<>(this.namespaces);
         }
         if (this.attributes != null) {
-            result.attributes = new ArrayList<Attribute>(this.attributes);
+            result.attributes = new ArrayList<>(this.attributes);
         }
         return result;
     }

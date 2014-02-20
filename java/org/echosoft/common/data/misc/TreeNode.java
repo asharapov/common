@@ -146,7 +146,7 @@ public class TreeNode<K, T> {
     public TreeNode<K, T> addChildNode(final K id, final T data) {
         final TreeNode<K, T> node = new TreeNode<K, T>(id, data, this);
         if (children == null)
-            children = new ArrayList<TreeNode<K, T>>();
+            children = new ArrayList<>();
         children.add(node);
         return node;
     }
@@ -188,7 +188,7 @@ public class TreeNode<K, T> {
         return new Iterable<TreeNode<K, T>>() {
             @Override
             public Iterator<TreeNode<K, T>> iterator() {
-                return new Walker<K, T>(TreeNode.this, includeRoot);
+                return new Walker<>(TreeNode.this, includeRoot);
             }
         };
     }
@@ -208,7 +208,7 @@ public class TreeNode<K, T> {
         private TreeNode<K, T> next;
         private boolean nextCalculated;
         public Walker(final TreeNode<K, T> root, final boolean includeRoot) {
-            stack = new ArrayList<Iterator<TreeNode<K, T>>>();
+            stack = new ArrayList<>();
             if (includeRoot) {
                 stack.add(Collections.singletonList(root).iterator());
             } else {

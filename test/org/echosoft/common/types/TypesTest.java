@@ -53,11 +53,12 @@ public class TypesTest {
     }
 
     @Test
-    public void testIntegerArrays() throws Exception {
+    public void testIntegerArrays1() throws Exception {
         final Object[][] testcases = {
                 new Object[]{null, null},
                 new Object[]{new Integer[]{}, ""},
                 new Object[]{new Integer[]{1}, "1"},
+                new Object[]{new Integer[]{1,2,3}, "1,2,3"},
                 new Object[]{new Integer[]{1,2,3}, "1,2,3"},
                 new Object[]{new Integer[]{-1,0,50000}, "-1,0,50000"}
         };
@@ -70,6 +71,30 @@ public class TypesTest {
             Assert.assertEquals(tcJoined, joined);
             final Integer[] parts = t.decode(joined);
             Assert.assertArrayEquals(tcParts, parts);
+        }
+        for (Object[] testcase : testcases) {
+            final Integer[] expected = (Integer[])testcase[0];
+            final Integer[] actual = t.decode((String)testcase[1]);
+            Assert.assertArrayEquals(expected, actual);
+        }
+    }
+
+    @Test
+    public void testIntegerArrays2() throws Exception {
+        final Object[][] testcases = {
+                new Object[]{null, null},
+                new Object[]{new Integer[]{}, ""},
+                new Object[]{new Integer[]{1}, "1"},
+                new Object[]{new Integer[]{1,2,3}, "1,2,3"},
+                new Object[]{new Integer[]{1,2,3}, "1, 2, 3"},
+                new Object[]{new Integer[]{-1,0,50000}, " -1,0,50000"}
+        };
+        final TypeRegistry reg = new TypeRegistry();
+        final Type<Integer[]> t = reg.findType(Integer[].class);
+        for (Object[] testcase : testcases) {
+            final Integer[] expected = (Integer[])testcase[0];
+            final Integer[] actual = t.decode((String)testcase[1]);
+            Assert.assertArrayEquals(expected, actual);
         }
     }
 

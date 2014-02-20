@@ -17,8 +17,8 @@ public class Options implements Serializable {
     private final Map<String, Option> index;
 
     public Options() {
-        this.options = new ArrayList<Option>();
-        this.index = new HashMap<String, Option>();
+        this.options = new ArrayList<>();
+        this.index = new HashMap<>();
     }
 
     /**

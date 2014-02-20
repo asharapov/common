@@ -5,8 +5,8 @@ import java.math.BigInteger;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.StringTokenizer;
 
-import org.echosoft.common.io.FastStringTokenizer;
 import org.echosoft.common.utils.StringUtil;
 
 /**
@@ -358,8 +358,8 @@ public class Types {
                         return null;
                     if (str.isEmpty())
                         return EMPTY_ARRAY;
-                    final ArrayList<Integer> result = new ArrayList<Integer>();
-                    for (FastStringTokenizer it = new FastStringTokenizer(str, ','); it.hasNext(); ) {
+                    final ArrayList<Integer> result = new ArrayList<>();
+                    for (StringTokenizer it = new StringTokenizer(str, "\t\r\n ,;", false); it.hasMoreTokens(); ) {
                         final String token = it.nextToken();
                         result.add(token != null ? Integer.parseInt(token, 10) : null);
                     }
@@ -397,8 +397,8 @@ public class Types {
                         return null;
                     if (str.isEmpty())
                         return EMPTY_ARRAY;
-                    final ArrayList<Long> result = new ArrayList<Long>();
-                    for (FastStringTokenizer it = new FastStringTokenizer(str, ','); it.hasNext(); ) {
+                    final ArrayList<Long> result = new ArrayList<>();
+                    for (StringTokenizer it = new StringTokenizer(str, "\t\r\n ,;"); it.hasMoreTokens(); ) {
                         final String token = it.nextToken();
                         result.add(token != null ? Long.parseLong(token, 10) : null);
                     }

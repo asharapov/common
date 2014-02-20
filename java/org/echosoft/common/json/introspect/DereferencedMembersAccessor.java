@@ -20,14 +20,14 @@ public final class DereferencedMembersAccessor implements MemberAccessor {
     public DereferencedMembersAccessor(final Method method) {
         this.method = method;
         this.field = null;
-        this.cache = new ConcurrentHashMap<Class<?>, MemberAccessor[]>();
+        this.cache = new ConcurrentHashMap<>();
         method.setAccessible(true);
     }
 
     public DereferencedMembersAccessor(final Field field) {
         this.method = null;
         this.field = field;
-        this.cache = new ConcurrentHashMap<Class<?>, MemberAccessor[]>();
+        this.cache = new ConcurrentHashMap<>();
         field.setAccessible(true);
     }
 

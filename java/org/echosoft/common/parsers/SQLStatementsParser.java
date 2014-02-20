@@ -1,4 +1,4 @@
-package org.echosoft.common.data.db;
+package org.echosoft.common.parsers;
 
 import java.io.IOException;
 import java.io.Reader;
@@ -10,7 +10,7 @@ import java.util.NoSuchElementException;
  *
  * @author Anton Sharapov
  */
-public class StatementsParser implements Iterator<String> {
+public class SQLStatementsParser implements Iterator<String> {
 
     private final Reader reader;        // Поток символов который требуется разобрать на токены.
     private boolean nextStmtReaded;     // Указывает был ли уже выполнен разбор очередного SQL выражения (которое должно будет отдано при последующем вызове next()) из входного потока или нет.
@@ -22,7 +22,7 @@ public class StatementsParser implements Iterator<String> {
     private int length;                 // Количество символов реально загруженных в буфер. Всегда варьируется от 0 (буфер пуст) до емкости буфера. Имеет значение -1 после полного исчерпания входного потока.
     private int pos;                    // Текущая позиция сканера в буфере. Всегда варьируется от 0 до кол-ва символов загруженных в буфер.
 
-    public StatementsParser(final Reader reader) {
+    public SQLStatementsParser(final Reader reader) {
         this.reader = reader;
         this.nextStmtReaded = false;
         this.stmt = new StringBuilder(512);
@@ -68,6 +68,15 @@ public class StatementsParser implements Iterator<String> {
      */
     public int getStatementNumber() {
         return stmtNum;
+    }
+
+    /**
+     * Возвращает номер текущей разбираемой строки из входящего потока. Счет начинается с 0.
+     *
+     * @return номер разбираемой строки из исходного потока.
+     */
+    public int getRowNumber() {
+        return row;
     }
 
 

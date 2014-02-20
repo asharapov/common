@@ -33,9 +33,9 @@ public class JsonContext {
     }
 
     public JsonContext(final JsonContext original) {
-        serializers = new ConcurrentHashMap<Class<?>, JsonSerializer>(64);
-        cserializers = new HashMap<Class<?>, JsonSerializer>();
-        iserializers = new HashMap<Class<?>, JsonSerializer>();
+        serializers = new ConcurrentHashMap<>(64);
+        cserializers = new HashMap<>();
+        iserializers = new HashMap<>();
         if (original == null) {
             registerSerializer(String.class, Serializers.STRING, false);
             registerSerializer(Character.class, Serializers.CHAR, false);
@@ -183,6 +183,7 @@ public class JsonContext {
      * @param cls класс для которого должен быть найден соответствующий сериализатор в JSON формат.
      * @return наиболее подходящий сериализатор или <code>null</code>.
      */
+    @SuppressWarnings("unchecked")
     public <T> JsonSerializer<T> getSerializer(final Class<? extends T> cls) {
         JsonSerializer result = serializers.get(cls);
         if (result == null) {

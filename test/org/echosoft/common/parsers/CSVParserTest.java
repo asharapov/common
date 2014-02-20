@@ -1,4 +1,4 @@
-package org.echosoft.common.io;
+package org.echosoft.common.parsers;
 
 import java.io.StringReader;
 

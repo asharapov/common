@@ -1,4 +1,4 @@
-package org.echosoft.common.data.db;
+package org.echosoft.common.parsers;
 
 import java.io.StringReader;
 
@@ -7,7 +7,7 @@ import org.junit.Test;
 /**
  * @author Anton Sharapov
  */
-public class StatementsParserTest {
+public class SQLStatementsParserTest {
 
     private static final String SCRIPT = "-- statement 1;\n" +
             "/**\n" +
@@ -49,7 +49,7 @@ public class StatementsParserTest {
 
     @Test
     public void test1() throws Exception {
-        StatementsParser parser = new StatementsParser(new StringReader(SCRIPT));
+        SQLStatementsParser parser = new SQLStatementsParser(new StringReader(SCRIPT));
         while (parser.hasNext()) {
             final String stmt = parser.next();
             System.out.println(stmt);
@@ -69,7 +69,7 @@ public class StatementsParserTest {
 
     @Test
     public void test2() throws Exception {
-        StatementsParser parser = new StatementsParser(new StringReader(SCRIPT2));
+        SQLStatementsParser parser = new SQLStatementsParser(new StringReader(SCRIPT2));
         while (parser.hasNext()) {
             final String stmt = parser.next();
             System.out.println(stmt);

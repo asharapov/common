@@ -718,5 +718,5 @@ public class Serializers {
         }
         return result;
     }
-    private static final ThreadLocal<Calendar> _ctl = new ThreadLocal<Calendar>();
+    private static final ThreadLocal<Calendar> _ctl = new ThreadLocal<>();
 }

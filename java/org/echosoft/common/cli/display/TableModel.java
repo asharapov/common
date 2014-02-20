@@ -18,7 +18,7 @@ public class TableModel implements Serializable {
     private NewLineFormat nlf;
 
     public TableModel() {
-        this.columns = new ArrayList<Column>();
+        this.columns = new ArrayList<>();
         this.headersVisible = true;
         this.nlf = NewLineFormat.UNIX;
     }
