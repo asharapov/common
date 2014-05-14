@@ -1,12 +1,24 @@
 package org.echosoft.common.cli.parser;
 
-import org.echosoft.common.utils.DateUtil;
-import org.echosoft.common.utils.StringUtil;
-
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
 import java.io.Serializable;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import org.echosoft.common.utils.DateUtil;
+import org.echosoft.common.utils.StringUtil;
 
 /**
  * Содержит результат разбора аргументов командной строки.
@@ -216,7 +228,7 @@ public class CommandLine implements Serializable {
         final Option opt = options.getOption(optionName);
         if (opt == null)
             throw new UnknownOptionException(optionName);
-        final String[] tokens = StringUtil.splitIgnoringEmpty(values.get(opt), ',');
+        final String[] tokens = splitTokens(values.get(opt));
         if (tokens != null && tokens.length > 0) {
             try {
                 final int[] result = new int[tokens.length];
@@ -245,7 +257,7 @@ public class CommandLine implements Serializable {
         final Option opt = options.getOption(optionName);
         if (opt == null)
             throw new UnknownOptionException(optionName);
-        final String[] tokens = StringUtil.splitIgnoringEmpty(values.get(opt), ',');
+        final String[] tokens = splitTokens(values.get(opt));
         if (tokens != null && tokens.length > 0) {
             try {
                 final long[] result = new long[tokens.length];
@@ -332,13 +344,52 @@ public class CommandLine implements Serializable {
             unresolvedArgs.add(token);
     }
 
-    void setOptionValue(final Option option, final String value) throws CLParserException {
+    void setOptionValue(final Option option, String value) throws CLParserException {
         if (!options.hasOption(option))
             throw new UnknownOptionException(option);
+        if (value != null && value.length() > 2 && value.startsWith("@") && value.endsWith("@")) {
+            final File file = new File(value.substring(1, value.length() - 1));
+            if (!file.isFile())
+                throw new CLParserException("File '" + file + "' not found");
+            try {
+                try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
+                    final StringBuilder buf = new StringBuilder();
+                    String line;
+                    while( (line = reader.readLine()) != null) {
+                        buf.append(line).append('\n');
+                    }
+                    value = buf.toString();
+                }
+            } catch (IOException e) {
+                throw new CLParserException("Can't read file '" + file + "': " + e.getMessage(), e);
+            }
+        }
         values.put(option, value);
     }
 
     void setOption(final Option option) throws CLParserException {
         setOptionValue(option, null);
+    }
+
+    private static String[] splitTokens(final String text) {
+        if (text == null)
+            return null;
+        final ArrayList<String> list = new ArrayList<>();
+        int start = -1;
+        for (int i = 0, len = text.length(); i < len; i++) {
+            final char c = text.charAt(i);
+            if (c <= ' ' || c == ',' || c == ';') {
+                if (start >= 0) {
+                    list.add(text.substring(start, i));
+                    start = -1;
+                }
+            } else {
+                if (start < 0)
+                    start = i;
+            }
+        }
+        if (start >= 0)
+            list.add(text.substring(start));
+        return list.toArray(new String[list.size()]);
     }
 }
