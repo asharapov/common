@@ -52,6 +52,49 @@ public class TableProcessor {
         return out.toString();
     }
 
+    public static String renderCompact(final TableModel model, final Object data) throws InvocationTargetException, NoSuchMethodException, IllegalAccessException {
+        final int widths[] = calculateColumnWidths(model, data);
+        int totalWidth = widths.length - 1;
+        for (int width : widths) totalWidth += width;
+
+        final StringBuilder out = new StringBuilder(4096);
+        final char[] CRLF = model.getNewLineFormat().getChars();
+        if (model.isHeadersVisible()) {
+            // Отрисовка заголовка таблицы ...
+            for (int i = 0; i < widths.length; i++) {
+                final TableModel.Column col = model.getColumns().get(i);
+                printValueInCell(col, widths[i], col.getTitle(), out);
+                out.append(' ');
+            }
+            out.append(CRLF);
+        }
+
+        for (int i = 0; i < widths.length; i++) {
+            fill(out, '-', widths[i]);
+            out.append(' ');
+        }
+        out.append(CRLF);
+
+        // Отрисовка строк с данными таблицы ...
+        for (Iterator rows = ObjectUtil.makeIterator(data); rows.hasNext(); ) {
+            final Object row = rows.next();
+            for (int i = 0; i < widths.length; i++) {
+                final TableModel.Column col = model.getColumns().get(i);
+                final String value = getFormattedValue(col, row);
+                printValueInCell(col, widths[i], value, out);
+                out.append(' ');
+            }
+            out.append(CRLF);
+        }
+        for (int i = 0; i < widths.length; i++) {
+            fill(out, '-', widths[i]);
+            out.append(' ');
+        }
+        out.append(CRLF);
+
+        return out.toString();
+    }
+
     private static int[] calculateColumnWidths(final TableModel model, final Object data) throws InvocationTargetException, NoSuchMethodException, IllegalAccessException {
         final List<TableModel.Column> columns = model.getColumns();
         final int widths[] = new int[columns.size()];

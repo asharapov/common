@@ -24,15 +24,28 @@ public class CLDisplayTest {
                 new TestBean(7, "Просто какая-то строка", StringUtil.parseISODate("2014-08-02"), 31415926, 7.40f, false)
         );
 
-        final TableModel model = new TableModel();
-        model.addColumn("id", "id", CellFormatters.INTEGER, TableModel.Alignment.RIGHT);
-        model.addColumn("name", "name", CellFormatters.OBJECT, TableModel.Alignment.LEFT);
-        model.addColumn("date", "date", CellFormatters.DATE, TableModel.Alignment.CENTER);
-        model.addColumn("count", "count", CellFormatters.INTEGER, TableModel.Alignment.RIGHT);
-        model.addColumn("price", "price", CellFormatters.FLOAT, TableModel.Alignment.RIGHT);
-        model.addColumn("total", "total", CellFormatters.FLOAT, TableModel.Alignment.RIGHT);
+        final TableModel tm1 = new TableModel();
+        tm1.addColumn("id", "id", CellFormatters.INTEGER, TableModel.Alignment.RIGHT);
+        tm1.addColumn("name", "name", CellFormatters.OBJECT, TableModel.Alignment.LEFT);
+        tm1.addColumn("date", "date", CellFormatters.DATE, TableModel.Alignment.CENTER);
+        tm1.addColumn("count", "count", CellFormatters.INTEGER, TableModel.Alignment.RIGHT);
+        tm1.addColumn("price", "price", CellFormatters.FLOAT, TableModel.Alignment.RIGHT);
+        tm1.addColumn("total", "total", CellFormatters.FLOAT, TableModel.Alignment.RIGHT);
 
-        String rendered = TableProcessor.render(model, data);
+        String rendered = TableProcessor.render(tm1, data);
+        System.out.println(rendered);
+        System.out.println();
+
+        final TableModel tm2 = new TableModel();
+        tm2.setDefaultPadding(0);
+        tm2.addColumn("id", "id", CellFormatters.INTEGER, TableModel.Alignment.RIGHT);
+        tm2.addColumn("name", "name", CellFormatters.OBJECT, TableModel.Alignment.LEFT).setMaxWidth(20);
+        tm2.addColumn("date", "date", CellFormatters.DATE, TableModel.Alignment.CENTER);
+        tm2.addColumn("count", "count", CellFormatters.INTEGER, TableModel.Alignment.RIGHT);
+        tm2.addColumn("price", "price", CellFormatters.FLOAT, TableModel.Alignment.RIGHT);
+        tm2.addColumn("total", "total", CellFormatters.FLOAT, TableModel.Alignment.RIGHT);
+
+        rendered = TableProcessor.renderCompact(tm2, data);
         System.out.println(rendered);
     }
 }
