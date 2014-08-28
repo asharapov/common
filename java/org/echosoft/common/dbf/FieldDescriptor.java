@@ -39,7 +39,7 @@ class FieldDescriptor implements Serializable {
             case FLOAT: {
                 size = buf[offset + 16];
                 precision = buf[offset + 17];
-                if (size > 20 || precision > size)
+                if (size > 38 || precision > size)
                     throw new DBFException("Unsupported field size");
                 break;
             }
