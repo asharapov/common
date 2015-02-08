@@ -22,19 +22,12 @@ public class ProgressMeter {
     private final TimeUnit timeUnit;
     private String legend;
     private Locale locale;
+    private boolean verbose;
     private long startTime;
     private long completeTime;
     private long hitsCount;
     private long errorsCount;
     private boolean hasErrors;
-
-    public ProgressMeter() {
-        this(System.out, DEFAULT_HITS_PER_DOT, DEFAULT_DOTS_PER_LINE, null);
-    }
-
-    public ProgressMeter(final Appendable out) {
-        this(out, DEFAULT_HITS_PER_DOT, DEFAULT_DOTS_PER_LINE, null);
-    }
 
     public ProgressMeter(final Appendable out, final int hitsPerDot) {
         this(out, hitsPerDot, DEFAULT_DOTS_PER_LINE, null);
@@ -47,6 +40,7 @@ public class ProgressMeter {
         this.timeUnit = timeUnit;
         this.legend = "hits";
         this.locale = DEFAULT_LOCALE;
+        this.verbose = true;
     }
 
     public Locale getLocale() {
@@ -60,6 +54,11 @@ public class ProgressMeter {
 
     public ProgressMeter applyLegend(final String legend) {
         this.legend = legend;
+        return this;
+    }
+
+    public ProgressMeter applyVerbose(final boolean verbose) {
+        this.verbose = verbose;
         return this;
     }
 
@@ -77,12 +76,13 @@ public class ProgressMeter {
     }
 
     public void start() throws IOException {
-        out.append('\n');
         this.hasErrors = false;
         this.hitsCount = 0;
         this.errorsCount = 0;
         this.startTime = System.currentTimeMillis();
         this.completeTime = 0;
+        if (verbose)
+            out.append('\n');
     }
 
     public void hit(final boolean success) throws IOException {
@@ -92,19 +92,23 @@ public class ProgressMeter {
             errorsCount++;
         }
         if ((hitsCount % hitsPerDot) == 0) {
-            out.append(hasErrors ? 'E' : '.');
+            if (verbose) {
+                out.append(hasErrors ? 'E' : '.');
+                if ((hitsCount % (hitsPerDot * dotsPerLine)) == 0) {
+                    prepareAndShowStatistics();
+                }
+            }
             hasErrors = false;
-        }
-        if ((hitsCount % (hitsPerDot * dotsPerLine)) == 0) {
-            prepareAndShowStatistics();
         }
     }
 
     public void complete() throws IOException {
         completeTime = System.currentTimeMillis();
-        for (long i = hitsCount / hitsPerDot; i==0 || (i % dotsPerLine) != 0; i++)
-            out.append(' ');
-        prepareAndShowStatistics();
+        if (verbose) {
+            for (long i = hitsCount / hitsPerDot; i == 0 || (i % dotsPerLine) != 0; i++)
+                out.append(' ');
+            prepareAndShowStatistics();
+        }
     }
 
     protected void prepareAndShowStatistics() throws IOException {
