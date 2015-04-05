@@ -1,4 +1,4 @@
-package org.echosoft.common.cli;
+package org.echosoft.common.cli.parser;
 
 import org.echosoft.common.cli.parser.CLParser;
 import org.echosoft.common.cli.parser.CLPrintUtils;

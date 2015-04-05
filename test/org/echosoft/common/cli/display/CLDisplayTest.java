@@ -1,11 +1,8 @@
-package org.echosoft.common.cli;
+package org.echosoft.common.cli.display;
 
 import java.util.Arrays;
 import java.util.List;
 
-import org.echosoft.common.cli.display.CellFormatters;
-import org.echosoft.common.cli.display.TableModel;
-import org.echosoft.common.cli.display.TableProcessor;
 import org.echosoft.common.utils.StringUtil;
 
 /**

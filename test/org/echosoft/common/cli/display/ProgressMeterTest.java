@@ -1,4 +1,4 @@
-package org.echosoft.common.cli;
+package org.echosoft.common.cli.display;
 
 import java.util.concurrent.TimeUnit;
 
