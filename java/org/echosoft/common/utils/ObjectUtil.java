@@ -280,10 +280,10 @@ public class ObjectUtil {
     @SuppressWarnings("unchecked")
     public static <T> Class<T> loadClass(final String name) throws ClassNotFoundException {
         try {
-            return (Class<T>) ClassLoader.getSystemClassLoader().loadClass(name);
+            return (Class<T>) Class.forName(name);
         } catch (ClassNotFoundException e) {
             try {
-                return (Class<T>) Class.forName(name);
+                return (Class<T>) ClassLoader.getSystemClassLoader().loadClass(name);
             } catch (ClassNotFoundException ex) {
                 return (Class<T>) Thread.currentThread().getContextClassLoader().loadClass(name);
             }
