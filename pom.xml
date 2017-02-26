@@ -60,12 +60,6 @@
     </dependencies>
 
     <build>
-        <sourceDirectory>java</sourceDirectory>
-        <testSourceDirectory>test</testSourceDirectory>
-        <directory>build</directory>
-        <outputDirectory>build/classes/production</outputDirectory>
-        <testOutputDirectory>build/classes/test</testOutputDirectory>
-
         <plugins>
             <plugin>
                 <groupId>pl.project13.maven</groupId>

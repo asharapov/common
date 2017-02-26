@@ -2,7 +2,7 @@ package org.echosoft.common.parsers;
 
 import java.io.StringReader;
 
-import junit.framework.Assert;
+import org.junit.Assert;
 import org.junit.Test;
 
 /**

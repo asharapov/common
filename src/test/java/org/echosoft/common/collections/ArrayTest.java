@@ -2,9 +2,9 @@ package org.echosoft.common.collections;
 
 import java.util.Iterator;
 
-import junit.framework.Assert;
 import org.echosoft.common.collections.iterators.ArrayIterator;
 import org.echosoft.common.collections.iterators.ObjectArrayIterator;
+import org.junit.Assert;
 import org.junit.Test;
 
 /**

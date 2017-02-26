@@ -1,6 +1,6 @@
 package org.echosoft.common.io.xml;
 
-import junit.framework.Assert;
+import org.junit.Assert;
 import org.junit.Test;
 
 /**
