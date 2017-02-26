@@ -17,6 +17,7 @@ import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 import java.util.StringTokenizer;
+import java.util.function.Function;
 
 /**
  * Содержит часто используемые методы для работы со строками.
@@ -68,17 +69,14 @@ public class StringUtil {
      * Возвращает копию переданной в аргументе строки без начальных и завершающих пробелов (а также всех прочих символов с кодом меньше  <code>'&#92;u0020'</code>).
      * Если полученная строка имеет нулевую длину то метод возвращает <code>null</code>.
      *
-     * @param string строка в которой надо избавиться от начальных и завершающих пробелов.
+     * @param text строка в которой надо избавиться от начальных и завершающих пробелов.
      * @return копия переданной в аргументе строки без начальных и завершающих пробелов или <code>null</code>.
      */
-    public static String trim(String string) {
-        if (string != null) {
-            string = string.trim();
-            if (string.length() < 1) {
-                string = null;
-            }
-        }
-        return string;
+    public static String trim(String text) {
+        if (text == null)
+            return null;
+        text = text.trim();
+        return !text.isEmpty() ? text : null;
     }
 
     /**
@@ -274,14 +272,17 @@ public class StringUtil {
      * Заменяет все вхождения указанных в атрибуте <code>attrs</code> выражений на соответствующие им значения.
      *
      * @param text   строка в которой требуется провести серию замен. Если аргумент равен <code>null</code> то метод завершает работу возвращая <code>null</code>.
-     * @param attrs  перечень шаблонов в строке и соответствующих им реальным значениям на которые эти шаблоны должны быть заменены. Если аргумент равен <code>null</code> то метод завершает работу возвращая исходную строку.
+     * @param attrs  перечень шаблонов в строке и соответствующих им реальным значениям на которые эти шаблоны должны быть заменены..
      * @param prefix специальный маркерный символ предшествующий началу очередного шаблона для замены. Не может быть пустым.
      * @param suffix специальный маркерный символ завершающий текст шаблона для замены. Не может быть пустым или быть идентичным префиксу.
+     * @param defaultValue  значение по умолчанию используемое если требуемый в строке атрибут отсутствует в мапе или равен <code>null</code>
      * @return Итоговая строка, в которой все шаблоны заменены соответствующими значениями.
      */
-    public static String replace(final String text, final Map<String, CharSequence> attrs, final char prefix, final char suffix) {
-        if (text == null || attrs == null)
-            return text;
+    public static String replace(final String text, Map<String, ? extends CharSequence> attrs, final char prefix, final char suffix, final String defaultValue) {
+        if (text == null)
+            return null;
+        if (attrs == null)
+            attrs = Collections.emptyMap();
         final int textSize = text.length();
         final StringBuilder result = new StringBuilder(textSize);
         int pos = 0;
@@ -292,8 +293,50 @@ public class StringUtil {
             for (int spp = text.indexOf(prefix, sp + 1); spp > 0 && spp < ep; spp = text.indexOf(prefix, sp + 1)) sp = spp;
             result.append(text.substring(pos, sp));
             final String key = text.substring(sp + 1, ep);
-            result.append(attrs.get(key));
+            final Object value = attrs.get(key);
+            if (value != null) {
+                result.append(value.toString());
+            } else
+            if (defaultValue != null) {
+                result.append(defaultValue);
+            }
             pos = ep + 1;
+        }
+        result.append(text.substring(pos, textSize));
+        return result.toString();
+    }
+
+    public static String replace(final String text, final String prefix, final String suffix, final Function<String, ?> supplier) {
+        return replace(text, prefix, suffix, supplier, "");
+    }
+
+    public static String replace(final String text, final String prefix, final String suffix, final Function<String, ?> supplier, final String defaultValue) {
+        int sp;
+        if (text == null || (sp = text.indexOf(prefix, 0)) < 0)
+            return text;
+        final int textSize = text.length();
+        final int prefixSize = prefix.length();
+        final int suffixSize = suffix.length();
+        final StringBuilder result = new StringBuilder(textSize);
+        int pos = 0;
+        for (; sp >= 0; sp = text.indexOf(prefix, pos)) {
+            int ep = text.indexOf(suffix, sp);
+            if (ep < 0)
+                break;
+            final int spp = text.lastIndexOf(prefix, ep - 1);
+            if (spp > sp) {
+                sp = spp;
+            }
+            result.append(text.substring(pos, sp));
+            final String key = text.substring(sp + prefixSize, ep);
+            final Object value = supplier.apply(key);
+            if (value != null) {
+                result.append(value.toString());
+            } else
+            if (defaultValue != null) {
+                result.append(defaultValue);
+            }
+            pos = ep + suffixSize;
         }
         result.append(text.substring(pos, textSize));
         return result.toString();
@@ -301,7 +344,7 @@ public class StringUtil {
 
     /**
      * Объединяет список строк в одну строку, используя в качестве разделителя между исходными частями ее специальный символ.
-     * Как правило используется в паре с методом {@link StringUtil#split(char, char, String)}, выполняющим обратную операцию.
+     * Как правило используется в паре с методом {@link StringUtil#split(String, char, char)}, выполняющим обратную операцию.
      * <table border="1" style="border:1px solid black; white-space:nowrap;">
      * <caption>Примеры использования</caption>
      * <tr><th colspan="3">Аргументы вызова</th><th rowspan="2">Результат</th></tr>
@@ -345,18 +388,18 @@ public class StringUtil {
     /**
      * Выполняет операцию, обратную той что делает метод {@link StringUtil#join(char, char, String...)}
      *
-     * @param mask      символ которым маскируется символ-разделитель в строке, которую требуется разбить на подстроки.
-     * @param separator символ, по которому будут разделяться подстроки в исходной строке.
      * @param text      Строка которую требуется разбить на подстроки. Может быть пустой строкой.
-     * @return Массив строк полученных путем разбиения исходной строки на подстроки, где в качестве разделителя используется указанный во втором аргументе символ.
-     *         Массив может быть пустым если исходная строка была нулевой длины. Метод возвращает <code>null</code> если и исходная строка была равна <code>null</code>.
+     * @param separator символ, по которому будут разделяться подстроки в исходной строке.
+     * @param mask      символ которым маскируется символ-разделитель в строке, которую требуется разбить на подстроки.
+     * @return список строк полученных путем разбиения исходной строки на подстроки, где в качестве разделителя используется указанный во втором аргументе символ.
+     *         Список может быть пустым если исходная строка была нулевой длины. Метод возвращает <code>null</code> если и исходная строка была равна <code>null</code>.
      */
-    public static String[] split(final char mask, final char separator, final String text) {
+    public static List<String> split(final String text, final char separator, final char mask) {
         if (text == null)
             return null;
+        final ArrayList<String> parts = new ArrayList<>();
         if (text.length() == 0)
-            return EMPTY_STRING_ARRAY;
-        final ArrayList<String> parts = new ArrayList<>(5);
+            return parts;
         final StringBuilder buf = new StringBuilder(32);
         boolean masked = false;
         for (int i = 0, len = text.length(); i < len; i++) {
@@ -382,7 +425,7 @@ public class StringUtil {
             }
         }
         parts.add(buf.toString());
-        return parts.toArray(new String[parts.size()]);
+        return parts;
     }
 
     /**
@@ -398,10 +441,10 @@ public class StringUtil {
      *
      * @param text      исходная строка.
      * @param separator символ используемый в качестве разделителя.
-     * @return массив строк полученных в результате разделения исходной строки на подстроки используя указанный символ-разделитель.
+     * @return список строк полученных в результате разделения исходной строки на подстроки используя указанный символ-разделитель.
      *         Метод возвращает <code>null</code> если исходная строка равна <code>null</code>.
      */
-    public static String[] split(final String text, final char separator) {
+    public static List<String> split(final String text, final char separator) {
         if (text == null)
             return null;
         final ArrayList<String> buf = new ArrayList<>();
@@ -415,7 +458,7 @@ public class StringUtil {
         }
         if (pos < length)
             buf.add(text.substring(pos, length));
-        return buf.toArray(new String[buf.size()]);
+        return buf;
     }
 
     /**
@@ -436,7 +479,7 @@ public class StringUtil {
      * </ol>
      *
      * @param text      исходная строка.
-     * @return массив строк полученных в результате разделения исходной строки на подстроки используя указанный символ-разделитель.
+     * @return список строк полученных в результате разделения исходной строки на подстроки используя указанный символ-разделитель.
      *         Метод возвращает <code>null</code> если исходная строка равна <code>null</code>.
      */
     public static List<String> splitIgnoringEmpty(final String text) {
@@ -478,10 +521,10 @@ public class StringUtil {
      *
      * @param text      исходная строка.
      * @param separator символ используемый в качестве разделителя.
-     * @return массив непустых строк полученных в результате разделения исходной строки на подстроки используя указанный символ-разделитель.
+     * @return список непустых строк полученных в результате разделения исходной строки на подстроки используя указанный символ-разделитель.
      *         Метод возвращает <code>null</code> если исходная строка равна <code>null</code>.
      */
-    public static String[] splitIgnoringEmpty(final String text, final char separator) {
+    public static List<String> splitIgnoringEmpty(final String text, final char separator) {
         if (text == null)
             return null;
         final ArrayList<String> result = new ArrayList<>();
@@ -500,7 +543,7 @@ public class StringUtil {
             if (!token.isEmpty())
                 result.add(token);
         }
-        return result.toArray(new String[result.size()]);
+        return result;
     }
 
     /**
@@ -750,7 +793,7 @@ public class StringUtil {
     public static String normalizePath(final String context, final String path) {
         if (path == null)
             return context;
-        final ArrayList<String> tokens = new ArrayList<>(10);
+        final ArrayList<String> tokens = new ArrayList<>();
         final boolean addContext = !path.startsWith("/");
         for (StringTokenizer tokenizer = new StringTokenizer(path.trim(), "/", false); tokenizer.hasMoreTokens(); ) {
             final String token = tokenizer.nextToken();
@@ -823,8 +866,10 @@ public class StringUtil {
     public static String formatDate(final Date date) {
         if (date == null)
             return "";
-        final StringBuilder buf = new StringBuilder(10);
-        final Calendar cal = getCalendarInstanceForThread();
+        final FormatData data = FMT_DATA_HOLDER.get();
+        final StringBuilder buf = data.buf;
+        buf.setLength(0);
+        final Calendar cal = data.calendar;
         cal.setTime(date);
         int p = cal.get(Calendar.DAY_OF_MONTH);
         if (p < 10)
@@ -851,7 +896,7 @@ public class StringUtil {
     public static void formatDate(final Appendable buf, final Date date) throws IOException {
         if (date == null)
             return;
-        final Calendar cal = getCalendarInstanceForThread();
+        final Calendar cal = FMT_DATA_HOLDER.get().calendar;
         cal.setTime(date);
         int p = cal.get(Calendar.DAY_OF_MONTH);
         if (p < 10)
@@ -876,7 +921,7 @@ public class StringUtil {
     public static void formatDate(final StringBuilder buf, final Date date) {
         if (date == null)
             return;
-        final Calendar cal = getCalendarInstanceForThread();
+        final Calendar cal = FMT_DATA_HOLDER.get().calendar;
         cal.setTime(date);
         int p = cal.get(Calendar.DAY_OF_MONTH);
         if (p < 10)
@@ -900,8 +945,10 @@ public class StringUtil {
     public static String formatDateTime(final Date date) {
         if (date == null)
             return "";
-        final StringBuilder buf = new StringBuilder(19);
-        final Calendar cal = getCalendarInstanceForThread();
+        final FormatData data = FMT_DATA_HOLDER.get();
+        final StringBuilder buf = data.buf;
+        buf.setLength(0);
+        final Calendar cal = data.calendar;
         cal.setTime(date);
         int p = cal.get(Calendar.DAY_OF_MONTH);
         if (p < 10)
@@ -943,7 +990,7 @@ public class StringUtil {
     public static void formatDateTime(final Appendable buf, final Date date) throws IOException {
         if (date == null)
             return;
-        final Calendar cal = getCalendarInstanceForThread();
+        final Calendar cal = FMT_DATA_HOLDER.get().calendar;
         cal.setTime(date);
         int p = cal.get(Calendar.DAY_OF_MONTH);
         if (p < 10)
@@ -983,7 +1030,7 @@ public class StringUtil {
     public static void formatDateTime(final StringBuilder buf, final Date date) {
         if (date == null)
             return;
-        final Calendar cal = getCalendarInstanceForThread();
+        final Calendar cal = FMT_DATA_HOLDER.get().calendar;
         cal.setTime(date);
         int p = cal.get(Calendar.DAY_OF_MONTH);
         if (p < 10)
@@ -1022,8 +1069,10 @@ public class StringUtil {
     public static String formatDateTime2(final Date date) {
         if (date == null)
             return "";
-        final StringBuilder buf = new StringBuilder(16);
-        final Calendar cal = getCalendarInstanceForThread();
+        final FormatData data = FMT_DATA_HOLDER.get();
+        final StringBuilder buf = data.buf;
+        buf.setLength(0);
+        final Calendar cal = data.calendar;
         cal.setTime(date);
         int p = cal.get(Calendar.DAY_OF_MONTH);
         if (p < 10)
@@ -1060,7 +1109,7 @@ public class StringUtil {
     public static void formatDateTime2(final Appendable buf, final Date date) throws IOException {
         if (date == null)
             return;
-        final Calendar cal = getCalendarInstanceForThread();
+        final Calendar cal = FMT_DATA_HOLDER.get().calendar;
         cal.setTime(date);
         int p = cal.get(Calendar.DAY_OF_MONTH);
         if (p < 10)
@@ -1095,7 +1144,7 @@ public class StringUtil {
     public static void formatDateTime2(final StringBuilder buf, final Date date) {
         if (date == null)
             return;
-        final Calendar cal = getCalendarInstanceForThread();
+        final Calendar cal = FMT_DATA_HOLDER.get().calendar;
         cal.setTime(date);
         int p = cal.get(Calendar.DAY_OF_MONTH);
         if (p < 10)
@@ -1129,8 +1178,10 @@ public class StringUtil {
     public static String formatISODate(final Date date) {
         if (date == null)
             return "";
-        final StringBuilder buf = new StringBuilder(10);
-        final Calendar cal = getCalendarInstanceForThread();
+        final FormatData data = FMT_DATA_HOLDER.get();
+        final StringBuilder buf = data.buf;
+        buf.setLength(0);
+        final Calendar cal = data.calendar;
         cal.setTime(date);
         buf.append(cal.get(Calendar.YEAR));
         buf.append('-');
@@ -1157,7 +1208,7 @@ public class StringUtil {
     public static void formatISODate(final Appendable buf, final Date date) throws IOException {
         if (date == null)
             return;
-        final Calendar cal = getCalendarInstanceForThread();
+        final Calendar cal = FMT_DATA_HOLDER.get().calendar;
         cal.setTime(date);
         buf.append(Integer.toString(cal.get(Calendar.YEAR)));
         buf.append('-');
@@ -1182,7 +1233,7 @@ public class StringUtil {
     public static void formatISODate(final StringBuilder buf, final Date date) {
         if (date == null)
             return;
-        final Calendar cal = getCalendarInstanceForThread();
+        final Calendar cal = FMT_DATA_HOLDER.get().calendar;
         cal.setTime(date);
         buf.append(Integer.toString(cal.get(Calendar.YEAR)));
         buf.append('-');
@@ -1207,9 +1258,11 @@ public class StringUtil {
     public static String formatISODateTime(final Date date) {
         if (date == null)
             return "";
-        final Calendar cal = getCalendarInstanceForThread();
+        final FormatData data = FMT_DATA_HOLDER.get();
+        final Calendar cal = data.calendar;
         cal.setTime(date);
-        final StringBuilder buf = new StringBuilder(19);
+        final StringBuilder buf = data.buf;
+        buf.setLength(0);
         buf.append(Integer.toString(cal.get(Calendar.YEAR)));
         buf.append('-');
         int p = cal.get(Calendar.MONTH) + 1;
@@ -1221,7 +1274,7 @@ public class StringUtil {
         if (p < 10)
             buf.append('0');
         buf.append(Integer.toString(p));
-        buf.append('T');
+        buf.append(' ');
         p = cal.get(Calendar.HOUR_OF_DAY);
         if (p < 10)
             buf.append('0');
@@ -1240,7 +1293,7 @@ public class StringUtil {
     }
 
     /**
-     * Преобразует переданную в аргументе дату в строку формата <code>yyyy-MM-ddTHH:mm:ss</code>.
+     * Преобразует переданную в аргументе дату в строку формата <code>yyyy-MM-dd HH:mm:ss</code>.
      * Если исходная дата равна <code>null</code> то метод не делает ничего.
      *
      * @param buf  буффер, реализующий интерфейс {@link Appendable} в котором будет аккумулироваться результат.
@@ -1250,7 +1303,7 @@ public class StringUtil {
     public static void formatISODateTime(final Appendable buf, final Date date) throws IOException {
         if (date == null)
             return;
-        final Calendar cal = getCalendarInstanceForThread();
+        final Calendar cal = FMT_DATA_HOLDER.get().calendar;
         cal.setTime(date);
         buf.append(Integer.toString(cal.get(Calendar.YEAR)));
         buf.append('-');
@@ -1263,7 +1316,7 @@ public class StringUtil {
         if (p < 10)
             buf.append('0');
         buf.append(Integer.toString(p));
-        buf.append('T');
+        buf.append(' ');
         p = cal.get(Calendar.HOUR_OF_DAY);
         if (p < 10)
             buf.append('0');
@@ -1281,7 +1334,7 @@ public class StringUtil {
     }
 
     /**
-     * Преобразует переданную в аргументе дату в строку формата <code>yyyy-MM-ddTHH:mm:ss</code>.
+     * Преобразует переданную в аргументе дату в строку формата <code>yyyy-MM-dd HH:mm:ss</code>.
      * Если исходная дата равна <code>null</code> то метод не делает ничего.
      *
      * @param buf  буффер, реализующий интерфейс {@link Appendable} в котором будет аккумулироваться результат.
@@ -1290,7 +1343,7 @@ public class StringUtil {
     public static void formatISODateTime(final StringBuilder buf, final Date date) {
         if (date == null)
             return;
-        final Calendar cal = getCalendarInstanceForThread();
+        final Calendar cal = FMT_DATA_HOLDER.get().calendar;
         cal.setTime(date);
         buf.append(Integer.toString(cal.get(Calendar.YEAR)));
         buf.append('-');
@@ -1303,7 +1356,7 @@ public class StringUtil {
         if (p < 10)
             buf.append('0');
         buf.append(Integer.toString(p));
-        buf.append('T');
+        buf.append(' ');
         p = cal.get(Calendar.HOUR_OF_DAY);
         if (p < 10)
             buf.append('0');
@@ -1330,9 +1383,11 @@ public class StringUtil {
     public static String formatISODateTime2(final Date date) {
         if (date == null)
             return "";
-        final Calendar cal = getCalendarInstanceForThread();
+        final FormatData data = FMT_DATA_HOLDER.get();
+        final Calendar cal = data.calendar;
         cal.setTime(date);
-        final StringBuilder buf = new StringBuilder(16);
+        final StringBuilder buf = data.buf;
+        buf.setLength(0);
         buf.append(Integer.toString(cal.get(Calendar.YEAR)));
         buf.append('-');
         int p = cal.get(Calendar.MONTH) + 1;
@@ -1368,7 +1423,7 @@ public class StringUtil {
     public static void formatISODateTime2(final Appendable buf, final Date date) throws IOException {
         if (date == null)
             return;
-        final Calendar cal = getCalendarInstanceForThread();
+        final Calendar cal = FMT_DATA_HOLDER.get().calendar;
         cal.setTime(date);
         buf.append(Integer.toString(cal.get(Calendar.YEAR)));
         buf.append('-');
@@ -1403,7 +1458,7 @@ public class StringUtil {
     public static void formatISODateTime2(final StringBuilder buf, final Date date) {
         if (date == null)
             return;
-        final Calendar cal = getCalendarInstanceForThread();
+        final Calendar cal = FMT_DATA_HOLDER.get().calendar;
         cal.setTime(date);
         buf.append(Integer.toString(cal.get(Calendar.YEAR)));
         buf.append('-');
@@ -1442,7 +1497,7 @@ public class StringUtil {
             return null;
         if (length < 10)
             throw new ParseException("length of the string in argument must be at least 10", 0);
-        final Calendar cal = getCalendarInstanceForThread();
+        final Calendar cal = FMT_DATA_HOLDER.get().calendar;
         cal.clear();
         if (text.charAt(2) != '.')
             throw new ParseException("Delimiter not finded", 2);
@@ -1467,7 +1522,7 @@ public class StringUtil {
             return null;
         if (length < 19)
             throw new ParseException("length of the string in argument must be at least 19", 0);
-        final Calendar cal = getCalendarInstanceForThread();
+        final Calendar cal = FMT_DATA_HOLDER.get().calendar;
         cal.clear();
         if (text.charAt(2) != '.')
             throw new ParseException("Delimiter not finded", 2);
@@ -1501,7 +1556,7 @@ public class StringUtil {
             return null;
         if (length < 16)
             throw new ParseException("length of the string in argument must be at least 16", 0);
-        final Calendar cal = getCalendarInstanceForThread();
+        final Calendar cal = FMT_DATA_HOLDER.get().calendar;
         cal.clear();
         if (text.charAt(2) != '.')
             throw new ParseException("Delimiter not finded", 2);
@@ -1532,7 +1587,7 @@ public class StringUtil {
             return null;
         if (length < 10)
             throw new ParseException("length of the string in argument must be at least 10", 0);
-        final Calendar cal = getCalendarInstanceForThread();
+        final Calendar cal = FMT_DATA_HOLDER.get().calendar;
         cal.clear();
         if (text.charAt(4) != '-')
             throw new ParseException("Delimiter not finded", 4);
@@ -1558,7 +1613,7 @@ public class StringUtil {
             return null;
         if (length < 19)
             throw new ParseException("length of the string in argument must be at least 19", 0);
-        final Calendar cal = getCalendarInstanceForThread();
+        final Calendar cal = FMT_DATA_HOLDER.get().calendar;
         cal.clear();
         if (text.charAt(4) != '-')
             throw new ParseException("Delimiter not finded", 4);
@@ -1730,16 +1785,19 @@ public class StringUtil {
      * Единственное (и самое главное!) что гарантирует данный метод это то что возвращаемый объект можно безопасно  использовать в текущем потоке (и только в нем!).<br/>
      * Данный метод используется в целях избежания потерь на избыточном создании новых экземпляров {@link Calendar} так как этот класс не является потокобезопасным
      * и инициализация объектов этого класса занимает довольно большое время.
-     *
-     * @return экземпляр класса {@link Calendar} с неопределенными значениями своих свойств.
      */
-    private static Calendar getCalendarInstanceForThread() {
-        Calendar result = _ctl.get();
-        if (result == null) {
-            result = Calendar.getInstance();
-            _ctl.set(result);
+    private static final ThreadLocal<FormatData> FMT_DATA_HOLDER = new ThreadLocal<FormatData>() {
+        protected FormatData initialValue() {
+            return new FormatData();
         }
-        return result;
+    };
+
+    private static final class FormatData {
+        final Calendar calendar;
+        final StringBuilder  buf;
+        private FormatData() {
+            this.calendar = Calendar.getInstance();
+            this.buf = new StringBuilder(30);
+        }
     }
-    private static final ThreadLocal<Calendar> _ctl = new ThreadLocal<>();
 }

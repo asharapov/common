@@ -20,12 +20,13 @@ public class Anchor implements Serializable {
     private static final Anchor EMPTY_ANCHOR = new Anchor();
 
     public static Anchor parseString(final String text) {
-        final String[] tokens = StringUtil.splitIgnoringEmpty(text, '/');
-        if (tokens == null || tokens.length == 0)
+        final List<String> tokens = StringUtil.splitIgnoringEmpty(text, '/');
+        if (tokens == null || tokens.isEmpty())
             return EMPTY_ANCHOR;
-        final Part[] parts = new Part[tokens.length];
-        for (int i = 0; i < tokens.length; i++) {
-            final String token = tokens[i];
+        final int cnt = tokens.size();
+        final Part[] parts = new Part[cnt];
+        for (int i = 0; i < cnt; i++) {
+            final String token = tokens.get(i);
             final int p = token.indexOf(':');
             final String localPrefix = p > 0 ? token.substring(0, p) : "";
             final int lb = token.indexOf('[', p + 1);

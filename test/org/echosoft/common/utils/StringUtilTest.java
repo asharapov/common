@@ -259,10 +259,10 @@ public class StringUtilTest {
 
     @Test
     public void testParseISODateTime() throws Exception {
-        final SimpleDateFormat formatter1 = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
+        final SimpleDateFormat formatter1 = new SimpleDateFormat("yyyy-MM-dd' 'HH:mm:ss");
         Assert.assertNull( StringUtil.parseDate(null) );
         Assert.assertNull( StringUtil.parseDate("") );
-        final String[] validTestCases1 = {"2010-02-01T21:00:00", "2010-12-31T23:59:59", "2011-12-31T00:00:00", "2009-12-31T13:27:45xxxx"};
+        final String[] validTestCases1 = {"2010-02-01 21:00:00", "2010-12-31 23:59:59", "2011-12-31 00:00:00", "2009-12-31 13:27:45xxxx"};
         for (String txt : validTestCases1) {
             final Date date = StringUtil.parseISODateTime(txt);
             Assert.assertNotNull(date);
@@ -341,10 +341,11 @@ public class StringUtilTest {
             final String tcJoined = (String)testcase[1];
             final String joined = StringUtil.join('&', ':', tcParts);
             Assert.assertEquals(tcJoined, joined);
-            final String[] parts = StringUtil.split('&', ':', joined);
+            final List<String> lst = StringUtil.split(joined, ':', '&');
+            final String[] parts = lst != null ? lst.toArray(new String[lst.size()]) : null;
             Assert.assertArrayEquals(tcParts, parts);
         }
-        Assert.assertNull( StringUtil.split('&',':',null) );
+        Assert.assertNull( StringUtil.split(null, ':', '&') );
     }
 
     @Test
@@ -365,7 +366,7 @@ public class StringUtilTest {
                 {"{{{x{a}}}}+{b}}{","{{{xAA}}}+BB}{"}
         };
         for (String[] testcase : testcases) {
-            final String result = StringUtil.replace(testcase[0], attrs,'{','}');
+            final String result = StringUtil.replace(testcase[0], attrs,'{','}', "null");
             Assert.assertEquals(testcase[0], testcase[1], result);
         }
     }

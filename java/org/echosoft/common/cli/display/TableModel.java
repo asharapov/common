@@ -207,16 +207,17 @@ public class TableModel implements Serializable, Cloneable {
                     rightPadding == other.rightPadding;
         }
 
+        @Override
         public String toString() {
             return "[Column{attr:" + attr + ", title:" + title + ", padding:" + leftPadding + ", minwidth:" + minWidth + ", maxwidth:" + maxWidth + ", width:" + width + "}]";
         }
     }
 
-    public static enum Alignment {
+    public enum Alignment {
         LEFT, CENTER, RIGHT
     }
 
-    public static enum NewLineFormat {
+    public enum NewLineFormat {
         DOS(new char[]{'\r', '\n'}),
         UNIX(new char[]{'\n'});
 

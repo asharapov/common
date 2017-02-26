@@ -1,10 +1,11 @@
 package org.echosoft.common.io.datasource;
 
+import javax.activation.DataSource;
+import javax.servlet.http.Part;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import javax.activation.DataSource;
-import javax.servlet.http.Part;
+import java.util.List;
 
 import org.echosoft.common.utils.StringUtil;
 
@@ -22,7 +23,7 @@ public class PartDataSource implements DataSource {
         String file = null;
         final String hcd = part.getHeader("content-disposition");
         if (hcd != null) {
-            final String[] attrs = StringUtil.splitIgnoringEmpty(hcd, ';');
+            final List<String> attrs = StringUtil.splitIgnoringEmpty(hcd, ';');
             for (String attr : attrs) {
                 final int delim = attr.indexOf('=');
                 if (delim < 0)

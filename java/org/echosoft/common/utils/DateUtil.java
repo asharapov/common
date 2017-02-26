@@ -4,6 +4,7 @@ import java.text.ParseException;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -300,10 +301,10 @@ public class DateUtil {
     public static Date calculate(final Date base, final String text) throws ParseException {
         if (text == null)
             return null;
-        final String[] tokens = StringUtil.splitIgnoringEmpty(text.toLowerCase().replace('_', ' '), ' ');
-        if (tokens.length == 0)
+        final List<String> tokens = StringUtil.splitIgnoringEmpty(text.toLowerCase().replace('_', ' '), ' ');
+        if (tokens.isEmpty())
             return null;
-        if (tokens.length == 1 && "now".equals(tokens[0]))
+        if (tokens.size() == 1 && "now".equals(tokens.get(0)))
             return base;
         Integer amount = null;
         Integer amount2 = null;

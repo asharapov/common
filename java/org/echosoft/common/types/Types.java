@@ -5,6 +5,7 @@ import java.math.BigInteger;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.StringTokenizer;
 
 import org.echosoft.common.utils.StringUtil;
@@ -324,7 +325,8 @@ public class Types {
                     return StringUtil.join('$', ',', value);
                 }
                 public String[] decode(final String str) {
-                    return StringUtil.split('$', ',', str);
+                    final List<String> parts = StringUtil.split(str, ',', '$');
+                    return parts != null ? parts.toArray(new String[parts.size()]) : null;
                 }
                 public String toString() {
                     return "[Type<String...>]";

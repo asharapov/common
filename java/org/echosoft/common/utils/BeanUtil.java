@@ -64,7 +64,8 @@ public class BeanUtil {
                     final int r = expr.indexOf(']', i);
                     if (r < i)
                         throw new IllegalArgumentException("Missed ']' symbol: " + expr);
-                    final String[] args = StringUtil.split(expr.substring(i + 1, r), ',');
+                    final List<String> lst = StringUtil.split(expr.substring(i + 1, r), ',');
+                    final String[] args = lst != null ? lst.toArray(new String[lst.size()]) : null;
                     if (i > start) {
                         final BeanMetadata meta = getMetadata(result.getClass());
                         result = meta.getValue(result, expr.substring(start, i));
@@ -82,7 +83,8 @@ public class BeanUtil {
                     final int r = expr.indexOf(')', i);
                     if (r < i)
                         throw new IllegalArgumentException("Missed ')' symbol: " + expr);
-                    final String[] args = StringUtil.split(expr.substring(i + 1, r), ',');
+                    final List<String> lst = StringUtil.split(expr.substring(i + 1, r), ',');
+                    final String[] args = lst != null ? lst.toArray(new String[lst.size()]) : null;
                     final BeanMetadata meta = getMetadata(result.getClass());
                     result = meta.getValue(result, expr.substring(start, i), args);
                     if (result == null)
@@ -132,7 +134,8 @@ public class BeanUtil {
                     final int r = expr.indexOf(']', i);
                     if (r < i)
                         throw new IllegalArgumentException("Missed ']' symbol: " + expr);
-                    final String[] args = StringUtil.split(expr.substring(i + 1, r), ',');
+                    final List<String> lst = StringUtil.split(expr.substring(i + 1, r), ',');
+                    final String[] args = lst != null ? lst.toArray(new String[lst.size()]) : null;
                     if (i > start) {
                         final BeanMetadata meta = getMetadata(scope.getClass());
                         scope = meta.getValue(scope, expr.substring(start, i));
@@ -150,7 +153,8 @@ public class BeanUtil {
                     final int r = expr.indexOf(')', i);
                     if (r < i)
                         throw new IllegalArgumentException("Missed ')' symbol: " + expr);
-                    final String[] args = StringUtil.split(expr.substring(i + 1, r), ',');
+                    final List<String> lst = StringUtil.split(expr.substring(i + 1, r), ',');
+                    final String[] args = lst != null ? lst.toArray(new String[lst.size()]) : null;
                     final BeanMetadata meta = getMetadata(scope.getClass());
                     if (r < lastPos) {
                         scope = meta.getValue(scope, expr.substring(start, i), args);

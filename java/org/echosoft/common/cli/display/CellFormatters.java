@@ -18,6 +18,14 @@ public class CellFormatters {
                 }
             };
 
+    public static final CellValueFormatter STRING =
+            new CellValueFormatter() {
+                @Override
+                public String format(final Object obj) {
+                    return obj != null ? StringUtil.valueOf(obj) : "";
+                }
+            };
+
     public static final CellValueFormatter INTEGER =
             new CellValueFormatter() {
                 @Override
@@ -44,7 +52,7 @@ public class CellFormatters {
             new CellValueFormatter() {
                 @Override
                 public String format(final Object obj) {
-                    return StringUtil.formatDate((Date) obj);
+                    return StringUtil.formatISODate((Date) obj);
                 }
             };
 
@@ -52,7 +60,7 @@ public class CellFormatters {
             new CellValueFormatter() {
                 @Override
                 public String format(final Object obj) {
-                    return StringUtil.formatDateTime((Date) obj);
+                    return StringUtil.formatISODateTime((Date) obj);
                 }
             };
 
@@ -60,7 +68,7 @@ public class CellFormatters {
             new CellValueFormatter() {
                 @Override
                 public String format(final Object obj) {
-                    return StringUtil.formatDateTime2((Date) obj);
+                    return StringUtil.formatISODateTime2((Date) obj);
                 }
             };
 }
