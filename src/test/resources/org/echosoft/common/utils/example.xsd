@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema
+        xmlns="http://www.w3.org/2001/XMLSchema"
+        xmlns:xs="http://www.w3.org/2001/XMLSchema"
+        xmlns:vc="http://www.w3.org/2007/XMLSchema-versioning" vc:minVersion="1.0" vc:maxVersion="1.1"
+        xmlns:tst="http://schemas.echo.org/test/1"
+        targetNamespace="http://schemas.echo.org/test/1"
+        elementFormDefault="qualified"
+        attributeFormDefault="unqualified"
+>
+    <xs:element name="data" type="tst:DataType">
+
+    </xs:element>
+
+    <xs:complexType name="DataType">
+        <xs:sequence minOccurs="0">
+            <xs:element name="customers">
+                <xs:complexType>
+                    <xs:sequence minOccurs="0" maxOccurs="unbounded">
+                        <xs:element name="customer" type="tst:CustomerType"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="CustomersType">
+        <xs:sequence minOccurs="0" maxOccurs="unbounded">
+            <xs:element name="customer" type="tst:CustomerType"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="CustomerType">
+        <xs:sequence>
+            <xs:element name="last-name" type="xs:string"/>
+            <xs:element name="first-name" type="xs:string"/>
+            <xs:element name="age" type="xs:positiveInteger"/>
+            <xs:element name="tags">
+                <xs:complexType>
+                    <xs:sequence minOccurs="0" maxOccurs="unbounded">
+                        <xs:element name="tag" type="xs:NMTOKEN"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="misc" minOccurs="0">
+                <xs:complexType>
+                    <xs:sequence minOccurs="0" maxOccurs="unbounded">
+                        <xs:any namespace="##any" processContents="lax" minOccurs="0"/>
+                    </xs:sequence>
+                    <xs:anyAttribute namespace="##other" processContents="lax"/>
+                </xs:complexType>
+            </xs:element>
+        </xs:sequence>
+        <xs:attribute name="id" type="xs:positiveInteger" use="required"/>
+    </xs:complexType>
+</xs:schema>

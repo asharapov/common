@@ -1,15 +1,5 @@
 package org.echosoft.common.utils;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.StringReader;
-import java.net.URL;
-import java.util.Iterator;
-import java.util.NoSuchElementException;
-import java.util.Properties;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -21,12 +11,22 @@ import javax.xml.transform.dom.DOMResult;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.stream.StreamSource;
+import javax.xml.validation.Schema;
+import javax.xml.validation.Validator;
 import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.StringReader;
+import java.io.StringWriter;
+import java.util.Iterator;
+import java.util.NoSuchElementException;
+import java.util.Properties;
 
-import org.echosoft.common.io.FastStringWriter;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -44,6 +44,7 @@ import org.xml.sax.SAXException;
 public class XMLUtil {
 
     private static final Properties SER_PROPS;
+
     static {
         SER_PROPS = new Properties();
         SER_PROPS.put(OutputKeys.OMIT_XML_DECLARATION, "no");
@@ -52,77 +53,181 @@ public class XMLUtil {
         SER_PROPS.put("{http://xml.apache.org/xslt}indent-amount", "2");
     }
 
-    /**
-     * Constructor of <code>XMLUtil</code> declared as private
-     * to prevent its direct instantiation.
-     */
+    private static class ElementsIterator implements Iterator<Element> {
+        private final NodeList nodes;
+        private final String ns;
+        private int nextPos;
+        private Element nextElement;
+
+        private ElementsIterator(final NodeList nodes, final String ns) {
+            this.nodes = nodes;
+            this.ns = ns;
+            this.nextPos = 0;
+            this.nextElement = seekNext();
+        }
+
+        @Override
+        public boolean hasNext() {
+            return nextElement != null;
+        }
+
+        @Override
+        public Element next() {
+            if (nextElement == null)
+                throw new NoSuchElementException();
+            final Element result = nextElement;
+            nextElement = seekNext();
+            return result;
+        }
+
+        @Override
+        public void remove() {
+            throw new UnsupportedOperationException("operation not supported");
+        }
+
+        private Element seekNext() {
+            for (int i = nextPos, len = nodes.getLength(); i < len; i++) {
+                final Node childNode = nodes.item(i);
+                if (childNode.getNodeType() == Node.ELEMENT_NODE && (ns == null || ns.equals(childNode.getNamespaceURI()))) {
+                    nextPos = i + 1;
+                    return (Element) childNode;
+                }
+            }
+            return null;
+        }
+    }
+
     private XMLUtil() {
     }
 
-
     /**
-     * Loads document from file, that name specified as parameter to this method.
+     * Загружает xml документ в виде DOM дерева.
      *
-     * @param file the file name, that contains XML document.
-     * @return the <code>Document</code> interface instance that represents the entire XML document.
-     * @throws IOException                  in case of any io errors.
-     * @throws ParserConfigurationException in case of any parsing errors.
-     * @throws SAXException                 in case of any xml parsing errors.
-     */
-    public static Document loadDocument(final File file) throws IOException, ParserConfigurationException, SAXException {
-        final DocumentBuilder builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
-        try (FileInputStream in = new FileInputStream(file)) {
-            return builder.parse(new InputSource(in));
-        }
-    }
-
-    /**
-     * Loads document from the URL, that specified as parameter to this method. Also, the URL can referencing to the file.
-     *
-     * @param url the URL to the XML source.
-     * @return the <code>Document</code> interface instance that represents the entire XML document.
-     * @throws IOException                  in case of any io errors.
-     * @throws ParserConfigurationException in case of any parsing errors.
-     * @throws SAXException                 in case of any xml parsing errors.
-     */
-    public static Document loadDocument(final URL url) throws IOException, ParserConfigurationException, SAXException {
-        if (url.getProtocol().equalsIgnoreCase("file")) {
-            final String fileName = StringUtil.trim(url.getHost()) != null ? StringUtil.trim(url.getHost()) : url.getFile();
-            return loadDocument(new File(fileName));
-        } else {
-            try (InputStream in = url.openStream()) {
-                return loadDocument(in);
-            }
-        }
-    }
-
-    /**
-     * Loads document from the input stream, that specified as parameter to this method.
-     *
-     * @param in the input stream of XML document.
-     * @return the <code>Document</code> interface instance that represents the entire XML document.
-     * @throws IOException                  in case of any io errors.
-     * @throws ParserConfigurationException in case of any parsing errors.
-     * @throws SAXException                 in case of any xml parsing errors.
+     * @param in входной поток данных содержащих свнедения о дереве.
+     * @return прочитанный документ.
      */
     public static Document loadDocument(final InputStream in) throws IOException, ParserConfigurationException, SAXException {
-        final DocumentBuilder builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
-        return builder.parse(new InputSource(in));
+        return loadDocument(in, false, null);
+    }
+
+    /**
+     * Загружает xml документ в виде DOM дерева.
+     *
+     * @param in      входной поток данных содержащих свнедения о дереве.
+     * @param nsAware включать или нет поддержку пространств имен.
+     * @param schema  заполняется если требуется включить валидацию структуры документа согласно представленной схеме.
+     * @return прочитанный документ.
+     */
+    public static Document loadDocument(final InputStream in, final boolean nsAware, final Schema schema) throws IOException, ParserConfigurationException, SAXException {
+        final DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+        dbf.setNamespaceAware(nsAware);
+        final DocumentBuilder builder = dbf.newDocumentBuilder();
+        final Document doc = builder.parse(new InputSource(in));
+        if (schema != null) {
+            final Validator validator = schema.newValidator();
+            validator.validate(new DOMSource(doc));
+        }
+        return doc;
     }
 
 
     /**
-     * Gets <code>TEXT</code> element for node.
+     * Возвращает итератор по дочерним элементам дерева.
      *
-     * @param node node with text.
-     * @return text, that contains the specified node.
+     * @param parentNode элемент дерева по чьим дочерним узлам будет осуществляться поиск.
+     */
+    public static Iterable<Element> getChildElements(final Element parentNode) {
+        return new Iterable<Element>() {
+            @Override
+            public Iterator<Element> iterator() {
+                return new ElementsIterator(parentNode.getChildNodes(), null);
+            }
+        };
+    }
+
+    /**
+     * Возвращает итератор по дочерним элементам дерева.
+     *
+     * @param parentNode элемент дерева по чьим дочерним узлам будет осуществляться поиск.
+     * @param ns         неймспейс чьи элементы нам интересны, если <code>null</code> то ограничений по имени неймспейса не будет.
+     */
+    public static Iterable<Element> getChildElements(final Element parentNode, final String ns) {
+        return new Iterable<Element>() {
+            @Override
+            public Iterator<Element> iterator() {
+                return new ElementsIterator(parentNode.getChildNodes(), ns);
+            }
+        };
+    }
+
+    /**
+     * Возвращает первый дочерний элемент с указанным именем.
+     *
+     * @param parentNode родительский элемент.
+     * @param childName  имя искомого элемента.
+     * @return первый найденный элемент или <code>null</code>.
+     */
+    public static Element getChildElement(final Element parentNode, final String childName) {
+        return getChildElement(parentNode, null, childName);
+    }
+
+    /**
+     * Возвращает первый дочерний элемент с указанным именем.
+     *
+     * @param parentNode родительский элемент.
+     * @param ns         неймспейс чьи элементы нам интересны, если <code>null</code> то ограничений по имени неймспейса не будет.
+     * @param childName  локальное имя искомого дочернего элемента.
+     * @return первый найденный элемент или <code>null</code>.
+     */
+    public static Element getChildElement(final Element parentNode, final String ns, final String childName) {
+        for (Node node = parentNode.getFirstChild(); node != null; node = node.getNextSibling()) {
+            if (node.getNodeType() != Node.ELEMENT_NODE)
+                continue;
+            if (ns != null && !ns.equals(node.getNamespaceURI()))
+                continue;
+            if (childName != null) {
+                String ln = node.getLocalName();
+                if (ln == null)
+                    ln = node.getNodeName();
+                if (!childName.equals(ln))
+                    continue;
+            }
+            return (Element) node;
+        }
+        return null;
+    }
+
+    public static Element getNextSiblingElement(Node node, final String ns, final String siblingName) {
+        while (true) {
+            node = node.getNextSibling();
+            if (node == null)
+                return null;
+            if (node.getNodeType() != Node.ELEMENT_NODE)
+                continue;
+            if (ns != null && !ns.equals(node.getNamespaceURI()))
+                continue;
+            if (siblingName != null) {
+                String ln = node.getLocalName();
+                if (ln == null)
+                    ln = node.getNodeName();
+                if (!siblingName.equals(ln))
+                    continue;
+            }
+            return (Element)node;
+        }
+    }
+
+
+    /**
+     * Возвращает текстовое значение для указанного узла дерева, предварительно склеив содержимое всех дочерних текстовых узлов дерева.
+     *
+     * @param node узел для которого возвращается текстовое значение.
+     * @return искомый текст с обрезанными концевыми пробелами или <code>null</code>.
      */
     public static String getNodeText(final Node node) {
 //        node.normalize();
         StringBuilder buf = null;
-        final NodeList list = node.getChildNodes();
-        for (int i = 0, len = list.getLength(); i < len; i++) {
-            final Node n = list.item(i);
+        for (Node n = node.getFirstChild(); n != null; n = n.getNextSibling()) {
             final int type = n.getNodeType();
             if (type == Node.TEXT_NODE || type == Node.CDATA_SECTION_NODE) {
                 final String value = n.getNodeValue();
@@ -136,144 +241,17 @@ public class XMLUtil {
         return buf != null ? StringUtil.trim(buf.toString()) : null;
     }
 
-
     /**
-     * Extracts child elements from node whith type <code>ELEMENT_NODE</code>.
+     * Возвращает текстовое значение для указанного дочернего элемента.
      *
-     * @param node root node of XML document for search.
-     * @return iterator with proper node childs.
+     * @param parentElement элемент относительно которого ищется дочерний элемент для которого, в свою очередь, вычисляется его значение.
+     * @param ns            неймспейс дочернего элемента, если <code>null</code> то ограничений по имени неймспейса не будет.
+     * @param childName     имя дочернего элемента.
+     * @return текстовое значение найденного дочернего элемента или <code>null</code>
      */
-    public static Iterator<Element> getChildElements(final Node node) {
-//        node.normalize();
-        return new Iterator<Element>() {
-            private final NodeList nodes = node.getChildNodes();
-            private int nextPos = 0;
-            private Element nextElement = seekNext();
-
-            public boolean hasNext() {
-                return nextElement != null;
-            }
-            public Element next() {
-                if (nextElement == null)
-                    throw new NoSuchElementException();
-                final Element result = nextElement;
-                nextElement = seekNext();
-                return result;
-            }
-            public void remove() {
-                throw new UnsupportedOperationException("operation not supported");
-            }
-            private Element seekNext() {
-                for (int i = nextPos, len = nodes.getLength(); i < len; i++) {
-                    final Node childNode = nodes.item(i);
-                    if (childNode.getNodeType() == Node.ELEMENT_NODE) {
-                        nextPos = i + 1;
-                        return (Element) childNode;
-                    }
-                }
-                return null;
-            }
-        };
-    }
-
-
-    /**
-     * Extracts child elements with given name from node whith type <code>ELEMENT_NODE</code>.
-     *
-     * @param node        root node of XML document for search.
-     * @param elementName name of elements that should be returned.
-     * @return iterator with proper node childs.
-     */
-    public static Iterator<Element> getChildElements(final Node node, final String elementName) {
-//        node.normalize();
-        return new Iterator<Element>() {
-            private final NodeList nodes = node.getChildNodes();
-            private int nextPos = 0;
-            private Element nextElement = seekNext();
-
-            public boolean hasNext() {
-                return nextElement != null;
-            }
-            public Element next() {
-                if (nextElement == null)
-                    throw new NoSuchElementException();
-                final Element result = nextElement;
-                nextElement = seekNext();
-                return result;
-            }
-            public void remove() {
-                throw new UnsupportedOperationException("operation not supported");
-            }
-            private Element seekNext() {
-                for (int i = nextPos, len = nodes.getLength(); i < len; i++) {
-                    final Node childNode = nodes.item(i);
-                    if (childNode.getNodeType() == Node.ELEMENT_NODE && childNode.getNodeName().equals(elementName)) {
-                        nextPos = i + 1;
-                        return (Element) childNode;
-                    }
-                }
-                return null;
-            }
-        };
-    }
-
-    /**
-     * Gets first child element with specified name.
-     *
-     * @param parentNode parent node.
-     * @param childName  child name.
-     * @return first childr element with specified name.
-     */
-    public static Element getChildElement(final Node parentNode, final String childName) {
-//        parentNode.normalize();
-        final NodeList nodeList = parentNode.getChildNodes();
-        for (int i = 0; i < nodeList.getLength(); i++) {
-            final Node node = nodeList.item(i);
-            if (node.getNodeType() == Node.ELEMENT_NODE && node.getNodeName().equals(childName))
-                return (Element) node;
-        }
-        return null;
-    }
-
-
-    public static Element getNextSiblingElement(Node node, final String siblingName) {
-        do {
-            node = node.getNextSibling();
-            if (node == null)
-                return null;
-        } while (node.getNodeType() != Node.ELEMENT_NODE || !node.getNodeName().equals(siblingName));
-        return (Element) node;
-    }
-
-
-    /**
-     * Gets <code>TEXT</code> parentElement for child parentElement
-     *
-     * @param parentElement parent parentElement.
-     * @param childName     child parentElement name.
-     * @return text, that contains the specified child parentElement.
-     */
-    public static String getChildNodeText(final Element parentElement, final String childName) {
-        final Element childElement = getChildElement(parentElement, childName);
+    public static String getChildNodeText(final Element parentElement, final String ns, final String childName) {
+        final Element childElement = getChildElement(parentElement, ns, childName);
         return childElement != null ? getNodeText(childElement) : null;
-    }
-
-
-    /**
-     * Gets <code>CDATASection</code> element for node.
-     *
-     * @param node node with text.
-     * @return text, that contains the specified node.
-     */
-    public static String getNodeCDATASection(final Node node) {
-//        node.normalize();
-        final NodeList list = node.getChildNodes();
-        for (int i = 0, len = list.getLength(); i < len; i++) {
-            final Node child = list.item(i);
-            if (child.getNodeType() == Node.CDATA_SECTION_NODE)
-                return child.getNodeValue();
-        }
-        return null;
     }
 
 
@@ -404,7 +382,7 @@ public class XMLUtil {
     public static String serialize(final Node node) throws TransformerException {
         final Transformer serializer = TransformerFactory.newInstance().newTransformer();
         serializer.setOutputProperties(SER_PROPS);
-        final FastStringWriter writer = new FastStringWriter();
+        final StringWriter writer = new StringWriter(1024);
         serializer.transform(new DOMSource(node), new StreamResult(writer));
         return writer.toString();
     }
@@ -438,7 +416,7 @@ public class XMLUtil {
      */
     public static Document apply(final Document xmlDoc, final Document xslDoc) throws TransformerException, ParserConfigurationException {
         final Transformer transformer = TransformerFactory.newInstance().newTransformer(new DOMSource(xslDoc));
-        final Document targetDoc = XMLUtil.createDocument();
+        final Document targetDoc = createDocument();
         transformer.transform(new DOMSource(xmlDoc), new DOMResult(targetDoc));
         return targetDoc;
     }

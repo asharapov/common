@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<tst:data xmlns:tst="http://schemas.echo.org/test/1"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:schemaLocation="http://schemas.echo.org/test/1 example.xsd">
+    <tst:customers>
+        <tst:customer id="1">
+            <tst:last-name>Ivanov</tst:last-name>
+            <tst:first-name>Ivan</tst:first-name>
+            <tst:age>25</tst:age>
+            <tst:tags>
+                <tst:tag>A1</tst:tag>
+                <tst:tag>B1</tst:tag>
+            </tst:tags>
+        </tst:customer>
+        <tst:customer id="2">
+            <tst:last-name>Petrov</tst:last-name>
+            <tst:first-name>Petr</tst:first-name>
+            <tst:age>28</tst:age>
+            <tst:tags>
+                <tst:tag>A1</tst:tag>
+                <tst:tag>B2</tst:tag>
+            </tst:tags>
+        </tst:customer>
+        <tst:customer id="3">
+            <tst:last-name>Svetova</tst:last-name>
+            <tst:first-name>Sveta</tst:first-name>
+            <tst:age>18</tst:age>
+            <tst:tags>
+                <tst:tag>A3</tst:tag>
+                <tst:tag>B2</tst:tag>
+            </tst:tags>
+            <tst:misc>
+                <param name="a"><![CDATA[ hello world 1]]></param>
+                <param name="b">hello world 2</param>
+                <param name="c"><?compiler attr1="1" attr2="2"?></param>
+            </tst:misc>
+        </tst:customer>
+    </tst:customers>
+</tst:data>

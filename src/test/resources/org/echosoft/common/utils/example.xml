@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<data>
+    <customers>
+        <customer id="1">
+            <last-name>Ivanov</last-name>
+            <first-name>Ivan</first-name>
+            <age>25</age>
+            <tags>
+                <tag>A1</tag>
+                <tag>B1</tag>
+            </tags>
+        </customer>
+        <customer id="2">
+            <last-name>Petrov</last-name>
+            <first-name>Petr</first-name>
+            <age>28</age>
+            <tags>
+                <tag>A1</tag>
+                <tag>B2</tag>
+            </tags>
+        </customer>
+        <customer id="3">
+            <last-name>Svetova</last-name>
+            <first-name>Sveta</first-name>
+            <age>18</age>
+            <tags>
+                <tag>A3</tag>
+                <tag>B2</tag>
+            </tags>
+            <misc>
+                <param name="a"><![CDATA[ hello world 1]]></param>
+                <param name="b">hello world 2</param>
+                <param name="c"><?compiler attr1="1" attr2="2"?></param>
+            </misc>
+        </customer>
+    </customers>
+</data>
