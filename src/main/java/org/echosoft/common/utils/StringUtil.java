@@ -17,7 +17,7 @@ import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 import java.util.StringTokenizer;
-import java.util.function.Function;
+
 
 /**
  * Содержит часто используемые методы для работы со строками.
@@ -306,6 +306,7 @@ public class StringUtil {
         return result.toString();
     }
 
+/*
     public static String replace(final String text, final String prefix, final String suffix, final Function<String, ?> supplier) {
         return replace(text, prefix, suffix, supplier, "");
     }
@@ -341,6 +342,7 @@ public class StringUtil {
         result.append(text.substring(pos, textSize));
         return result.toString();
     }
+*/
 
     /**
      * Объединяет список строк в одну строку, используя в качестве разделителя между исходными частями ее специальный символ.

@@ -44,7 +44,7 @@ public class ArrayTest {
     @Test
     public void test3() throws Exception {
         try {
-            final Iterator<String> i1 = new ObjectArrayIterator<>(null);
+            final Iterator<String> i1 = new ObjectArrayIterator<>((String[])null);
             Assert.fail("should be NullPointerException: " + i1);
         } catch (NullPointerException e) {
         }
