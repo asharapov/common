@@ -26,10 +26,12 @@ public class StreamUtil {
                 public int read() {
                     return -1;
                 }
+
                 @Override
                 public int read(final byte buf[], final int offset, final int length) {
                     return -1;
                 }
+
                 @Override
                 public long skip(final long n) {
                     return 0;
@@ -41,9 +43,11 @@ public class StreamUtil {
                 @Override
                 public void write(final int b) {
                 }
+
                 @Override
                 public void write(final byte[] buf) {
                 }
+
                 @Override
                 public void write(final byte[] buf, final int offset, final int length) {
                 }
@@ -55,17 +59,21 @@ public class StreamUtil {
                 public int read(final CharBuffer target) {
                     return -1;
                 }
+
                 @Override
                 public int read() {
                     return -1;
                 }
+
                 @Override
                 public int read(final char[] cbuf, final int off, final int len) {
                     return -1;
                 }
+
                 public long skip(final long n) {
                     return 0;
                 }
+
                 @Override
                 public void close() {
                 }
@@ -76,33 +84,42 @@ public class StreamUtil {
                 @Override
                 public void write(final int c) {
                 }
+
                 @Override
                 public void write(final char[] cbuf) {
                 }
+
                 @Override
                 public void write(final char[] cbuf, final int off, final int len) {
                 }
+
                 @Override
                 public void write(final String str) {
                 }
+
                 @Override
                 public void write(final String str, final int off, final int len) {
                 }
+
                 @Override
                 public Writer append(final CharSequence csq) {
                     return this;
                 }
+
                 @Override
                 public Writer append(final CharSequence csq, final int start, final int end) {
                     return this;
                 }
+
                 @Override
                 public Writer append(final char c) {
                     return this;
                 }
+
                 @Override
                 public void flush() {
                 }
+
                 @Override
                 public void close() {
                 }
@@ -169,8 +186,8 @@ public class StreamUtil {
      * @param in  входной поток.
      * @param buf буфер куда помещается прочитанные из потока байты..
      * @return реальное количество прочитанных байт. Может изменяться в диапазоне от 0 до N, где N - размер массива.
-     *         Если возвращаемое методом значение меньшее чем N значит поток был исчерпан полностью,
-     *         в противном случае - возможно (!) в потоке есть еще непрочитанное нами содержимое.
+     * Если возвращаемое методом значение меньшее чем N значит поток был исчерпан полностью,
+     * в противном случае - возможно (!) в потоке есть еще непрочитанное нами содержимое.
      * @throws IOException в случае возникновения каких-либо ошибок ввода-вывода.
      */
     public static int readFromStream(final InputStream in, final byte[] buf) throws IOException {
@@ -192,8 +209,8 @@ public class StreamUtil {
      * @param in  входной поток.
      * @param buf буфер куда помещается прочитанные из потока байты..
      * @return реальное количество прочитанных байт. Может изменяться в диапазоне от 0 до N, где N - размер массива.
-     *         Если возвращаемое методом значение меньшее чем N значит поток был исчерпан полностью,
-     *         в противном случае - возможно (!) в потоке есть еще непрочитанное нами содержимое.
+     * Если возвращаемое методом значение меньшее чем N значит поток был исчерпан полностью,
+     * в противном случае - возможно (!) в потоке есть еще непрочитанное нами содержимое.
      * @throws IOException в случае возникновения каких-либо ошибок ввода-вывода.
      */
     public static int readFromReader(final Reader in, final char[] buf) throws IOException {

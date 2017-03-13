@@ -444,11 +444,11 @@ public class StringUtil {
      * @param text      исходная строка.
      * @param separator символ используемый в качестве разделителя.
      * @return список строк полученных в результате разделения исходной строки на подстроки используя указанный символ-разделитель.
-     *         Метод возвращает <code>null</code> если исходная строка равна <code>null</code>.
+     *         Метод возвращает пустой список если исходная строка равна <code>null</code>.
      */
     public static List<String> split(final String text, final char separator) {
         if (text == null)
-            return null;
+            return Collections.emptyList();
         final ArrayList<String> buf = new ArrayList<>();
         final int length = text.length();
         int pos = 0;
@@ -482,11 +482,11 @@ public class StringUtil {
      *
      * @param text      исходная строка.
      * @return список строк полученных в результате разделения исходной строки на подстроки используя указанный символ-разделитель.
-     *         Метод возвращает <code>null</code> если исходная строка равна <code>null</code>.
+     *         Метод возвращает пустой список если исходная строка равна <code>null</code>.
      */
     public static List<String> splitIgnoringEmpty(final String text) {
         if (text == null)
-            return null;
+            return Collections.emptyList();
         final int len0 = text.length();
         final ArrayList<String> result = new ArrayList<>();
         int start = -1;
@@ -1251,7 +1251,7 @@ public class StringUtil {
     }
 
     /**
-     * Преобразует переданную в аргументе дату в строку формата <code>yyyy-MM-ddTHH:mm:ss</code>.
+     * Преобразует переданную в аргументе дату в строку формата <code>yyyy-MM-dd HH:mm:ss</code>.
      * Если исходная дата равна <code>null</code> то метод возвращает пустую строку.
      *
      * @param date дата которую требуется преобразовать в строку.

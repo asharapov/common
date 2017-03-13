@@ -82,7 +82,7 @@ public class StringUtilTest {
     @Test
     public void testSplitIgnoringEmpty1() throws Exception {
         final Object[][] tests = {
-                {null, null},
+                {null, StringUtil.EMPTY_STRING_ARRAY},
                 {"", StringUtil.EMPTY_STRING_ARRAY},
                 {" ", StringUtil.EMPTY_STRING_ARRAY},
                 {"  ", StringUtil.EMPTY_STRING_ARRAY},

@@ -107,13 +107,7 @@ public final class JsonUtil {
                 if (result == null)
                     throw new NullPointerException();
                 return result;
-            } catch (NoSuchMethodException ee) {
-                // Это какой-то неправильный синглтон. Мерзко ругаемся чтоб программисты быстрее это зафиксили...
-                throw new RuntimeException("Unable to obtain valid json serializer from class: " + scls);
-            } catch (IllegalAccessException ee){
-                // Это какой-то неправильный синглтон. Мерзко ругаемся чтоб программисты быстрее это зафиксили...
-                throw new RuntimeException("Unable to obtain valid json serializer from class: " + scls);
-            } catch (InvocationTargetException ee) {
+            } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException ee) {
                 // Это какой-то неправильный синглтон. Мерзко ругаемся чтоб программисты быстрее это зафиксили...
                 throw new RuntimeException("Unable to obtain valid json serializer from class: " + scls);
             }
@@ -129,7 +123,7 @@ public final class JsonUtil {
     }
 
     public static Collection<NamedMethod> findGetters(final Class<?> cls) {
-        final Collection<NamedMethod> result = new ArrayList<NamedMethod>();
+        final Collection<NamedMethod> result = new ArrayList<>();
         for (final Method method : cls.getMethods()) {
             if (Modifier.isStatic(method.getModifiers()))
                 continue;
