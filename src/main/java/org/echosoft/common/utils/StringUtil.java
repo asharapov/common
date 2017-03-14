@@ -528,7 +528,7 @@ public class StringUtil {
      */
     public static List<String> splitIgnoringEmpty(final String text, final char separator) {
         if (text == null)
-            return null;
+            return Collections.emptyList();
         final ArrayList<String> result = new ArrayList<>();
         final int length = text.length();
         int pos = 0;
