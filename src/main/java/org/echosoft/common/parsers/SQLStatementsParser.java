@@ -101,6 +101,7 @@ public class SQLStatementsParser implements Iterator<String> {
     private void scanStatement() throws IOException {
         final StringBuilder token = new StringBuilder();
         int depth = 0;
+        boolean isPlSql = false;
         boolean lastTokenIsEnd = false;
         stmt.setLength(0);
         int state = 0;
@@ -148,8 +149,10 @@ public class SQLStatementsParser implements Iterator<String> {
                                         depth++;
                                     break;
                                 case 5:
-                                    if ("BEGIN".equals(tuc))
+                                    if ("BEGIN".equals(tuc)) {
                                         depth++;
+                                        isPlSql = true;
+                                    }
                                     break;
                             }
                             token.setLength(0);
@@ -190,7 +193,8 @@ public class SQLStatementsParser implements Iterator<String> {
                         }
                         case ';': {
                             if (depth == 0) {
-                                stmt.setLength(stmt.length() - 1);
+                                if (!isPlSql)
+                                    stmt.setLength(stmt.length() - 1);
                                 return;
                             }
                             break;
