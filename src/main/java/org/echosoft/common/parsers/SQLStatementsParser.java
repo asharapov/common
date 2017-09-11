@@ -12,6 +12,12 @@ import java.util.NoSuchElementException;
  */
 public class SQLStatementsParser implements Iterator<String> {
 
+    private enum SemanticState {
+        DEFAULT,
+        DECLARE,
+        BODY
+    }
+
     private final Reader reader;        // Поток символов который требуется разобрать на токены.
     private boolean nextStmtReaded;     // Указывает был ли уже выполнен разбор очередного SQL выражения (которое должно будет отдано при последующем вызове next()) из входного потока или нет.
     private StringBuilder stmt;         // Прочитанное из потока SQL выражение ожидающее отдачи при последующем вызове метода next().
@@ -101,7 +107,7 @@ public class SQLStatementsParser implements Iterator<String> {
     private void scanStatement() throws IOException {
         final StringBuilder token = new StringBuilder();
         int depth = 0;
-        boolean isPlSql = false;
+        SemanticState semanticState = SemanticState.DEFAULT;
         boolean lastTokenIsEnd = false;
         stmt.setLength(0);
         int state = 0;
@@ -151,7 +157,14 @@ public class SQLStatementsParser implements Iterator<String> {
                                 case 5:
                                     if ("BEGIN".equals(tuc)) {
                                         depth++;
-                                        isPlSql = true;
+                                        semanticState = SemanticState.BODY;
+                                    }
+                                    break;
+                                case 7:
+                                    if ("DECLARE".equals(tuc)) {
+                                        if (semanticState == SemanticState.DEFAULT) {
+                                            semanticState = SemanticState.DECLARE;
+                                        }
                                     }
                                     break;
                             }
@@ -193,9 +206,14 @@ public class SQLStatementsParser implements Iterator<String> {
                         }
                         case ';': {
                             if (depth == 0) {
-                                if (!isPlSql)
-                                    stmt.setLength(stmt.length() - 1);
-                                return;
+                                switch (semanticState) {
+                                    case DEFAULT:
+                                        stmt.setLength(stmt.length() - 1);
+                                    case BODY:
+                                        return;
+                                    case DECLARE:
+                                        break;
+                                }
                             }
                             break;
                         }

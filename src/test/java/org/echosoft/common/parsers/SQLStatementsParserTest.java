@@ -44,7 +44,29 @@ public class SQLStatementsParserTest {
             "  if :new.ID is null then\n" +
             "    select SEQ_ID.NEXTVAL into :new.ID from dual;\n" +
             "  end if;\n" +
-            "END;\n";
+            "END;\n" +
+            "\n" +
+            "DECLARE\n" +
+            "  emp_id          employees_temp.employee_id%TYPE := 299;\n" +
+            "  emp_first_name  employees_temp.first_name%TYPE  := 'Bob';\n" +
+            "  emp_last_name   employees_temp.last_name%TYPE   := 'Henry';\n" +
+            "BEGIN\n" +
+            "  INSERT INTO employees_temp (employee_id, first_name, last_name) \n" +
+            "  VALUES (emp_id, emp_first_name, emp_last_name);\n" +
+            " \n" +
+            "  UPDATE employees_temp\n" +
+            "  SET first_name = 'Robert'\n" +
+            "  WHERE employee_id = emp_id;\n" +
+            " \n" +
+            "  DELETE FROM employees_temp\n" +
+            "  WHERE employee_id = emp_id\n" +
+            "  RETURNING first_name, last_name\n" +
+            "  INTO emp_first_name, emp_last_name;\n" +
+            " \n" +
+            "  COMMIT;\n" +
+            "  DBMS_OUTPUT.PUT_LINE (emp_first_name || ' ' || emp_last_name);\n" +
+            "END;" +
+            "";
 
 
     @Test
