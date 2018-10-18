@@ -142,7 +142,9 @@ public class SQLStatementsParser implements Iterator<String> {
                             switch (tl) {
                                 case 2:
                                     if ("IF".equals(tuc) && !lastTokenIsEnd)
-                                        depth++;
+                                        if (depth > 0) {  // спецусловия для команд вида "CREATE la-la-la IF NOT EXISTS ..." 
+                                            depth++;
+                                        }
                                     break;
                                 case 3:
                                     if ("END".equals(tuc)) {

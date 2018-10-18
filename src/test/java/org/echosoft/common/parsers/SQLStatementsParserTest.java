@@ -66,7 +66,9 @@ public class SQLStatementsParserTest {
             "  COMMIT;\n" +
             "  DBMS_OUTPUT.PUT_LINE (emp_first_name || ' ' || emp_last_name);\n" +
             "END;" +
-            "";
+            "\n" +
+            "CREATE UNIQUE INDEX IF NOT EXISTS uidx_ais_queue_doc_state ON ais_queue(doc_id, state) WHERE state in ('awaiting', 'indexed');\n" +
+            "CREATE INDEX IF NOT EXISTS idx_ais_queue_doc ON ais_queue(doc_id);\n";
 
 
     @Test
