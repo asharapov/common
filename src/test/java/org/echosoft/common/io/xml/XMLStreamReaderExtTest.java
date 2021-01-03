@@ -7,6 +7,7 @@ import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamConstants;
 import javax.xml.stream.XMLStreamWriter;
 
+import com.sun.org.apache.xerces.internal.impl.Constants;
 import junit.framework.Assert;
 import org.junit.After;
 import org.junit.Before;
@@ -21,7 +22,7 @@ public class XMLStreamReaderExtTest {
     private static XMLInputFactory inputFactory;
     private static XMLOutputFactory outputFactory;
     private XMLStreamReaderExt xmlr1, xmlr2;
-    private static String test1 = "<?xml version='1.0' encoding='UTF-8'?>" +
+    private static String test1 = "<?xml version=\"1.0\" ?>" +
             "<data xmlns:xs=\"http://www.w3.org/2001/XMLSchema\" xmlns:ts=\"http://ts.ru/schema\">\n" +
             " <profiles>\n" +
             "  <profile id=\"1\" ts:item=\"&quot;test&quot;\">\n" +
@@ -56,7 +57,7 @@ public class XMLStreamReaderExtTest {
             " </profiles>\n" +
             "</data>";
 
-    private static String test2 = "<?xml version='1.0' encoding='UTF-8'?>" +
+    private static String test2 = "<?xml version=\"1.0\" ?>" +
             //"<!DOCTYPE rdf:RDF SYSTEM \"http://dublincore.org/2000/12/01-dcmes-xml-dtd.dtd\">\n" +
             "<rdf:RDF xmlns:dc=\"http://purl.org/dc/elements/1.1/\" xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\" rdf:about=\"http://dublincore.org/\">\n" +
             "<!-- Sample from http://dublincore.org/documents/2002/04/22/dcmes-xml/-->\n" +
@@ -76,6 +77,7 @@ public class XMLStreamReaderExtTest {
     @BeforeClass
     public static void beforeClass() throws Exception {
         inputFactory = XMLInputFactory.newFactory();
+        inputFactory.setProperty(Constants.ZEPHYR_PROPERTY_PREFIX + Constants.STAX_REPORT_CDATA_EVENT, true);   // если требуется обработка CDATA токенов
         outputFactory = XMLOutputFactory.newFactory();
     }
 

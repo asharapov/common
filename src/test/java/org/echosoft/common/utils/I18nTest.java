@@ -15,7 +15,7 @@ public class I18nTest {
     private static final Locale locale = new Locale("ru", "RU");
     @BeforeClass
     public static void beforeClass() {
-        I18n.registerBundle("test", "org.ts.common.utils.messages");
+        I18n.registerBundle("test", "org.echosoft.common.utils.messages");
     }
 
     @Test

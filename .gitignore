@@ -1,3 +1,7 @@
+.DS_Store
+.classpath
+.project
+.settings
 .idea
-build
-common.iml
+*.iml
+/target
