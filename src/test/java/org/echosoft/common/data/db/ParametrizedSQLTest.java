@@ -34,7 +34,7 @@ public class ParametrizedSQLTest {
                 new TestCase(
                         "SELECT /* &param */ FROM dual -- WHERE f1>&p\nAND f2<&param2",
                         "SELECT /* &param */ FROM dual -- WHERE f1>&p\nAND f2<?",
-                        "p2"),
+                        "param2"),
         };
         final Map<String,Object> p = new HashMap<>();
         p.put("param1", 1);

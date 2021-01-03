@@ -1303,6 +1303,10 @@ public class StringUtil {
      * @throws IOException в случае каких-либо проблем с сохранением данных в буфере.
      */
     public static void formatISODateTime(final Appendable buf, final Date date) throws IOException {
+        formatISODateTime(buf, date, ' ');
+    }
+
+    public static void formatISODateTime(final Appendable buf, final Date date, final char dateTimeSeparator) throws IOException {
         if (date == null)
             return;
         final Calendar cal = FMT_DATA_HOLDER.get().calendar;
@@ -1318,7 +1322,7 @@ public class StringUtil {
         if (p < 10)
             buf.append('0');
         buf.append(Integer.toString(p));
-        buf.append(' ');
+        buf.append(dateTimeSeparator);
         p = cal.get(Calendar.HOUR_OF_DAY);
         if (p < 10)
             buf.append('0');

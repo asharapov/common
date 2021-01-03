@@ -4,10 +4,10 @@ import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamConstants;
 import javax.xml.stream.XMLStreamWriter;
-import java.io.ByteArrayOutputStream;
 import java.io.StringWriter;
 import java.net.URL;
 
+import com.sun.org.apache.xerces.internal.impl.Constants;
 import org.echosoft.common.utils.StreamUtil;
 import org.echosoft.common.utils.XMLUtilTest;
 import org.junit.After;
@@ -33,6 +33,7 @@ public class XMLStreamReaderExtTest {
     @BeforeClass
     public static void beforeClass() throws Exception {
         inputFactory = XMLInputFactory.newFactory();
+        inputFactory.setProperty(Constants.ZEPHYR_PROPERTY_PREFIX + Constants.STAX_REPORT_CDATA_EVENT, true);   // если требуется обработка CDATA токенов
         outputFactory = XMLOutputFactory.newFactory();
         res1 = XMLUtilTest.class.getResource("example.xml");
         res2 = XMLUtilTest.class.getResource("example-ns.xml");

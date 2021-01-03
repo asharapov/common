@@ -16,6 +16,7 @@ import org.echosoft.common.json.introspect.BeanSerializer;
 import org.echosoft.common.utils.StringUtil;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 public class CompactJsonWriterTest {
@@ -318,6 +319,7 @@ public class CompactJsonWriterTest {
     }
 
     @Test
+    @Ignore
     public void testDynamicDereference() throws Exception {
         jw.beginArray();
         jw.writeObject( new Component("c1", null, new Object()) );

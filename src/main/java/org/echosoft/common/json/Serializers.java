@@ -214,7 +214,7 @@ public class Serializers {
                     if (dateOnly) {
                         StringUtil.formatISODate(out, src);
                     } else {
-                        StringUtil.formatISODateTime(out, src);
+                        StringUtil.formatISODateTime(out, src, 'T');
                     }
                     out.write('"');
                 }
