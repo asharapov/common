@@ -1287,6 +1287,10 @@ public class StringUtil {
         cal.set(Calendar.DAY_OF_MONTH, parseInt(text, 0, 2));
         cal.set(Calendar.MONTH, parseInt(text, 3, 5) - 1);
         cal.set(Calendar.YEAR, parseInt(text, 6, 10));
+        cal.set(Calendar.HOUR_OF_DAY, 0);
+        cal.set(Calendar.MINUTE, 0);
+        cal.set(Calendar.SECOND, 0);
+        cal.set(Calendar.MILLISECOND, 0);
         return cal.getTime();
     }
 
@@ -1321,6 +1325,7 @@ public class StringUtil {
         cal.set(Calendar.HOUR_OF_DAY, parseInt(text, 11, 13));
         cal.set(Calendar.MINUTE, parseInt(text, 14, 16));
         cal.set(Calendar.SECOND, parseInt(text, 17, 19));
+        cal.set(Calendar.MILLISECOND, 0);
         return cal.getTime();
     }
 
@@ -1352,6 +1357,8 @@ public class StringUtil {
         cal.set(Calendar.YEAR, parseInt(text, 6, 10));
         cal.set(Calendar.HOUR_OF_DAY, parseInt(text, 11, 13));
         cal.set(Calendar.MINUTE, parseInt(text, 14, 16));
+        cal.set(Calendar.SECOND, 0);
+        cal.set(Calendar.MILLISECOND, 0);
         return cal.getTime();
     }
 
@@ -1377,6 +1384,10 @@ public class StringUtil {
         cal.set(Calendar.YEAR, parseInt(text, 0, 4));
         cal.set(Calendar.MONTH, parseInt(text, 5, 7) - 1);
         cal.set(Calendar.DAY_OF_MONTH, parseInt(text, 8, 10));
+        cal.set(Calendar.HOUR_OF_DAY, 0);
+        cal.set(Calendar.MINUTE, 0);
+        cal.set(Calendar.SECOND, 0);
+        cal.set(Calendar.MILLISECOND, 0);
         return cal.getTime();
     }
 
@@ -1413,6 +1424,7 @@ public class StringUtil {
         cal.set(Calendar.HOUR_OF_DAY, parseInt(text, 11, 13));
         cal.set(Calendar.MINUTE, parseInt(text, 14, 16));
         cal.set(Calendar.SECOND, parseInt(text, 17, 19));
+        cal.set(Calendar.MILLISECOND, 0);
         return cal.getTime();
     }
 
